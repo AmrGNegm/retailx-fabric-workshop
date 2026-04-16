@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Free hands-on Microsoft Fabric workshop — Build a complete data platform from Bronze to Power BI DirectLake in 3 hours. Free trial compatible.">
+<meta property="og:title" content="RetailX — Microsoft Fabric Workshop">
+<meta property="og:description" content="Build a complete data platform on Microsoft Fabric in 3 hours using only a browser and a free trial.">
+<title>RetailX — Microsoft Fabric Workshop</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;background:#0A0F1E;color:#E2E8F0;font-size:14px;line-height:1.6}
+
+/* ── HERO ── */
+.hero{background:linear-gradient(160deg,#0D1730 0%,#0A0F1E 60%);padding:56px 20px 48px;text-align:center;position:relative;overflow:hidden;border-bottom:1px solid #1E293B}
+.hero::before{content:'';position:absolute;top:-120px;left:50%;transform:translateX(-50%);width:600px;height:600px;background:radial-gradient(circle,rgba(59,130,246,.12) 0%,transparent 70%);pointer-events:none}
+.hero-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#3B82F6;margin-bottom:14px;display:block}
+.hero-title{font-size:clamp(28px,5vw,46px);font-weight:800;color:#F8FAFC;line-height:1.15;margin-bottom:14px}
+.hero-title span{background:linear-gradient(90deg,#F59E0B,#EF4444,#8B5CF6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-sub{font-size:16px;color:#64748B;max-width:560px;margin:0 auto 28px;line-height:1.7}
+.hero-badges{display:flex;justify-content:center;flex-wrap:wrap;gap:8px;margin-bottom:30px}
+.hbadge{font-size:11px;font-weight:600;padding:4px 12px;border-radius:20px;border:1px solid;display:inline-flex;align-items:center;gap:5px}
+.hb-blue  {background:#0A1829;border-color:#1D3A5F;color:#60A5FA}
+.hb-amber {background:#1A1200;border-color:#3D2A00;color:#FBBF24}
+.hb-green {background:#0A1F0D;border-color:#14401A;color:#4ADE80}
+.hb-purple{background:#130A2E;border-color:#2D1A50;color:#A78BFA}
+.cta-row{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
+.btn-primary{padding:11px 26px;border-radius:8px;background:#3B82F6;color:#FFF;font-size:14px;font-weight:700;text-decoration:none;border:none;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:6px}
+.btn-primary:hover{background:#2563EB;transform:translateY(-1px)}
+.btn-secondary{padding:10px 22px;border-radius:8px;background:transparent;color:#94A3B8;font-size:14px;font-weight:600;text-decoration:none;border:1.5px solid #334155;transition:all .15s;display:inline-flex;align-items:center;gap:6px}
+.btn-secondary:hover{border-color:#475569;color:#E2E8F0}
+
+/* ── PAGE WRAPPER ── */
+.page-wrapper{max-width:940px;margin:0 auto;padding:0 20px}
+
+/* ── SECTION TITLE ── */
+.section-header{text-align:center;padding:48px 0 28px}
+.section-header h2{font-size:24px;font-weight:700;color:#F1F5F9;margin-bottom:6px}
+.section-header p{font-size:14px;color:#64748B;max-width:500px;margin:0 auto}
+
+/* ── STATS ROW ── */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:#1E293B;border:1px solid #1E293B;border-radius:12px;overflow:hidden;margin:0 0 48px}
+.stat-item{background:#0D1730;padding:20px 16px;text-align:center}
+.stat-num{font-size:28px;font-weight:800;color:#F8FAFC;display:block}
+.stat-label{font-size:11px;color:#475569;text-transform:uppercase;letter-spacing:.06em;margin-top:3px;display:block}
+
+/* ── ARCHITECTURE STRIP ── */
+.arch-strip{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:0;margin:0 0 48px;background:#0D1730;border:1px solid #1E293B;border-radius:12px;padding:18px 20px}
+.arch-node{padding:10px 14px;border-radius:8px;text-align:center;min-width:100px}
+.an-src {background:#0A1829;border:1px solid #1D3A5F}
+.an-br  {background:#1A1200;border:1px solid #3D2800}
+.an-sl  {background:#141A22;border:1px solid #2A3A4A}
+.an-go  {background:#1A1400;border:1px solid #3D3000}
+.an-pl  {background:#0A1829;border:1px solid #1D3A5F}
+.arch-label{font-size:11px;font-weight:700;display:block}
+.an-src .arch-label{color:#60A5FA}
+.an-br  .arch-label{color:#FBBF24}
+.an-sl  .arch-label{color:#94A3B8}
+.an-go  .arch-label{color:#F59E0B}
+.an-pl  .arch-label{color:#818CF8}
+.arch-sub{font-size:9px;color:#475569;margin-top:2px;display:block}
+.arch-arr{font-size:16px;color:#334155;padding:0 6px;align-self:center}
+
+/* ── LAB CARDS GRID ── */
+.labs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin-bottom:48px}
+
+.lab-card{background:#0D1730;border:1px solid #1E293B;border-radius:12px;padding:18px;text-decoration:none;color:inherit;transition:all .2s;display:flex;flex-direction:column;gap:10px;position:relative;overflow:hidden}
+.lab-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:12px 12px 0 0}
+.lc-bronze::before{background:#F59E0B}
+.lc-silver::before{background:#94A3B8}
+.lc-gold::before{background:#D97706}
+.lc-plat::before{background:#6366F1}
+.lc-arch::before{background:#0EA5E9}
+.lc-pre::before{background:#475569}
+.lc-cheat::before{background:#EF4444}
+.lab-card:hover{border-color:#334155;transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.4)}
+
+.lab-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.lab-icon{font-size:22px;flex-shrink:0}
+.lab-badge{font-size:9px;font-weight:700;padding:2px 7px;border-radius:4px;text-transform:uppercase;letter-spacing:.05em;flex-shrink:0}
+.lb-pre   {background:#1E293B;color:#64748B;border:1px solid #334155}
+.lb-arch  {background:#0A1829;color:#3B82F6;border:1px solid #1D3A5F}
+.lb-bronze{background:#1A1200;color:#F59E0B;border:1px solid #3D2800}
+.lb-silver{background:#141A22;color:#94A3B8;border:1px solid #2A3A4A}
+.lb-gold  {background:#1A1400;color:#D97706;border:1px solid #3D3000}
+.lb-plat  {background:#130A2E;color:#818CF8;border:1px solid #2D1A50}
+.lb-cheat {background:#1A0A0A;color:#EF4444;border:1px solid #4D1414}
+
+.lab-title{font-size:14px;font-weight:700;color:#F1F5F9;line-height:1.3}
+.lab-desc {font-size:12px;color:#64748B;line-height:1.6;flex:1}
+.lab-footer{display:flex;align-items:center;justify-content:space-between;margin-top:4px}
+.lab-duration{font-size:11px;color:#475569;display:flex;align-items:center;gap:4px}
+.lab-tags{display:flex;flex-wrap:wrap;gap:3px}
+.lab-tag{font-size:10px;padding:1px 6px;border-radius:3px;background:#1E293B;color:#475569}
+.lab-arrow{font-size:13px;color:#334155;margin-left:auto;padding-left:8px;flex-shrink:0}
+.lab-card:hover .lab-arrow{color:#3B82F6}
+
+/* ── PREREQS SUMMARY ── */
+.prereq-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-bottom:14px}
+.prereq-item{background:#0D1730;border:1px solid #1E293B;border-radius:8px;padding:10px 12px;display:flex;align-items:flex-start;gap:8px}
+.pi-icon{font-size:14px;flex-shrink:0;margin-top:1px}
+.pi-title{font-size:12px;font-weight:600;color:#E2E8F0}
+.pi-level{font-size:10px;color:#475569;margin-top:2px}
+
+/* ── FEATURES TABLE ── */
+.features-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:48px}
+.feat-item{background:#0D1730;border:1px solid #1E293B;border-radius:8px;padding:10px 12px;display:flex;align-items:center;gap:9px}
+.feat-dot{width:6px;height:6px;border-radius:50%;background:#3B82F6;flex-shrink:0}
+.feat-text{font-size:12px;color:#94A3B8}
+.feat-lab{font-size:10px;color:#334155;margin-left:auto;flex-shrink:0}
+
+/* ── BOTTOM CTA ── */
+.bottom-cta{background:#0D1730;border:1px solid #1E293B;border-radius:16px;padding:36px 24px;text-align:center;margin-bottom:48px}
+.bca-title{font-size:22px;font-weight:700;color:#F8FAFC;margin-bottom:8px}
+.bca-sub{font-size:13px;color:#64748B;margin-bottom:20px}
+.steps-row{display:flex;justify-content:center;gap:0;flex-wrap:wrap;margin-bottom:24px}
+.step-item{display:flex;align-items:center;gap:0}
+.step-circle{width:32px;height:32px;border-radius:50%;background:#1E293B;border:1.5px solid #334155;font-size:13px;font-weight:700;color:#64748B;display:flex;align-items:center;justify-content:center}
+.step-circle.done{background:#0A1829;border-color:#3B82F6;color:#60A5FA}
+.step-label{font-size:11px;color:#475569;margin-top:4px;text-align:center;max-width:80px}
+.step-box{display:flex;flex-direction:column;align-items:center;padding:0 10px}
+.step-line{width:30px;height:1px;background:#1E293B;margin-top:-14px}
+
+/* ── FOOTER ── */
+.footer{border-top:1px solid #1E293B;padding:24px 20px;text-align:center}
+.footer-links{display:flex;justify-content:center;gap:20px;flex-wrap:wrap;margin-bottom:10px}
+.footer-link{font-size:12px;color:#475569;text-decoration:none;transition:color .1s}
+.footer-link:hover{color:#94A3B8}
+.footer-credit{font-size:11px;color:#334155}
+
+/* ── RESPONSIVE ── */
+@media(max-width:640px){
+  .stats-row{grid-template-columns:1fr 1fr}
+  .arch-strip{gap:4px}
+  .arch-arr{display:none}
+  .features-grid{grid-template-columns:1fr}
+  .steps-row{gap:4px}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ HERO ═══════════════════════════════════════════════════ -->
+<section class="hero">
+  <span class="hero-label">Microsoft Fabric · Free Workshop</span>
+  <h1 class="hero-title">
+    Build a Full Data Platform<br>
+    <span>from Bronze to Power BI</span>
+  </h1>
+  <p class="hero-sub">
+    A 3-hour hands-on workshop using the <strong>free 60-day Fabric trial</strong>.
+    Real data sources, real code, real star schema, real DirectLake report.
+    No local tools — just a browser.
+  </p>
+  <div class="hero-badges">
+    <span class="hbadge hb-blue">⏱ 3 hours total</span>
+    <span class="hbadge hb-green">✓ Free Fabric trial</span>
+    <span class="hbadge hb-amber">5 hands-on labs</span>
+    <span class="hbadge hb-purple">9 Delta tables built</span>
+  </div>
+  <div class="cta-row">
+    <a href="section_01_prerequisites.html" class="btn-primary">🚀 Start Workshop</a>
+    <a href="section_08_cheatsheet.html" class="btn-secondary">👨‍🏫 Instructor Sheet</a>
+    <a href="https://github.com/AmrGNegm/retailx-fabric-workshop" class="btn-secondary" target="_blank">⭐ GitHub</a>
+  </div>
+</section>
+
+<div class="page-wrapper">
+
+  <!-- ═══ STATS ═══════════════════════════════════════════════ -->
+  <div class="stats-row" style="margin-top:36px">
+    <div class="stat-item">
+      <span class="stat-num">5</span>
+      <span class="stat-label">Hands-on labs</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num">9</span>
+      <span class="stat-label">Delta tables</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num">4</span>
+      <span class="stat-label">PySpark notebooks</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num">8</span>
+      <span class="stat-label">DAX measures</span>
+    </div>
+  </div>
+
+  <!-- ═══ ARCHITECTURE STRIP ══════════════════════════════════ -->
+  <div class="arch-strip">
+    <div class="arch-node an-src">
+      <span class="arch-label">📁 GitHub CSV</span>
+      <span class="arch-sub">Superstore · 9,994 rows</span>
+    </div>
+    <span class="arch-arr">→</span>
+    <div class="arch-node an-br">
+      <span class="arch-label">🥉 Bronze</span>
+      <span class="arch-sub">DFG2 + NB-01</span>
+    </div>
+    <span class="arch-arr">→</span>
+    <div class="arch-node an-sl">
+      <span class="arch-label">🥈 Silver</span>
+      <span class="arch-sub">NB-02 (×2)</span>
+    </div>
+    <span class="arch-arr">→</span>
+    <div class="arch-node an-go">
+      <span class="arch-label">🥇 Gold</span>
+      <span class="arch-sub">NB-03 · Star schema</span>
+    </div>
+    <span class="arch-arr">→</span>
+    <div class="arch-node an-pl">
+      <span class="arch-label">💎 Power BI</span>
+      <span class="arch-sub">DirectLake · 8 DAX</span>
+    </div>
+    <div style="width:100%;height:1px;background:#1E293B;margin:10px 0"></div>
+    <div class="arch-node an-src" style="min-width:140px">
+      <span class="arch-label">🌐 REST Countries API</span>
+      <span class="arch-sub">No auth · 250 countries</span>
+    </div>
+    <span class="arch-arr">→</span>
+    <div class="arch-node an-br">
+      <span class="arch-label">🥉 Bronze</span>
+      <span class="arch-sub">NB-01 raw_countries</span>
+    </div>
+    <span class="arch-arr">→</span>
+    <div class="arch-node an-sl">
+      <span class="arch-label">🥈 Silver</span>
+      <span class="arch-sub">silver_countries</span>
+    </div>
+    <span class="arch-arr">→</span>
+    <div class="arch-node an-go" style="min-width:140px">
+      <span class="arch-label">🥇 dim_geography</span>
+      <span class="arch-sub">Enriched from countries</span>
+    </div>
+  </div>
+
+  <!-- ═══ LABS GRID ════════════════════════════════════════════ -->
+  <div class="section-header">
+    <h2>Workshop Labs</h2>
+    <p>Follow in order · Each lab builds on the previous one</p>
+  </div>
+
+  <div class="labs-grid">
+
+    <!-- Prerequisites -->
+    <a href="section_01_prerequisites.html" class="lab-card lc-pre">
+      <div class="lab-card-top">
+        <span class="lab-icon">📖</span>
+        <span class="lab-badge lb-pre">PRE-SESSION</span>
+      </div>
+      <div class="lab-title">Section 1 — Prerequisites</div>
+      <div class="lab-desc">8 topics you need to know before starting. Expandable summaries, what-you-need checklists, official reference links, and a self-assessment readiness checker.</div>
+      <div class="lab-footer">
+        <span class="lab-duration">⏱ Before session</span>
+        <div class="lab-tags">
+          <span class="lab-tag">Delta Lake</span><span class="lab-tag">PySpark</span><span class="lab-tag">DAX</span>
+        </div>
+        <span class="lab-arrow">→</span>
+      </div>
+    </a>
+
+    <!-- Architecture -->
+    <a href="section_02_architecture.html" class="lab-card lc-arch">
+      <div class="lab-card-top">
+        <span class="lab-icon">🗺️</span>
+        <span class="lab-badge lb-arch">ARCHITECTURE</span>
+      </div>
+      <div class="lab-title">Section 2 — Platform Architecture</div>
+      <div class="lab-desc">Interactive architecture flow diagram, pipeline DAG, full table reference (9 tables with column types), and naming convention guide. Click any layer to see details.</div>
+      <div class="lab-footer">
+        <span class="lab-duration">⏱ 15 min intro</span>
+        <div class="lab-tags">
+          <span class="lab-tag">OneLake</span><span class="lab-tag">Medallion</span>
+        </div>
+        <span class="lab-arrow">→</span>
+      </div>
+    </a>
+
+    <!-- Lab 1 -->
+    <a href="section_03_lab1.html" class="lab-card lc-bronze">
+      <div class="lab-card-top">
+        <span class="lab-icon">🏗️</span>
+        <span class="lab-badge lb-bronze">🥉 BRONZE</span>
+      </div>
+      <div class="lab-title">Lab 1 — Lakehouse &amp; Dataflow Gen2</div>
+      <div class="lab-desc">Create the workspace, set up LH_RetailX Lakehouse, and ingest the Superstore Sales CSV using Dataflow Gen2 with Power Query M. No Python yet.</div>
+      <div class="lab-footer">
+        <span class="lab-duration">⏱ 30 min</span>
+        <div class="lab-tags">
+          <span class="lab-tag">Workspace</span><span class="lab-tag">DFG2</span><span class="lab-tag">Power Query M</span>
+        </div>
+        <span class="lab-arrow">→</span>
+      </div>
+    </a>
+
+    <!-- Lab 2 -->
+    <a href="section_04_lab2.html" class="lab-card lc-bronze">
+      <div class="lab-card-top">
+        <span class="lab-icon">🌐</span>
+        <span class="lab-badge lb-bronze">🥉 BRONZE</span>
+      </div>
+      <div class="lab-title">Lab 2 — Bronze Layer: REST API Notebook</div>
+      <div class="lab-desc">Write your first PySpark notebook. Call the REST Countries API, save raw JSON, parse 250 country objects, run DQ assertions, and write to a Delta table.</div>
+      <div class="lab-footer">
+        <span class="lab-duration">⏱ 30 min · 5 code challenges</span>
+        <div class="lab-tags">
+          <span class="lab-tag">PySpark</span><span class="lab-tag">REST API</span><span class="lab-tag">DQ</span>
+        </div>
+        <span class="lab-arrow">→</span>
+      </div>
+    </a>
+
+    <!-- Lab 3 -->
+    <a href="section_05_lab3.html" class="lab-card lc-silver">
+      <div class="lab-card-top">
+        <span class="lab-icon">🔧</span>
+        <span class="lab-badge lb-silver">🥈 SILVER</span>
+      </div>
+      <div class="lab-title">Lab 3 — Silver Layer &amp; Data Pipeline</div>
+      <div class="lab-desc">Build two Silver notebooks that clean, type, and derive business columns. Then wire all notebooks into a Data Pipeline with serial and parallel DAG execution.</div>
+      <div class="lab-footer">
+        <span class="lab-duration">⏱ 25 min · 4 code challenges</span>
+        <div class="lab-tags">
+          <span class="lab-tag">F.when</span><span class="lab-tag">coalesce</span><span class="lab-tag">Pipeline</span>
+        </div>
+        <span class="lab-arrow">→</span>
+      </div>
+    </a>
+
+    <!-- Lab 4 -->
+    <a href="section_06_lab4.html" class="lab-card lc-gold">
+      <div class="lab-card-top">
+        <span class="lab-icon">⭐</span>
+        <span class="lab-badge lb-gold">🥇 GOLD</span>
+      </div>
+      <div class="lab-title">Lab 4 — Gold Layer: Star Schema</div>
+      <div class="lab-desc">Build the complete star schema: dim_date (SQL sequence), dim_customer, dim_product, dim_geography (enriched from Countries API), and fact_sales with surrogate key joins.</div>
+      <div class="lab-footer">
+        <span class="lab-duration">⏱ 25 min · 4 code challenges</span>
+        <div class="lab-tags">
+          <span class="lab-tag">Window</span><span class="lab-tag">row_number()</span><span class="lab-tag">SQL</span>
+        </div>
+        <span class="lab-arrow">→</span>
+      </div>
+    </a>
+
+    <!-- Lab 5 -->
+    <a href="section_07_lab5.html" class="lab-card lc-plat">
+      <div class="lab-card-top">
+        <span class="lab-icon">📊</span>
+        <span class="lab-badge lb-plat">💎 PLATINUM</span>
+      </div>
+      <div class="lab-title">Lab 5 — Power BI DirectLake Report</div>
+      <div class="lab-desc">Create SM_RetailX DirectLake semantic model, build 4 relationships, write 8 DAX measures (including Sales YoY %), and build the executive dashboard.</div>
+      <div class="lab-footer">
+        <span class="lab-duration">⏱ 20 min · 3 DAX challenges</span>
+        <div class="lab-tags">
+          <span class="lab-tag">DirectLake</span><span class="lab-tag">DATEADD</span><span class="lab-tag">DAX</span>
+        </div>
+        <span class="lab-arrow">→</span>
+      </div>
+    </a>
+
+    <!-- Cheat Sheet -->
+    <a href="section_08_cheatsheet.html" class="lab-card lc-cheat">
+      <div class="lab-card-top">
+        <span class="lab-icon">📋</span>
+        <span class="lab-badge lb-cheat">INSTRUCTOR</span>
+      </div>
+      <div class="lab-title">Cheat Sheet — All Code</div>
+      <div class="lab-desc">Every code block copy-paste ready. DFG2 M code, all 4 notebooks, 3 SQL queries, 8 DAX measures, relationship table, benchmark values, and common error fixes.</div>
+      <div class="lab-footer">
+        <span class="lab-duration">⏱ Keep open during session</span>
+        <div class="lab-tags">
+          <span class="lab-tag">All code</span><span class="lab-tag">Troubleshooting</span>
+        </div>
+        <span class="lab-arrow">→</span>
+      </div>
+    </a>
+
+  </div><!-- end labs-grid -->
+
+
+  <!-- ═══ FABRIC FEATURES ══════════════════════════════════════ -->
+  <div class="section-header">
+    <h2>What you will practice</h2>
+    <p>12 Microsoft Fabric features across all 5 labs</p>
+  </div>
+
+  <div class="features-grid">
+    <div class="feat-item"><span class="feat-dot"></span><span class="feat-text">Workspace &amp; Trial Capacity</span><span class="feat-lab">Lab 1</span></div>
+    <div class="feat-item"><span class="feat-dot"></span><span class="feat-text">Lakehouse + OneLake</span><span class="feat-lab">Labs 1–5</span></div>
+    <div class="feat-item"><span class="feat-dot"></span><span class="feat-text">Dataflow Gen2 (Power Query M)</span><span class="feat-lab">Lab 1</span></div>
+    <div class="feat-item"><span class="feat-dot"></span><span class="feat-text">PySpark Notebooks (4 notebooks)</span><span class="feat-lab">Labs 2–4</span></div>
+    <div class="feat-item"><span class="feat-dot"></span><span class="feat-text">Data Pipeline + DAG orchestration</span><span class="feat-lab">Lab 3</span></div>
+    <div class="feat-item"><span class="feat-dot"></span><span class="feat-text">Delta Table format (ACID + time travel)</span><span class="feat-lab">Labs 2–4</span></div>
+    <div class="feat-item"><span class="feat-dot"></span><span class="feat-text">SQL Analytics Endpoint (T-SQL)</span><span class="feat-lab">Lab 4</span></div>
+    <div class="feat-item"><span class="feat-dot"></span><span class="feat-text">DirectLake Semantic Model</span><span class="feat-lab">Lab 5</span></div>
+    <div class="feat-item"><span class="feat-dot"></span><span class="feat-text">Power BI Report + 8 DAX measures</span><span class="feat-lab">Lab 5</span></div>
+    <div class="feat-item"><span class="feat-dot"></span><span class="feat-text">DQ assertions inside notebooks</span><span class="feat-lab">Labs 2–4</span></div>
+    <div class="feat-item"><span class="feat-dot"></span><span class="feat-text">mssparkutils file operations</span><span class="feat-lab">Lab 2</span></div>
+    <div class="feat-item"><span class="feat-dot"></span><span class="feat-text">Window functions + surrogate keys</span><span class="feat-lab">Lab 4</span></div>
+  </div>
+
+
+  <!-- ═══ GET STARTED CTA ══════════════════════════════════════ -->
+  <div class="bottom-cta">
+    <div class="bca-title">Ready to start? 3 steps</div>
+    <div class="bca-sub">Everything runs in a browser. No installs. No Azure subscription.</div>
+    <div class="steps-row">
+      <div class="step-box">
+        <div class="step-circle done">1</div>
+        <div class="step-label">Activate free Fabric trial</div>
+      </div>
+      <div class="step-line"></div>
+      <div class="step-box">
+        <div class="step-circle done">2</div>
+        <div class="step-label">Read Prerequisites (Section 1)</div>
+      </div>
+      <div class="step-line"></div>
+      <div class="step-box">
+        <div class="step-circle done">3</div>
+        <div class="step-label">Start Lab 1</div>
+      </div>
+    </div>
+    <div class="cta-row">
+      <a href="section_01_prerequisites.html" class="btn-primary">📖 Read Prerequisites first</a>
+      <a href="section_03_lab1.html" class="btn-secondary">⚡ Jump straight to Lab 1</a>
+    </div>
+  </div>
+
+</div><!-- end page-wrapper -->
+
+<!-- ═══ FOOTER ═══════════════════════════════════════════════ -->
+<footer class="footer">
+  <div class="footer-links">
+    <a class="footer-link" href="section_01_prerequisites.html">Prerequisites</a>
+    <a class="footer-link" href="section_02_architecture.html">Architecture</a>
+    <a class="footer-link" href="section_03_lab1.html">Lab 1</a>
+    <a class="footer-link" href="section_04_lab2.html">Lab 2</a>
+    <a class="footer-link" href="section_05_lab3.html">Lab 3</a>
+    <a class="footer-link" href="section_06_lab4.html">Lab 4</a>
+    <a class="footer-link" href="section_07_lab5.html">Lab 5</a>
+    <a class="footer-link" href="section_08_cheatsheet.html">Cheat Sheet</a>
+    <a class="footer-link" href="https://github.com/AmrGNegm/retailx-fabric-workshop" target="_blank">GitHub ↗</a>
+  </div>
+  <div class="footer-credit">
+    Built by <strong style="color:#475569">Amr Negm</strong> · Senior Expert Data Analytics Engineer · Bank Albilad ·
+    <a href="https://github.com/AmrGNegm/retailx-fabric-workshop" style="color:#334155;text-decoration:none" target="_blank">Open Source · MIT License</a>
+  </div>
+</footer>
+
+</body>
+</html>
