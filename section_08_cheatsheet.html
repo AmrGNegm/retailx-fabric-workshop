@@ -1,0 +1,1077 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RetailX Fabric Workshop — Instructor Cheat Sheet</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;background:#0F172A;color:#E2E8F0;font-size:14px;line-height:1.6}
+.page-wrapper{max-width:960px;margin:0 auto;padding:28px 20px 60px}
+
+/* ── TYPOGRAPHY ── */
+h1{font-size:24px;font-weight:700;color:#F8FAFC;margin-bottom:4px}
+h2{font-size:16px;font-weight:700;color:#F1F5F9;margin-bottom:8px}
+p{color:#94A3B8;line-height:1.7;margin-bottom:8px;font-size:13px}
+code{font-family:'Consolas','Courier New',monospace;font-size:11px;background:#1E293B;border:1px solid #334155;border-radius:4px;padding:1px 6px;color:#38BDF8}
+
+/* ── LAYOUT ── */
+.section-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#475569;margin-bottom:6px}
+.divider{height:1px;background:#1E293B;margin:24px 0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+
+/* ── HEADER BANNER ── */
+.banner{background:#1E293B;border:1px solid #334155;border-radius:12px;padding:16px 18px;margin-bottom:20px;border-left:4px solid #F59E0B}
+.banner-badge{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;padding:3px 9px;border-radius:4px;background:#FEF3C7;color:#92400E;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
+.banner-title{font-size:22px;font-weight:700;color:#F8FAFC;margin-bottom:4px}
+.banner-sub{font-size:13px;color:#64748B}
+
+/* ── TOC ── */
+.toc{background:#1E293B;border:1px solid #334155;border-radius:10px;padding:14px 16px;margin-bottom:20px}
+.toc-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#475569;margin-bottom:10px}
+.toc-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+.toc-item{display:flex;align-items:center;gap:7px;font-size:12px;color:#94A3B8;padding:3px 0;cursor:pointer;transition:color .1s;text-decoration:none}
+.toc-item:hover{color:#38BDF8}
+.toc-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+
+/* ── SECTION CARDS ── */
+.section-card{background:#1E293B;border:1px solid #334155;border-radius:10px;margin-bottom:16px;overflow:hidden}
+.section-hdr{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid #334155;cursor:pointer;user-select:none;transition:background .1s}
+.section-hdr:hover{background:#263244}
+.section-icon{font-size:16px}
+.section-title{font-size:14px;font-weight:700;color:#F1F5F9;flex:1}
+.section-meta{font-size:11px;color:#475569}
+.section-toggle{font-size:11px;color:#475569;transition:transform .2s}
+.section-toggle.open{transform:rotate(180deg)}
+.section-body{display:none}
+.section-body.open{display:block}
+
+/* ── SNIPPET CARDS ── */
+.snippet{margin:0;border-bottom:1px solid #1A2332}
+.snippet:last-child{border-bottom:none}
+.snippet-hdr{display:flex;align-items:flex-start;gap:10px;padding:10px 14px 8px}
+.snippet-icon{font-size:13px;flex-shrink:0;margin-top:1px}
+.snippet-info{flex:1;min-width:0}
+.snippet-title{font-size:13px;font-weight:600;color:#E2E8F0;margin-bottom:2px}
+.snippet-note{font-size:11px;color:#64748B;line-height:1.5}
+.snippet-note code{font-size:10px}
+
+/* ── CODE BLOCK ── */
+.code-wrap{margin:0 14px 12px;border:1px solid #334155;border-radius:7px;overflow:hidden}
+.code-bar{display:flex;justify-content:space-between;align-items:center;padding:6px 12px;background:#0F172A;border-bottom:1px solid #1E293B}
+.code-lang{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#475569}
+.code-label{font-size:11px;font-family:'Consolas','Courier New',monospace;color:#64748B;margin-left:8px;flex:1}
+.copy-btn{font-size:11px;padding:3px 10px;border-radius:4px;background:transparent;border:1px solid #334155;color:#64748B;cursor:pointer;font-family:inherit;transition:all .15s;flex-shrink:0}
+.copy-btn:hover{background:#1E293B;color:#94A3B8;border-color:#475569}
+.copy-btn.ok{border-color:#22C55E!important;color:#22C55E!important}
+pre{margin:0;padding:14px;background:#060D1A;color:#E2E8F0;font-size:12px;line-height:1.75;font-family:'Consolas','Courier New',monospace;overflow-x:auto;white-space:pre;tab-size:4}
+
+/* ── HINT PILLS ── */
+.hints{display:flex;flex-wrap:wrap;gap:5px;padding:0 14px 10px}
+.hint-pill{font-size:11px;padding:3px 10px;border-radius:12px;background:#172033;border:1px solid #293548;color:#94A3B8;display:flex;align-items:center;gap:4px}
+.hp-amber{border-color:#4D3800;background:#1A1200;color:#B45309}
+.hp-green{border-color:#14401A;background:#0A1F0D;color:#15803D}
+.hp-red  {border-color:#4D1414;background:#1A0A0A;color:#B91C1C}
+.hp-blue {border-color:#1D3A5F;background:#0A1829;color:#2563EB}
+
+/* ── LAYER BADGE ── */
+.layer-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;letter-spacing:.04em;flex-shrink:0}
+.lb-bronze{background:#2A1E00;color:#F59E0B;border:1px solid #3D2A00}
+.lb-silver{background:#1A2030;color:#94A3B8;border:1px solid #2D3A50}
+.lb-gold  {background:#2A1E00;color:#D97706;border:1px solid #3D2E00}
+.lb-dax   {background:#1A0A2E;color:#8B5CF6;border:1px solid #2D1A50}
+.lb-sql   {background:#0A1A14;color:#10B981;border:1px solid #1A3028}
+.lb-ui    {background:#0A1829;color:#3B82F6;border:1px solid #1A2E4A}
+
+/* ── QUICK REF TABLE ── */
+.ref-table{width:100%;border-collapse:collapse;font-size:12px;margin:0 0 12px}
+.ref-table th{text-align:left;padding:7px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#475569;background:#0F172A;border-bottom:1px solid #334155}
+.ref-table td{padding:7px 10px;border-bottom:1px solid #1E293B;vertical-align:top}
+.ref-table tr:last-child td{border-bottom:none}
+.ref-table tr:hover td{background:#1A2332}
+.col-name{font-family:'Consolas','Courier New',monospace;color:#38BDF8;font-size:11px}
+.col-val {color:#94A3B8}
+.col-note{color:#475569;font-size:11px}
+
+/* ── ALERT BOXES ── */
+.alert{border-radius:8px;padding:10px 12px;font-size:12px;line-height:1.6;margin:8px 14px}
+.alert-amber{background:#1A1200;border:1px solid #3D2A00;color:#B45309}
+.alert-blue {background:#0A1829;border:1px solid #1D3A5F;color:#2563EB}
+.alert-green{background:#0A1F0D;border:1px solid #14401A;color:#15803D}
+
+/* ── KEYBOARD SHORTCUTS ── */
+.shortcut-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;padding:10px 14px}
+.shortcut-item{display:flex;align-items:center;gap:8px;font-size:12px;color:#94A3B8}
+kbd{font-size:10px;padding:2px 5px;border-radius:3px;background:#1E293B;border:1px solid #334155;color:#E2E8F0;font-family:'Consolas','Courier New',monospace}
+
+/* ── PROGRESS ── */
+.progress-bar-outer{height:3px;background:#1E293B;border-radius:2px;overflow:hidden;margin-bottom:14px}
+.progress-bar-inner{height:100%;background:#F59E0B;border-radius:2px;width:0%;transition:width .3s}
+
+/* ── RESPONSIVE ── */
+@media(max-width:640px){
+  .page-wrapper{padding:14px 10px 40px}
+  .grid2,.toc-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="page-wrapper">
+
+<!-- ═══════════════════════════════════════════════════════
+     HEADER
+═══════════════════════════════════════════════════════ -->
+<div class="banner">
+  <div class="banner-badge">👨‍🏫 Instructor Use</div>
+  <div class="banner-title">RetailX Workshop — Instructor Cheat Sheet</div>
+  <div class="banner-sub">All code copy-paste ready · Quick hints per block · Troubleshooting notes · Use when a student is stuck or you need to demo live</div>
+</div>
+
+<!-- ═══ TOC ══════════════════════════════════════════════ -->
+<div class="toc">
+  <div class="toc-title">Jump to section</div>
+  <div class="toc-grid">
+    <a class="toc-item" href="#s0" onclick="openSection('s0')"><span class="toc-dot" style="background:#64748B"></span>Quick Reference — Naming Conventions</a>
+    <a class="toc-item" href="#s1" onclick="openSection('s1')"><span class="toc-dot" style="background:#F59E0B"></span>Lab 1 — DFG2 Power Query M</a>
+    <a class="toc-item" href="#s2" onclick="openSection('s2')"><span class="toc-dot" style="background:#F59E0B"></span>Lab 2 — NB-01-BRONZE-Countries-API</a>
+    <a class="toc-item" href="#s3" onclick="openSection('s3')"><span class="toc-dot" style="background:#94A3B8"></span>Lab 3 — NB-02-SILVER-Sales</a>
+    <a class="toc-item" href="#s4" onclick="openSection('s4')"><span class="toc-dot" style="background:#94A3B8"></span>Lab 3 — NB-02-SILVER-Countries</a>
+    <a class="toc-item" href="#s5" onclick="openSection('s5')"><span class="toc-dot" style="background:#D97706"></span>Lab 4 — NB-03-GOLD-StarSchema</a>
+    <a class="toc-item" href="#s6" onclick="openSection('s6')"><span class="toc-dot" style="background:#10B981"></span>Lab 4 — SQL Endpoint Queries</a>
+    <a class="toc-item" href="#s7" onclick="openSection('s7')"><span class="toc-dot" style="background:#8B5CF6"></span>Lab 5 — All 8 DAX Measures</a>
+    <a class="toc-item" href="#s8" onclick="openSection('s8')"><span class="toc-dot" style="background:#3B82F6"></span>Lab 5 — Semantic Model + Report checklist</a>
+    <a class="toc-item" href="#s9" onclick="openSection('s9')"><span class="toc-dot" style="background:#EF4444"></span>Common Errors &amp; Fixes</a>
+  </div>
+</div>
+
+
+<!-- ═══ S0 — QUICK REFERENCE ═════════════════════════════ -->
+<div class="section-card" id="s0">
+  <div class="section-hdr" onclick="toggleSection('s0')">
+    <span class="section-icon">📋</span>
+    <span class="section-title">Quick Reference — Naming Conventions &amp; URLs</span>
+    <span class="section-meta">All item names used in this workshop</span>
+    <span class="section-toggle open" id="tog-s0">▾</span>
+  </div>
+  <div class="section-body open" id="body-s0">
+
+    <div style="padding:12px 14px 4px">
+      <table class="ref-table">
+        <thead><tr><th>Item</th><th>Exact name</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td class="col-name">Workspace</td><td class="col-val">RetailX-Analytics</td><td class="col-note">Must be on Fabric/Trial capacity</td></tr>
+          <tr><td class="col-name">Lakehouse</td><td class="col-val">LH_RetailX</td><td class="col-note">All tables + files live here</td></tr>
+          <tr><td class="col-name">Dataflow Gen2</td><td class="col-val">DFG2-Sales-CSV</td><td class="col-note">Ingests Superstore CSV → raw_sales</td></tr>
+          <tr><td class="col-name">Notebook 1</td><td class="col-val">NB-01-BRONZE-Countries-API</td><td class="col-note">REST API → raw_countries</td></tr>
+          <tr><td class="col-name">Notebook 2a</td><td class="col-val">NB-02-SILVER-Sales</td><td class="col-note">raw_sales → silver_sales</td></tr>
+          <tr><td class="col-name">Notebook 2b</td><td class="col-val">NB-02-SILVER-Countries</td><td class="col-note">raw_countries → silver_countries</td></tr>
+          <tr><td class="col-name">Notebook 3</td><td class="col-val">NB-03-GOLD-StarSchema</td><td class="col-note">silver → dim_* + fact_sales</td></tr>
+          <tr><td class="col-name">Pipeline</td><td class="col-val">PL-RetailX-Daily</td><td class="col-note">Orchestrates all 4 notebooks</td></tr>
+          <tr><td class="col-name">Semantic Model</td><td class="col-val">SM_RetailX</td><td class="col-note">DirectLake, 5 tables, 4 relationships</td></tr>
+          <tr><td class="col-name">Report</td><td class="col-val">RPT-RetailX-Overview</td><td class="col-note">Executive dashboard, 8 measures</td></tr>
+        </tbody>
+      </table>
+      <table class="ref-table">
+        <thead><tr><th>URL / path</th><th>Used in</th></tr></thead>
+        <tbody>
+          <tr><td class="col-name">https://raw.githubusercontent.com/plotly/datasets/master/superstore.csv</td><td class="col-val">DFG2 source URL</td></tr>
+          <tr><td class="col-name">https://restcountries.com/v3.1/all</td><td class="col-val">NB-01 API_URL</td></tr>
+          <tr><td class="col-name">https://app.fabric.microsoft.com</td><td class="col-val">Fabric portal</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Keyboard shortcuts -->
+    <div style="padding:4px 14px 12px">
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#475569;margin-bottom:8px">Notebook keyboard shortcuts</div>
+      <div class="shortcut-grid">
+        <div class="shortcut-item"><kbd>Shift+Enter</kbd> Run cell, move to next</div>
+        <div class="shortcut-item"><kbd>Ctrl+Enter</kbd> Run cell, stay on cell</div>
+        <div class="shortcut-item"><kbd>A</kbd> (command mode) Add cell above</div>
+        <div class="shortcut-item"><kbd>B</kbd> (command mode) Add cell below</div>
+        <div class="shortcut-item"><kbd>M</kbd> (command mode) Change to Markdown</div>
+        <div class="shortcut-item"><kbd>Y</kbd> (command mode) Change to Code</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══ S1 — DFG2 POWER QUERY M ══════════════════════════ -->
+<div class="section-card" id="s1">
+  <div class="section-hdr" onclick="toggleSection('s1')">
+    <span class="section-icon">🔧</span>
+    <span class="section-title">Lab 1 — Dataflow Gen2: Power Query M code</span>
+    <span class="section-meta">Paste in Advanced Editor → Home tab</span>
+    <span class="section-toggle" id="tog-s1">▾</span>
+  </div>
+  <div class="section-body" id="body-s1">
+    <div class="snippet">
+      <div class="snippet-hdr">
+        <span class="snippet-icon">📝</span>
+        <div class="snippet-info">
+          <div class="snippet-title">DFG2-Sales-CSV — Full M query</div>
+          <div class="snippet-note">Reads the CSV from GitHub · Promotes headers · Renames 21 columns to snake_case · Casts date + number types · Output destination: <code>raw_sales</code> (Replace mode)</div>
+        </div>
+        <span class="layer-badge lb-bronze">🥉 Bronze</span>
+      </div>
+      <div class="hints">
+        <span class="hint-pill hp-amber">⚠️ Open Advanced Editor: Home tab → Advanced Editor</span>
+        <span class="hint-pill hp-blue">💡 Replace ALL existing code with this block</span>
+        <span class="hint-pill hp-green">✓ Expected: 9,994 rows preview after connecting</span>
+      </div>
+      <div class="code-wrap">
+        <div class="code-bar">
+          <span class="code-lang">M</span>
+          <span class="code-label">DFG2-Sales-CSV · Advanced Editor</span>
+          <button class="copy-btn" onclick="cp(this,'m1')">Copy</button>
+        </div>
+        <pre id="code-m1">let
+  Source    = Csv.Document(Web.Contents(
+                "https://raw.githubusercontent.com/plotly/datasets/master/superstore.csv"),
+                [Delimiter=",", Encoding=65001, QuoteStyle=QuoteStyle.None]),
+
+  Headers   = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+
+  Renamed   = Table.RenameColumns(Headers, {
+    {"Row ID",        "row_id"},
+    {"Order ID",      "order_id"},
+    {"Order Date",    "order_date"},
+    {"Ship Date",     "ship_date"},
+    {"Ship Mode",     "ship_mode"},
+    {"Customer ID",   "customer_id"},
+    {"Customer Name", "customer_name"},
+    {"Segment",       "segment"},
+    {"Country",       "country"},
+    {"City",          "city"},
+    {"State",         "state"},
+    {"Postal Code",   "postal_code"},
+    {"Region",        "region"},
+    {"Product ID",    "product_id"},
+    {"Category",      "category"},
+    {"Sub-Category",  "sub_category"},
+    {"Product Name",  "product_name"},
+    {"Sales",         "sales"},
+    {"Quantity",      "quantity"},
+    {"Discount",      "discount"},
+    {"Profit",        "profit"}
+  }),
+
+  TypedCols = Table.TransformColumnTypes(Renamed, {
+    {"row_id",     Int64.Type},
+    {"order_date", type date},
+    {"ship_date",  type date},
+    {"sales",      type number},
+    {"quantity",   Int64.Type},
+    {"discount",   type number},
+    {"profit",     type number}
+  })
+
+in TypedCols</pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══ S2 — NB-01 BRONZE COUNTRIES ══════════════════════ -->
+<div class="section-card" id="s2">
+  <div class="section-hdr" onclick="toggleSection('s2')">
+    <span class="section-icon">🌐</span>
+    <span class="section-title">Lab 2 — NB-01-BRONZE-Countries-API</span>
+    <span class="section-meta">REST API → raw JSON file → raw_countries Delta table</span>
+    <span class="section-toggle" id="tog-s2">▾</span>
+  </div>
+  <div class="section-body" id="body-s2">
+    <div class="snippet">
+      <div class="snippet-hdr">
+        <span class="snippet-icon">📓</span>
+        <div class="snippet-info">
+          <div class="snippet-title">NB-01-BRONZE-Countries-API — Complete notebook (Cells 2–7)</div>
+          <div class="snippet-note">Cell 1 = Markdown header (separate). Paste this as one code cell OR split at each comment block. Toggle Cell 2 (# Parameters) as a parameter cell. Attach <code>LH_RetailX</code> before running.</div>
+        </div>
+        <span class="layer-badge lb-bronze">🥉 Bronze</span>
+      </div>
+      <div class="hints">
+        <span class="hint-pill hp-amber">⚠️ Attach LH_RetailX Lakehouse BEFORE running</span>
+        <span class="hint-pill hp-green">✓ Expected: "Fetched 250 countries"</span>
+        <span class="hint-pill hp-green">✓ Expected: "[DQ] 250 records — all checks passed"</span>
+        <span class="hint-pill hp-blue">💡 First run takes 60-90 sec (Spark session start)</span>
+        <span class="hint-pill hp-red">🔑 None-safe: use  or ""  not  ,""  for optional fields</span>
+      </div>
+      <div class="code-wrap">
+        <div class="code-bar">
+          <span class="code-lang">Python</span>
+          <span class="code-label">NB-01-BRONZE-Countries-API · Complete code</span>
+          <button class="copy-btn" onclick="cp(this,'nb01')">Copy</button>
+        </div>
+        <pre id="code-nb01"># Parameters  ← Toggle this cell as a parameter cell (3-dot menu → Toggle parameter cell)
+p_FullLoad = True
+API_URL    = "https://restcountries.com/v3.1/all"
+RAW_TABLE  = "raw_countries"
+
+import requests, json
+from pyspark.sql import functions as F
+from datetime import datetime
+
+# ── Fetch from REST Countries API ─────────────────────────────
+print("Fetching REST Countries API...")
+r = requests.get(API_URL, timeout=30)
+r.raise_for_status()           # raises HTTPError if status >= 400
+countries = r.json()
+print(f"Fetched {len(countries)} countries")
+
+# ── Save raw JSON to Files/bronze/ (immutable archive) ────────
+ts       = datetime.now().strftime("%Y%m%d_%H%M%S")
+raw_path = f"Files/bronze/countries/countries_{ts}.json"
+mssparkutils.fs.put(raw_path, json.dumps(countries), overwrite=True)
+print(f"Saved raw JSON → {raw_path}")
+
+# ── Parse JSON → flat Python dicts ────────────────────────────
+def parse(c):
+    curs = c.get("currencies", {})
+    return {
+        "country_code" : c.get("cca2", ""),
+        "name_common"  : c.get("name", {}).get("common", ""),
+        "region"       : c.get("region", ""),
+        "subregion"    : c.get("subregion") or "",      # None-safe
+        "population"   : int(c.get("population") or 0), # None-safe
+        "area_km2"     : float(c.get("area") or 0),     # None-safe
+        "capital"      : c.get("capital", [""])[0] if c.get("capital") else "",
+        "currency_code": list(curs.keys())[0] if curs else "",
+        "currency_name": list(curs.values())[0].get("name", "") if curs else "",
+        "latitude"     : float(c.get("latlng", [0,0])[0]) if c.get("latlng") else 0.0,
+        "longitude"    : float(c.get("latlng", [0,0])[1]) if c.get("latlng") else 0.0,
+    }
+
+records = [parse(c) for c in countries]
+
+# ── Create Spark DataFrame ─────────────────────────────────────
+df = spark.createDataFrame(records)
+
+# ── Add audit columns ──────────────────────────────────────────
+df = (df
+    .withColumn("_ingestion_ts", F.current_timestamp())
+    .withColumn("_source",       F.lit(API_URL))
+    .withColumn("_batch_id",     F.lit(ts)))
+
+# ── Data Quality Checks ────────────────────────────────────────
+total = df.count()
+assert df.filter(F.col("name_common")  == "").count() == 0, "DQ: empty country names"
+assert df.filter(F.col("country_code") == "").count() == 0, "DQ: empty country codes"
+print(f"[DQ] {total} records — all checks passed")
+
+# ── Write to Delta (Bronze layer) ─────────────────────────────
+(df.write
+   .format("delta")
+   .mode("overwrite")
+   .option("overwriteSchema", "true")
+   .saveAsTable(RAW_TABLE))
+print(f"Written {RAW_TABLE}: {total} rows")
+display(spark.table(RAW_TABLE).limit(5))</pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══ S3 — NB-02-SILVER-SALES ══════════════════════════ -->
+<div class="section-card" id="s3">
+  <div class="section-hdr" onclick="toggleSection('s3')">
+    <span class="section-icon">🥈</span>
+    <span class="section-title">Lab 3 — NB-02-SILVER-Sales</span>
+    <span class="section-meta">raw_sales → type casts → 6 derived columns → silver_sales</span>
+    <span class="section-toggle" id="tog-s3">▾</span>
+  </div>
+  <div class="section-body" id="body-s3">
+    <div class="snippet">
+      <div class="snippet-hdr">
+        <span class="snippet-icon">📓</span>
+        <div class="snippet-info">
+          <div class="snippet-title">NB-02-SILVER-Sales — Complete notebook</div>
+          <div class="snippet-note">Defensive rename (guards with <code>if old in df.columns</code>) · Type casts · 6 derived columns · dedup on (order_id, product_id) · 3 DQ assertions</div>
+        </div>
+        <span class="layer-badge lb-silver">🥈 Silver</span>
+      </div>
+      <div class="hints">
+        <span class="hint-pill hp-amber">⚠️ profit_margin uses F.when() — avoids divide-by-zero</span>
+        <span class="hint-pill hp-green">✓ Expected: ~9,994 rows</span>
+        <span class="hint-pill hp-blue">💡 Derived cols: order_year/month/quarter, days_to_ship, profit_margin, net_revenue</span>
+      </div>
+      <div class="code-wrap">
+        <div class="code-bar">
+          <span class="code-lang">Python</span>
+          <span class="code-label">NB-02-SILVER-Sales · Complete code</span>
+          <button class="copy-btn" onclick="cp(this,'nb02s')">Copy</button>
+        </div>
+        <pre id="code-nb02s"># Parameters
+p_FullLoad = True
+SRC_TABLE  = "raw_sales"
+DEST_TABLE = "silver_sales"
+
+from pyspark.sql import functions as F
+from pyspark.sql.types import DoubleType, IntegerType
+
+# ── Read from Bronze ──────────────────────────────────────────
+df = spark.table(SRC_TABLE)
+
+# ── Defensive rename (safe if DFG2 already renamed) ──────────
+rmap = {
+    "Row ID":"row_id",       "Order ID":"order_id",
+    "Order Date":"order_date",  "Ship Date":"ship_date",
+    "Ship Mode":"ship_mode",    "Customer ID":"customer_id",
+    "Customer Name":"customer_name", "Segment":"segment",
+    "Country":"country",        "City":"city",
+    "State":"state",            "Postal Code":"postal_code",
+    "Region":"region",          "Product ID":"product_id",
+    "Category":"category",      "Sub-Category":"sub_category",
+    "Product Name":"product_name", "Sales":"sales",
+    "Quantity":"quantity",      "Discount":"discount",
+    "Profit":"profit"
+}
+for old, new in rmap.items():
+    if old in df.columns:
+        df = df.withColumnRenamed(old, new)
+
+# ── Type casts ────────────────────────────────────────────────
+df = (df
+    .withColumn("sales",    F.col("sales").cast(DoubleType()))
+    .withColumn("quantity", F.col("quantity").cast(IntegerType()))
+    .withColumn("discount", F.col("discount").cast(DoubleType()))
+    .withColumn("profit",   F.col("profit").cast(DoubleType())))
+
+# ── Derived business columns ──────────────────────────────────
+df = (df
+    .withColumn("order_year",    F.year(F.col("order_date")))
+    .withColumn("order_month",   F.month(F.col("order_date")))
+    .withColumn("order_quarter", F.quarter(F.col("order_date")))
+    .withColumn("days_to_ship",  F.datediff(F.col("ship_date"), F.col("order_date")))
+    .withColumn("profit_margin", F.round(
+        F.when(F.col("sales") != 0, F.col("profit") / F.col("sales") * 100)
+         .otherwise(F.lit(0.0)), 2))
+    .withColumn("net_revenue",   F.round(F.col("sales") * (1 - F.col("discount")), 2))
+    .dropDuplicates(["order_id", "product_id"])
+    .filter(F.col("order_date").isNotNull())
+    .withColumn("_ingestion_ts", F.current_timestamp()))
+
+# ── DQ Checks ─────────────────────────────────────────────────
+total = df.count()
+assert df.filter(F.col("order_id").isNull()).count()   == 0, "DQ: null order_id"
+assert df.filter(F.col("order_date").isNull()).count() == 0, "DQ: null order_date"
+assert df.filter(F.col("sales").isNull()).count()      == 0, "DQ: null sales"
+print(f"[DQ] {total} rows — all checks passed")
+
+# ── Write to Silver ────────────────────────────────────────────
+(df.write
+   .format("delta")
+   .mode("overwrite")
+   .option("overwriteSchema", "true")
+   .saveAsTable(DEST_TABLE))
+print(f"Written {DEST_TABLE}: {total} rows")
+display(spark.table(DEST_TABLE)
+        .select("order_id","customer_name","sales","profit",
+                "profit_margin","days_to_ship","order_year","order_quarter")
+        .limit(5))</pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══ S4 — NB-02-SILVER-COUNTRIES ═════════════════════ -->
+<div class="section-card" id="s4">
+  <div class="section-hdr" onclick="toggleSection('s4')">
+    <span class="section-icon">🌍</span>
+    <span class="section-title">Lab 3 — NB-02-SILVER-Countries</span>
+    <span class="section-meta">raw_countries → coalesce nulls → population_m → silver_countries</span>
+    <span class="section-toggle" id="tog-s4">▾</span>
+  </div>
+  <div class="section-body" id="body-s4">
+    <div class="snippet">
+      <div class="snippet-hdr">
+        <span class="snippet-icon">📓</span>
+        <div class="snippet-info">
+          <div class="snippet-title">NB-02-SILVER-Countries — Complete notebook</div>
+          <div class="snippet-note">Filter empty codes/names · F.coalesce for null fields (subregion→"Unknown", capital→"N/A", currency→"Unknown") · Adds population_m · dedup on country_code</div>
+        </div>
+        <span class="layer-badge lb-silver">🥈 Silver</span>
+      </div>
+      <div class="hints">
+        <span class="hint-pill hp-green">✓ Expected: ~245 rows (some territories filtered)</span>
+        <span class="hint-pill hp-blue">💡 F.coalesce(F.trim(col), F.lit("default")) — handles both null and empty</span>
+      </div>
+      <div class="code-wrap">
+        <div class="code-bar">
+          <span class="code-lang">Python</span>
+          <span class="code-label">NB-02-SILVER-Countries · Complete code</span>
+          <button class="copy-btn" onclick="cp(this,'nb02c')">Copy</button>
+        </div>
+        <pre id="code-nb02c"># Parameters
+p_FullLoad = True
+SRC_TABLE  = "raw_countries"
+DEST_TABLE = "silver_countries"
+
+from pyspark.sql import functions as F
+
+# ── Read from Bronze ──────────────────────────────────────────
+df = spark.table(SRC_TABLE)
+
+# ── Clean and standardise ─────────────────────────────────────
+df = (df
+    .filter(F.col("name_common")  != "")
+    .filter(F.col("country_code") != "")
+    .withColumn("name_common",   F.trim(F.col("name_common")))
+    .withColumn("region",        F.trim(F.col("region")))
+    .withColumn("subregion",     F.coalesce(F.trim(F.col("subregion")),  F.lit("Unknown")))
+    .withColumn("capital",       F.coalesce(F.col("capital"),            F.lit("N/A")))
+    .withColumn("currency_code", F.coalesce(F.col("currency_code"),      F.lit("Unknown")))
+    .withColumn("population_m",  F.round(F.col("population") / 1e6, 3))
+    .dropDuplicates(["country_code"])
+    .withColumn("_ingestion_ts", F.current_timestamp()))
+
+# ── DQ Checks ─────────────────────────────────────────────────
+total = df.count()
+assert df.filter(F.col("country_code").isNull()).count() == 0, "DQ: null country_code"
+assert df.filter(F.col("name_common") == "").count()     == 0, "DQ: empty name_common"
+print(f"[DQ] {total} countries — all checks passed")
+
+# ── Write to Silver ────────────────────────────────────────────
+(df.write
+   .format("delta")
+   .mode("overwrite")
+   .option("overwriteSchema", "true")
+   .saveAsTable(DEST_TABLE))
+print(f"Written {DEST_TABLE}: {total} rows")
+display(spark.table(DEST_TABLE)
+        .select("country_code","name_common","region","subregion",
+                "capital","population_m","currency_code")
+        .limit(5))</pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══ S5 — NB-03-GOLD-STAR SCHEMA ═════════════════════ -->
+<div class="section-card" id="s5">
+  <div class="section-hdr" onclick="toggleSection('s5')">
+    <span class="section-icon">🥇</span>
+    <span class="section-title">Lab 4 — NB-03-GOLD-StarSchema</span>
+    <span class="section-meta">5 tables: dim_date · dim_customer · dim_product · dim_geography · fact_sales</span>
+    <span class="section-toggle" id="tog-s5">▾</span>
+  </div>
+  <div class="section-body" id="body-s5">
+    <div class="snippet">
+      <div class="snippet-hdr">
+        <span class="snippet-icon">📓</span>
+        <div class="snippet-info">
+          <div class="snippet-title">NB-03-GOLD-StarSchema — Complete notebook</div>
+          <div class="snippet-note">dim_date via SQL sequence (1,461 rows) · dim_customer/product via row_number() SK · dim_geography enriched from silver_countries · fact_sales joins all 3 SKs + generates date_key integers</div>
+        </div>
+        <span class="layer-badge lb-gold">🥇 Gold</span>
+      </div>
+      <div class="hints">
+        <span class="hint-pill hp-amber">⚠️ All chained .withColumn() calls MUST be in outer ()</span>
+        <span class="hint-pill hp-amber">⚠️ Window.orderBy("natural_key") — keeps SKs deterministic</span>
+        <span class="hint-pill hp-green">✓ dim_date: exactly 1,461 rows (2014–2017 incl. 2016 leap year)</span>
+        <span class="hint-pill hp-green">✓ fact_sales: ~9,994 rows, 15 columns</span>
+        <span class="hint-pill hp-blue">💡 order_date_key ≠ date_key by name, but same YYYYMMDD integer values</span>
+      </div>
+      <div class="code-wrap">
+        <div class="code-bar">
+          <span class="code-lang">Python</span>
+          <span class="code-label">NB-03-GOLD-StarSchema · Complete code</span>
+          <button class="copy-btn" onclick="cp(this,'nb03')">Copy</button>
+        </div>
+        <pre id="code-nb03"># Parameters
+p_FullLoad    = True
+SRC_SALES     = "silver_sales"
+SRC_COUNTRIES = "silver_countries"
+
+from pyspark.sql import functions as F
+from pyspark.sql.types import IntegerType
+from pyspark.sql.window import Window
+
+# ── Load Silver tables ─────────────────────────────────────────
+s  = spark.table(SRC_SALES)
+cn = spark.table(SRC_COUNTRIES)
+
+# ── 1) dim_date — SQL sequence (no source table needed) ───────
+dim_date = spark.sql("""
+    SELECT
+        CAST(date_format(d, 'yyyyMMdd') AS INT) AS date_key,
+        d                                        AS date,
+        year(d)                                  AS year,
+        quarter(d)                               AS quarter,
+        month(d)                                 AS month_num,
+        date_format(d, 'MMMM')                  AS month_name,
+        date_format(d, 'MMM')                    AS month_short,
+        (dayofweek(d) IN (1, 7))                 AS is_weekend,
+        date_format(d, 'yyyy-MM')               AS year_month,
+        concat('Q', quarter(d))                  AS quarter_label
+    FROM (
+        SELECT explode(
+            sequence(date('2014-01-01'), date('2017-12-31'), interval 1 day)
+        ) AS d
+    )
+""")
+dim_date.write.format("delta").mode("overwrite").saveAsTable("dim_date")
+print(f"dim_date      : {dim_date.count()} rows")   # expected 1461
+
+# ── 2) dim_customer ───────────────────────────────────────────
+dim_customer = (s
+    .select("customer_id", "customer_name", "segment")
+    .dropDuplicates(["customer_id"])
+    .withColumn("customer_sk",
+        F.row_number().over(Window.orderBy("customer_id")))
+    .withColumn("_ts", F.current_timestamp()))
+dim_customer.write.format("delta").mode("overwrite").saveAsTable("dim_customer")
+print(f"dim_customer  : {dim_customer.count()} rows")
+
+# ── 3) dim_product ────────────────────────────────────────────
+dim_product = (s
+    .select("product_id", "product_name", "category", "sub_category")
+    .dropDuplicates(["product_id"])
+    .withColumn("product_sk",
+        F.row_number().over(Window.orderBy("product_id")))
+    .withColumn("_ts", F.current_timestamp()))
+dim_product.write.format("delta").mode("overwrite").saveAsTable("dim_product")
+print(f"dim_product   : {dim_product.count()} rows")
+
+# ── 4) dim_geography — enriched from silver_countries ────────
+geo = (s
+    .select("country", "state", "city", "region", "postal_code")
+    .dropDuplicates())
+
+dim_geography = (geo
+    .join(
+        cn.select("name_common", "country_code", "subregion"),
+        geo.country == cn.name_common,
+        "left"
+    )
+    .drop("name_common")
+    .withColumn("geo_sk",
+        F.row_number().over(Window.orderBy("country", "state", "city")))
+    .withColumn("_ts", F.current_timestamp()))
+dim_geography.write.format("delta").mode("overwrite").saveAsTable("dim_geography")
+print(f"dim_geography : {dim_geography.count()} rows")
+
+# ── 5) fact_sales — join all dimension SKs ───────────────────
+dc = spark.table("dim_customer") .select("customer_id",  "customer_sk")
+dp = spark.table("dim_product")  .select("product_id",   "product_sk")
+dg = spark.table("dim_geography").select("country", "state", "city", "geo_sk")
+
+fact_sales = (s
+    .join(dc, "customer_id", "left")
+    .join(dp, "product_id",  "left")
+    .join(dg, ["country", "state", "city"], "left")
+    .withColumn("order_date_key",
+        F.date_format(F.col("order_date"), "yyyyMMdd").cast(IntegerType()))
+    .withColumn("ship_date_key",
+        F.date_format(F.col("ship_date"),  "yyyyMMdd").cast(IntegerType()))
+    .withColumn("fact_sk", F.monotonically_increasing_id())
+    .select(
+        "fact_sk",    "order_id",
+        "order_date_key", "ship_date_key",
+        "customer_sk", "product_sk", "geo_sk",
+        "sales", "quantity", "discount", "profit",
+        "days_to_ship", "profit_margin", "net_revenue",
+        "_ingestion_ts"))
+fact_sales.write.format("delta").mode("overwrite").saveAsTable("fact_sales")
+print(f"fact_sales    : {fact_sales.count()} rows")
+
+# ── Verify ────────────────────────────────────────────────────
+spark.sql("SHOW TABLES").filter(
+    "tableName LIKE 'dim_%' OR tableName LIKE 'fact_%'"
+).show()
+
+# ── Gold DQ ───────────────────────────────────────────────────
+f = spark.table("fact_sales")
+assert f.filter(F.col("customer_sk").isNull()).count()    == 0, "null customer_sk"
+assert f.filter(F.col("product_sk").isNull()).count()     == 0, "null product_sk"
+assert f.filter(F.col("order_date_key").isNull()).count() == 0, "null order_date_key"
+print("[DQ] All Gold FK checks passed ✓")</pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══ S6 — SQL ENDPOINT QUERIES ════════════════════════ -->
+<div class="section-card" id="s6">
+  <div class="section-hdr" onclick="toggleSection('s6')">
+    <span class="section-icon">🔍</span>
+    <span class="section-title">Lab 4 — SQL Analytics Endpoint Queries</span>
+    <span class="section-meta">3 validation queries · Run in the SQL endpoint after NB-03</span>
+    <span class="section-toggle" id="tog-s6">▾</span>
+  </div>
+  <div class="section-body" id="body-s6">
+
+    <div class="snippet">
+      <div class="snippet-hdr">
+        <span class="snippet-icon">📊</span>
+        <div class="snippet-info">
+          <div class="snippet-title">Query 1 — Sales by product category</div>
+          <div class="snippet-note">Tests: dim_product JOIN · Expected order: Technology ($836K) &gt; Furniture ($742K) &gt; Office Supplies ($719K)</div>
+        </div>
+        <span class="layer-badge lb-sql">SQL</span>
+      </div>
+      <div class="code-wrap">
+        <div class="code-bar">
+          <span class="code-lang">SQL</span>
+          <span class="code-label">Category aggregation · SQL endpoint</span>
+          <button class="copy-btn" onclick="cp(this,'sql1')">Copy</button>
+        </div>
+        <pre id="code-sql1">SELECT
+    p.category,
+    ROUND(SUM(f.sales),   0) AS total_sales,
+    ROUND(SUM(f.profit),  0) AS total_profit,
+    ROUND(AVG(f.profit_margin), 1) AS avg_margin_pct
+FROM fact_sales f
+JOIN dim_product p ON f.product_sk = p.product_sk
+GROUP BY p.category
+ORDER BY total_sales DESC;</pre>
+      </div>
+    </div>
+
+    <div class="snippet">
+      <div class="snippet-hdr">
+        <span class="snippet-icon">📅</span>
+        <div class="snippet-info">
+          <div class="snippet-title">Query 2 — Revenue by year (growth trend)</div>
+          <div class="snippet-note">Tests: dim_date JOIN · Revenue should grow 2014→2017. If all years null: order_date_key is null → Silver notebook type cast failed</div>
+        </div>
+        <span class="layer-badge lb-sql">SQL</span>
+      </div>
+      <div class="code-wrap">
+        <div class="code-bar">
+          <span class="code-lang">SQL</span>
+          <span class="code-label">Year aggregation · SQL endpoint</span>
+          <button class="copy-btn" onclick="cp(this,'sql2')">Copy</button>
+        </div>
+        <pre id="code-sql2">SELECT
+    d.year,
+    COUNT(DISTINCT f.order_id)    AS total_orders,
+    ROUND(SUM(f.sales), 0)        AS revenue,
+    ROUND(AVG(f.days_to_ship), 1) AS avg_days_to_ship
+FROM fact_sales f
+JOIN dim_date d ON f.order_date_key = d.date_key
+GROUP BY d.year
+ORDER BY d.year;</pre>
+      </div>
+    </div>
+
+    <div class="snippet">
+      <div class="snippet-hdr">
+        <span class="snippet-icon">👤</span>
+        <div class="snippet-info">
+          <div class="snippet-title">Query 3 — Top 5 customers</div>
+          <div class="snippet-note">Tests: dim_customer JOIN · Sean Miller typically highest-revenue customer in Superstore data</div>
+        </div>
+        <span class="layer-badge lb-sql">SQL</span>
+      </div>
+      <div class="code-wrap">
+        <div class="code-bar">
+          <span class="code-lang">SQL</span>
+          <span class="code-label">Top customers · SQL endpoint</span>
+          <button class="copy-btn" onclick="cp(this,'sql3')">Copy</button>
+        </div>
+        <pre id="code-sql3">SELECT
+    c.customer_name,
+    c.segment,
+    COUNT(DISTINCT f.order_id)     AS orders,
+    ROUND(SUM(f.sales), 0)         AS total_sales,
+    ROUND(AVG(f.profit_margin), 1) AS avg_margin_pct
+FROM fact_sales f
+JOIN dim_customer c ON f.customer_sk = c.customer_sk
+GROUP BY c.customer_name, c.segment
+ORDER BY total_sales DESC
+LIMIT 5;</pre>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ═══ S7 — ALL 8 DAX MEASURES ══════════════════════════ -->
+<div class="section-card" id="s7">
+  <div class="section-hdr" onclick="toggleSection('s7')">
+    <span class="section-icon">📐</span>
+    <span class="section-title">Lab 5 — All 8 DAX Measures</span>
+    <span class="section-meta">Add to fact_sales table · One at a time via New measure button</span>
+    <span class="section-toggle" id="tog-s7">▾</span>
+  </div>
+  <div class="section-body" id="body-s7">
+    <div class="alert alert-amber" style="margin:12px 14px 4px">
+      ⚠️ Add each measure to the <strong>fact_sales</strong> table in SM_RetailX. In the semantic model editor: select fact_sales → click "New measure" in the top ribbon. Add one measure at a time and verify it returns a value before moving to the next.
+    </div>
+    <div class="snippet">
+      <div class="snippet-hdr">
+        <span class="snippet-icon">📐</span>
+        <div class="snippet-info">
+          <div class="snippet-title">All 8 DAX measures — complete set</div>
+          <div class="snippet-note">Copy all at once for reference or copy individual measures. Measures 1–4 are simple aggregations. Measures 5–7 use DIVIDE/ROUND. Measure 8 uses CALCULATE + DATEADD time intelligence.</div>
+        </div>
+        <span class="layer-badge lb-dax">DAX</span>
+      </div>
+      <div class="hints">
+        <span class="hint-pill hp-green">✓ Total Sales ~$2.30M · Total Profit ~$286K · Total Orders ~5,009</span>
+        <span class="hint-pill hp-green">✓ Profit Margin % ~12.5% · Avg Days to Ship ~3.9</span>
+        <span class="hint-pill hp-amber">⚠️ Sales YoY % = BLANK with no year slicer — this is correct</span>
+        <span class="hint-pill hp-blue">💡 Slice to 2016 → YoY% should show +29.5%</span>
+      </div>
+      <div class="code-wrap">
+        <div class="code-bar">
+          <span class="code-lang">DAX</span>
+          <span class="code-label">SM_RetailX → fact_sales table → New measure (×8)</span>
+          <button class="copy-btn" onclick="cp(this,'dax')">Copy All</button>
+        </div>
+        <pre id="code-dax">-- ── Measure 1 ────────────────────────────────────────────────
+Total Sales = SUM(fact_sales[sales])
+
+-- ── Measure 2 ────────────────────────────────────────────────
+Total Profit = SUM(fact_sales[profit])
+
+-- ── Measure 3 ────────────────────────────────────────────────
+Total Orders = DISTINCTCOUNT(fact_sales[order_id])
+
+-- ── Measure 4 ────────────────────────────────────────────────
+Total Quantity = SUM(fact_sales[quantity])
+
+-- ── Measure 5 ────────────────────────────────────────────────
+Profit Margin % =
+VAR vSales  = [Total Sales]
+VAR vProfit = [Total Profit]
+RETURN
+    IF(
+        ISBLANK(vSales) || vSales = 0,
+        BLANK(),
+        ROUND(DIVIDE(vProfit, vSales) * 100, 1)
+    )
+
+-- ── Measure 6 ────────────────────────────────────────────────
+Avg Order Value =
+DIVIDE(
+    [Total Sales],
+    [Total Orders],
+    BLANK()
+)
+
+-- ── Measure 7 ────────────────────────────────────────────────
+Avg Days to Ship = ROUND(AVERAGE(fact_sales[days_to_ship]), 1)
+
+-- ── Measure 8 ────────────────────────────────────────────────
+Sales YoY % =
+VAR vCurr = [Total Sales]
+VAR vPrev =
+    CALCULATE(
+        [Total Sales],
+        DATEADD(dim_date[date], -1, YEAR)
+    )
+RETURN
+    IF(
+        ISBLANK(vPrev),
+        BLANK(),
+        ROUND(DIVIDE(vCurr - vPrev, vPrev) * 100, 1)
+    )</pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══ S8 — SEMANTIC MODEL + REPORT CHECKLIST ═══════════ -->
+<div class="section-card" id="s8">
+  <div class="section-hdr" onclick="toggleSection('s8')">
+    <span class="section-icon">💎</span>
+    <span class="section-title">Lab 5 — Semantic Model &amp; Report Checklist</span>
+    <span class="section-meta">Relationships · Report visuals · 5 interactive tests</span>
+    <span class="section-toggle" id="tog-s8">▾</span>
+  </div>
+  <div class="section-body" id="body-s8">
+
+    <div style="padding:12px 14px 4px">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#475569;margin-bottom:8px">4 Relationships to create in SM_RetailX (drag from fact → dim)</div>
+      <table class="ref-table">
+        <thead><tr><th>From (fact_sales)</th><th>To (dimension)</th><th>Cardinality</th><th>Direction</th></tr></thead>
+        <tbody>
+          <tr><td class="col-name">order_date_key</td><td class="col-name">dim_date[date_key]</td><td class="col-val">M:1</td><td class="col-note">Single ← NOTE: different column names, same integer values</td></tr>
+          <tr><td class="col-name">customer_sk</td><td class="col-name">dim_customer[customer_sk]</td><td class="col-val">M:1</td><td class="col-note">Single</td></tr>
+          <tr><td class="col-name">product_sk</td><td class="col-name">dim_product[product_sk]</td><td class="col-val">M:1</td><td class="col-note">Single</td></tr>
+          <tr><td class="col-name">geo_sk</td><td class="col-name">dim_geography[geo_sk]</td><td class="col-val">M:1</td><td class="col-note">Single</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div style="padding:0 14px 8px">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#475569;margin-bottom:8px">Report visuals — RPT-RetailX-Overview</div>
+      <table class="ref-table">
+        <thead><tr><th>Visual</th><th>Fields</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td class="col-val">Card ×4</td><td class="col-name">[Total Sales] · [Profit Margin %] · [Total Orders] · [Avg Days to Ship]</td><td class="col-note">Format: K/M units on Sales</td></tr>
+          <tr><td class="col-val">Line chart</td><td class="col-name">X: dim_date[year_month] · Y: [Total Sales]</td><td class="col-note">Clear all slicers to see full 48-month trend</td></tr>
+          <tr><td class="col-val">Clustered bar</td><td class="col-name">Y: dim_product[category] · X: [Total Sales] + [Total Profit]</td><td class="col-note">3 bars: Furniture, Office Supplies, Technology</td></tr>
+          <tr><td class="col-val">Slicer 1</td><td class="col-name">dim_date[year]</td><td class="col-note">Style: Tile (horizontal buttons)</td></tr>
+          <tr><td class="col-val">Slicer 2</td><td class="col-name">dim_product[category]</td><td class="col-note">Style: Dropdown</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div style="padding:0 14px 12px">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#475569;margin-bottom:8px">5 validation tests (run these with the class)</div>
+      <table class="ref-table">
+        <thead><tr><th>Test</th><th>Action</th><th>Expected result</th></tr></thead>
+        <tbody>
+          <tr><td class="col-val">1 — Baseline</td><td class="col-note">No slicers</td><td class="col-note">Total Sales ~$2.30M · YoY% = blank</td></tr>
+          <tr><td class="col-val">2 — YoY</td><td class="col-note">Slice to 2016</td><td class="col-note">Sales YoY % = +29.5%</td></tr>
+          <tr><td class="col-val">3 — First year</td><td class="col-note">Slice to 2014</td><td class="col-note">Sales YoY % = blank (no prior year)</td></tr>
+          <tr><td class="col-val">4 — Category</td><td class="col-note">Slice to Technology</td><td class="col-note">Profit Margin % &gt; 12.5% (Tech is most profitable)</td></tr>
+          <tr><td class="col-val">5 — Cross-filter</td><td class="col-note">Click bar chart bar</td><td class="col-note">All visuals filter to that category</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ═══ S9 — COMMON ERRORS ════════════════════════════════ -->
+<div class="section-card" id="s9">
+  <div class="section-hdr" onclick="toggleSection('s9')">
+    <span class="section-icon">🚨</span>
+    <span class="section-title">Common Errors &amp; Fixes</span>
+    <span class="section-meta">Quick lookup for student issues during the live session</span>
+    <span class="section-toggle" id="tog-s9">▾</span>
+  </div>
+  <div class="section-body" id="body-s9">
+    <div style="padding:12px 14px">
+      <table class="ref-table">
+        <thead><tr><th>Error</th><th>Root cause</th><th>Fix</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="col-name">Lakehouse/Notebook not in + New menu</td>
+            <td class="col-note">Workspace not on Fabric capacity</td>
+            <td class="col-note">Workspace settings → Licensing → assign Trial capacity</td>
+          </tr>
+          <tr>
+            <td class="col-name">DFG2 run fails</td>
+            <td class="col-note">M syntax error in Advanced Editor</td>
+            <td class="col-note">Check closing )} brackets — each step needs a comma except the last one</td>
+          </tr>
+          <tr>
+            <td class="col-name">raw_sales not in Tables</td>
+            <td class="col-note">DFG2 published but UI not refreshed</td>
+            <td class="col-note">Click ↻ refresh in the Tables panel header</td>
+          </tr>
+          <tr>
+            <td class="col-name">Spark session "Not started" wait</td>
+            <td class="col-note">Normal — first run starts cluster</td>
+            <td class="col-note">Wait 30–60 sec. Subsequent cells are fast.</td>
+          </tr>
+          <tr>
+            <td class="col-name">AssertionError: DQ failed</td>
+            <td class="col-note">Bad data passed parse()</td>
+            <td class="col-note">Run <code>display(df.filter(F.col("name_common") == ""))</code> to see bad rows</td>
+          </tr>
+          <tr>
+            <td class="col-name">IndentationError: unexpected indent</td>
+            <td class="col-note">Missing outer () on chained methods</td>
+            <td class="col-note">Wrap the entire chain in (df .withColumn(...) .withColumn(...))</td>
+          </tr>
+          <tr>
+            <td class="col-name">order_year is null for all rows</td>
+            <td class="col-note">order_date is still a string</td>
+            <td class="col-note">Check DFG2 TypedCols step ran. Re-run DFG2 + NB-02-SILVER-Sales</td>
+          </tr>
+          <tr>
+            <td class="col-name">country_code null in dim_geography</td>
+            <td class="col-note">Join condition mismatch</td>
+            <td class="col-note">Run: <code>SELECT DISTINCT name_common FROM silver_countries WHERE country_code='US'</code> in SQL endpoint — verify exact name</td>
+          </tr>
+          <tr>
+            <td class="col-name">null customer_sk in fact_sales</td>
+            <td class="col-note">Silver columns still Title Case</td>
+            <td class="col-note">Check NB-02-SILVER-Sales ran successfully. Check column names with <code>spark.table("silver_sales").columns</code></td>
+          </tr>
+          <tr>
+            <td class="col-name">Sales YoY % never shows a value</td>
+            <td class="col-note">dim_date relationship missing or inactive</td>
+            <td class="col-note">Check SM_RetailX model view — verify fact_sales[order_date_key] → dim_date[date_key] relationship exists and is Active</td>
+          </tr>
+          <tr>
+            <td class="col-name">Line chart shows dots only</td>
+            <td class="col-note">Slicer filtering to 1–2 months</td>
+            <td class="col-note">Clear all slicers. The 48-month trend needs no year filter active.</td>
+          </tr>
+          <tr>
+            <td class="col-name">Pipeline activity stays Queued 5+ min</td>
+            <td class="col-note">Trial capacity at limit</td>
+            <td class="col-note">Wait. Free trial has limited concurrent capacity. Try again after 5 min.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<div style="text-align:center;padding:20px 0;font-size:11px;color:#334155">
+  RetailX Data Platform · Microsoft Fabric Workshop · Instructor Cheat Sheet
+</div>
+
+</div><!-- end page-wrapper -->
+
+<!-- ============================================================
+     JAVASCRIPT
+============================================================ -->
+<script>
+/* ── SECTION TOGGLE ── */
+function toggleSection(id){
+  var body=document.getElementById('body-'+id);
+  var tog=document.getElementById('tog-'+id);
+  if(!body)return;
+  var o=body.classList.contains('open');
+  body.classList.toggle('open',!o);
+  if(tog)tog.classList.toggle('open',!o);
+}
+
+/* ── OPEN SPECIFIC SECTION ── */
+function openSection(id){
+  var body=document.getElementById('body-'+id);
+  var tog=document.getElementById('tog-'+id);
+  if(!body)return;
+  body.classList.add('open');
+  if(tog)tog.classList.add('open');
+  setTimeout(function(){
+    var el=document.getElementById(id);
+    if(el)el.scrollIntoView({behavior:'smooth',block:'start'});
+  },50);
+  return false;
+}
+
+/* ── COPY ── */
+function cp(btn,id){
+  var pre=document.getElementById('code-'+id);if(!pre)return;
+  var t=pre.textContent;
+  function ok(){btn.textContent='✓ Copied';btn.classList.add('ok');
+    setTimeout(function(){btn.textContent='Copy';btn.classList.remove('ok');},2000);}
+  function fail(){btn.textContent='Failed';}
+  if(navigator.clipboard&&window.isSecureContext){
+    navigator.clipboard.writeText(t).then(ok).catch(function(){fb(t,ok,fail);});}
+  else fb(t,ok,fail);
+}
+function fb(t,ok,fail){
+  var a=document.createElement('textarea');a.value=t;
+  a.style.cssText='position:fixed;opacity:0';document.body.appendChild(a);a.select();
+  try{document.execCommand('copy')?ok():fail();}catch(e){fail();}
+  document.body.removeChild(a);
+}
+
+/* ── AUTO-OPEN S0 ── */
+document.addEventListener('DOMContentLoaded',function(){
+  openSection('s0');
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RetailX Fabric Workshop — Section 1: Prerequisites</title>
+<style>
+/* ============================================================
+   GLOBAL RESET & BASE
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  background: #F0F4F8;
+  color: #1A202C;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* ============================================================
+   LAYOUT
+   ============================================================ */
+.page-wrapper {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 32px 24px 60px;
+}
+
+/* ============================================================
+   TYPOGRAPHY
+   ============================================================ */
+h1 { font-size: 26px; font-weight: 700; color: #0F172A; margin-bottom: 4px; }
+h2 { font-size: 19px; font-weight: 700; color: #1E293B; margin-bottom: 4px; }
+h3 { font-size: 15px; font-weight: 600; color: #334155; margin-bottom: 8px; }
+p  { color: #475569; line-height: 1.75; margin-bottom: 10px; }
+
+/* ============================================================
+   UTILITY CARDS
+   ============================================================ */
+.card {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+  padding: 20px 22px;
+  margin-bottom: 20px;
+}
+
+.card-accent-blue  { border-left: 4px solid #3B82F6; }
+.card-accent-amber { border-left: 4px solid #F59E0B; }
+.card-accent-green { border-left: 4px solid #22C55E; }
+
+.section-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #94A3B8;
+  margin-bottom: 6px;
+}
+
+/* ============================================================
+   ARCHITECTURE LAYERS
+   ============================================================ */
+.arch-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin: 14px 0;
+}
+
+.arch-layer {
+  border-radius: 10px;
+  padding: 14px 12px;
+  text-align: center;
+  border: 1px solid transparent;
+  cursor: default;
+  transition: transform 0.15s;
+}
+.arch-layer:hover { transform: translateY(-2px); }
+
+.layer-bronze  { background: #FEF3C7; border-color: #F59E0B; }
+.layer-silver  { background: #F1F5F9; border-color: #94A3B8; }
+.layer-gold    { background: #FEF9EC; border-color: #D97706; }
+.layer-plat    { background: #EFF6FF; border-color: #3B82F6; }
+
+.layer-icon  { font-size: 22px; margin-bottom: 6px; }
+.layer-name  { font-size: 13px; font-weight: 700; margin-bottom: 3px; }
+.layer-sub   { font-size: 11px; color: #64748B; line-height: 1.4; }
+
+.layer-bronze .layer-name  { color: #92400E; }
+.layer-silver .layer-name  { color: #475569; }
+.layer-gold   .layer-name  { color: #B45309; }
+.layer-plat   .layer-name  { color: #1D4ED8; }
+
+.arch-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: #CBD5E1;
+  padding-top: 18px;
+}
+
+/* ============================================================
+   PREREQUISITES CARDS
+   ============================================================ */
+.prereq-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.prereq-card {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 10px;
+  overflow: hidden;
+  transition: box-shadow 0.15s;
+}
+.prereq-card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.07); }
+
+.prereq-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.prereq-icon {
+  font-size: 20px;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.prereq-meta { flex: 1; min-width: 0; }
+.prereq-title { font-size: 14px; font-weight: 600; color: #1E293B; }
+.prereq-tagline { font-size: 11px; color: #94A3B8; margin-top: 1px; }
+
+.prereq-badges { display: flex; gap: 6px; align-items: center; flex-shrink: 0; }
+
+.badge {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.badge-required    { background: #FEE2E2; color: #B91C1C; }
+.badge-recommended { background: #FEF3C7; color: #B45309; }
+.badge-bonus       { background: #DCFCE7; color: #15803D; }
+
+.badge-easy   { background: #DCFCE7; color: #15803D; }
+.badge-medium { background: #FEF3C7; color: #B45309; }
+.badge-hard   { background: #FEE2E2; color: #B91C1C; }
+
+.toggle-arrow {
+  font-size: 12px;
+  color: #94A3B8;
+  transition: transform 0.2s;
+  flex-shrink: 0;
+}
+.toggle-arrow.open { transform: rotate(180deg); }
+
+.prereq-body {
+  display: none;
+  padding: 0 16px 16px 64px;
+  border-top: 1px solid #F1F5F9;
+}
+.prereq-body.open { display: block; padding-top: 14px; }
+
+.prereq-summary {
+  font-size: 13px;
+  color: #475569;
+  line-height: 1.75;
+  margin-bottom: 12px;
+}
+
+.prereq-what-you-need {
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+}
+
+.prereq-what-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #94A3B8;
+  margin-bottom: 8px;
+}
+
+.prereq-checklist { list-style: none; }
+.prereq-checklist li {
+  font-size: 12px;
+  color: #475569;
+  padding: 3px 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  line-height: 1.5;
+}
+.prereq-checklist li::before {
+  content: "✓";
+  color: #22C55E;
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 0px;
+}
+
+.ref-links { display: flex; flex-wrap: wrap; gap: 7px; }
+
+.ref-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: #2563EB;
+  text-decoration: none;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid #BFDBFE;
+  background: #EFF6FF;
+  transition: all 0.15s;
+}
+.ref-link:hover { background: #DBEAFE; border-color: #93C5FD; }
+.ref-link-ext::after { content: " ↗"; font-size: 10px; opacity: 0.6; }
+
+/* ============================================================
+   SELF-ASSESSMENT CHECKLIST
+   ============================================================ */
+.checklist-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.check-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #E2E8F0;
+  background: #FFFFFF;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.check-item:hover { border-color: #CBD5E1; }
+.check-item.checked { background: #F0FDF4; border-color: #86EFAC; }
+
+.check-item input[type="checkbox"] {
+  width: 15px;
+  height: 15px;
+  accent-color: #16A34A;
+  cursor: pointer;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.check-text { flex: 1; }
+.check-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: #1E293B;
+}
+.check-item.checked .check-title { color: #15803D; }
+.check-desc { font-size: 11px; color: #94A3B8; margin-top: 1px; }
+
+.readiness-bar-wrap {
+  height: 6px;
+  background: #E2E8F0;
+  border-radius: 3px;
+  margin: 12px 0 6px;
+  overflow: hidden;
+}
+.readiness-bar {
+  height: 100%;
+  background: #22C55E;
+  border-radius: 3px;
+  transition: width 0.3s;
+  width: 0%;
+}
+.readiness-text { font-size: 12px; color: #64748B; }
+
+/* ============================================================
+   INFO BOXES
+   ============================================================ */
+.info-box {
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 13px;
+  line-height: 1.65;
+  margin: 12px 0;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+.info-box-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+.info-blue  { background: #EFF6FF; border: 1px solid #BFDBFE; color: #1E40AF; }
+.info-amber { background: #FFFBEB; border: 1px solid #FDE68A; color: #92400E; }
+.info-green { background: #F0FDF4; border: 1px solid #BBF7D0; color: #14532D; }
+
+/* ============================================================
+   TOPIC COUNTER
+   ============================================================ */
+.topic-counter {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #64748B;
+  margin-bottom: 14px;
+}
+.topic-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: #3B82F6;
+}
+
+/* ============================================================
+   SECTION DIVIDER
+   ============================================================ */
+.divider {
+  height: 1px;
+  background: #E2E8F0;
+  margin: 28px 0;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 640px) {
+  .arch-grid { grid-template-columns: repeat(2, 1fr); }
+  .prereq-body { padding-left: 16px; }
+  .page-wrapper { padding: 16px 12px 40px; }
+}
+</style>
+</head>
+<body>
+
+<div class="page-wrapper">
+
+  <!-- ═══════════════════════════════════════════════════════════
+       SECTION HEADER
+       ═══════════════════════════════════════════════════════════ -->
+  <div class="section-label">RetailX Data Platform · Microsoft Fabric Workshop</div>
+  <h1>Section 1 — Prerequisites &amp; References</h1>
+  <p style="color:#64748B; font-size:14px; margin-bottom:28px;">
+    Everything you need to know <em>before</em> starting the labs.
+    Expand each topic to read a summary and find the right learning resource.
+  </p>
+
+
+  <!-- ═══════════════════════════════════════════════════════════
+       PROJECT OVERVIEW CARD
+       ═══════════════════════════════════════════════════════════ -->
+  <div class="card card-accent-blue">
+    <div class="section-label">What we are building</div>
+    <h2>RetailX — End-to-End Data Platform on Microsoft Fabric</h2>
+    <p style="margin-top:8px;">
+      RetailX is a fictional global e-commerce company with 4 years of sales data scattered across
+      CSV exports and public REST APIs. Over 3 hours, you will build their entire analytics
+      infrastructure — from raw data ingestion to a live Power BI executive dashboard — using
+      only a browser and a free Microsoft Fabric trial.
+    </p>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:14px;">
+      <div style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:8px; padding:12px;">
+        <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:#94A3B8; margin-bottom:8px;">Free data sources used</div>
+        <div style="font-size:12px; color:#475569; line-height:2;">
+          📁 Superstore Sales CSV — GitHub (Plotly datasets)<br>
+          🌐 REST Countries API — restcountries.com (no auth)<br>
+          📊 9,994 rows × 21 columns of retail transactions<br>
+          🌍 250+ countries with geographic &amp; economic data
+        </div>
+      </div>
+      <div style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:8px; padding:12px;">
+        <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:#94A3B8; margin-bottom:8px;">Deliverables by end of session</div>
+        <div style="font-size:12px; color:#475569; line-height:2;">
+          🗄 LH_RetailX Lakehouse (Bronze → Platinum)<br>
+          📓 4 production-grade PySpark notebooks<br>
+          🔄 1 Data Pipeline with parallel DAG execution<br>
+          ⭐ Star schema — 1 fact + 4 dimension tables<br>
+          📊 Power BI DirectLake report + 8 DAX measures
+        </div>
+      </div>
+    </div>
+
+    <div class="info-box info-blue" style="margin-top:14px; margin-bottom:0;">
+      <span class="info-box-icon">💡</span>
+      <span>No local tools required. Everything runs inside your browser using the
+      <strong>Microsoft Fabric free trial (60 days)</strong> — no credit card, no Azure subscription needed.</span>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════════
+       ARCHITECTURE OVERVIEW
+       ═══════════════════════════════════════════════════════════ -->
+  <div class="card card-accent-amber">
+    <div class="section-label">Medallion Architecture — RetailX naming convention</div>
+    <h2>Bronze → Silver → Gold → Platinum</h2>
+    <p style="margin-top:8px; margin-bottom:0;">
+      This project uses the <strong>medallion architecture</strong> pattern — a layered approach where
+      data quality improves progressively as it moves through each layer.
+      Each layer has a clear contract about what kind of data it contains.
+    </p>
+
+    <!-- Layer cards -->
+    <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin:16px 0 6px;">
+
+      <div class="arch-layer layer-bronze">
+        <div class="layer-icon">🥉</div>
+        <div class="layer-name">Bronze</div>
+        <div class="layer-sub">Raw, exact copy of source. Immutable. Never modified after landing.</div>
+        <div style="margin-top:8px; font-size:10px; background:#F59E0B22; border-radius:4px; padding:4px 6px; color:#92400E;">
+          raw_sales<br>raw_countries
+        </div>
+      </div>
+
+      <div class="arch-layer layer-silver">
+        <div class="layer-icon">🥈</div>
+        <div class="layer-name">Silver</div>
+        <div class="layer-sub">Cleaned, typed, renamed. Business rules and derived columns added.</div>
+        <div style="margin-top:8px; font-size:10px; background:#94A3B822; border-radius:4px; padding:4px 6px; color:#475569;">
+          silver_sales<br>silver_countries
+        </div>
+      </div>
+
+      <div class="arch-layer layer-gold">
+        <div class="layer-icon">🥇</div>
+        <div class="layer-name">Gold</div>
+        <div class="layer-sub">Star schema with surrogate keys. Optimized for analytics queries.</div>
+        <div style="margin-top:8px; font-size:10px; background:#D9770622; border-radius:4px; padding:4px 6px; color:#B45309;">
+          fact_sales<br>dim_date · dim_customer<br>dim_product · dim_geography
+        </div>
+      </div>
+
+      <div class="arch-layer layer-plat">
+        <div class="layer-icon">💎</div>
+        <div class="layer-name">Platinum</div>
+        <div class="layer-sub">DirectLake semantic model. Zero-copy Power BI serving layer.</div>
+        <div style="margin-top:8px; font-size:10px; background:#3B82F622; border-radius:4px; padding:4px 6px; color:#1D4ED8;">
+          SM_RetailX<br>RPT-RetailX-Overview
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Flow arrow -->
+    <div style="display:flex; align-items:center; justify-content:center; gap:6px; font-size:12px; color:#94A3B8; margin-bottom:6px;">
+      <span>DFG2 / NB-01</span>
+      <span>→</span>
+      <span>NB-02</span>
+      <span>→</span>
+      <span>NB-03</span>
+      <span>→</span>
+      <span>Power BI</span>
+    </div>
+
+    <div class="info-box info-amber" style="margin-bottom:0;">
+      <span class="info-box-icon">⚠️</span>
+      <span>
+        <strong>Key rule:</strong> Each layer is <em>append-only</em> from the layer below.
+        You never go backwards and modify Bronze data. If a bug is found,
+        fix the transformation logic and reprocess forward.
+      </span>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════════
+       PREREQUISITES — EXPANDABLE CARDS
+       ═══════════════════════════════════════════════════════════ -->
+  <div class="divider"></div>
+
+  <div class="section-label">Before you start</div>
+  <h2>Prerequisites — 8 Topics</h2>
+  <p style="margin-bottom:4px;">
+    Expand each topic to read a plain-English summary of what you need to know.
+    You don't need to be an expert — a working understanding is enough.
+  </p>
+
+  <div class="topic-counter">
+    <span class="topic-dot"></span>
+    3 Required &nbsp;·&nbsp; 4 Recommended &nbsp;·&nbsp; 1 Bonus
+  </div>
+
+  <div class="prereq-grid">
+
+    <!-- ─── 1. Microsoft Fabric ─────────────────────────────── -->
+    <div class="prereq-card" id="pc-1">
+      <div class="prereq-header" onclick="togglePrereq(1)">
+        <div class="prereq-icon" style="background:#EFF6FF;">🧱</div>
+        <div class="prereq-meta">
+          <div class="prereq-title">Microsoft Fabric Basics</div>
+          <div class="prereq-tagline">Workloads, workspaces, capacities, and OneLake</div>
+        </div>
+        <div class="prereq-badges">
+          <span class="badge badge-required">Required</span>
+          <span class="badge badge-medium">Intermediate</span>
+        </div>
+        <span class="toggle-arrow" id="ta-1">▼</span>
+      </div>
+      <div class="prereq-body" id="pb-1">
+        <p class="prereq-summary">
+          Microsoft Fabric is a unified analytics platform that combines data engineering,
+          data science, data warehousing, real-time analytics, and Power BI into a single
+          SaaS product — all sharing one underlying storage layer called <strong>OneLake</strong>.
+          Unlike traditional architectures where each tool has its own storage, Fabric means
+          a PySpark notebook and a Power BI report both read from the exact same Delta files
+          with no data movement between them.
+          You need to understand workspaces (where items live), capacities (compute that powers
+          the platform), and the workload switcher (the persona-based navigation).
+        </p>
+
+        <div class="prereq-what-you-need">
+          <div class="prereq-what-title">What you need to know for this project</div>
+          <ul class="prereq-checklist">
+            <li>How to create a workspace and assign it to a Fabric trial capacity</li>
+            <li>How to switch between Data Engineering, Power BI, and Data Warehouse workloads</li>
+            <li>What a Lakehouse is and the difference between Tables and Files sections</li>
+            <li>That OneLake means one copy of data — no imports, no movement between tools</li>
+          </ul>
+        </div>
+
+        <div class="ref-links">
+          <a class="ref-link ref-link-ext" href="https://learn.microsoft.com/en-us/fabric/get-started/microsoft-fabric-overview" target="_blank">Microsoft Fabric Overview</a>
+          <a class="ref-link ref-link-ext" href="https://learn.microsoft.com/en-us/fabric/get-started/fabric-trial" target="_blank">Start a Fabric Trial</a>
+          <a class="ref-link ref-link-ext" href="https://learn.microsoft.com/en-us/fabric/data-engineering/lakehouse-overview" target="_blank">Lakehouse Overview</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── 2. Delta Lake ───────────────────────────────────── -->
+    <div class="prereq-card" id="pc-2">
+      <div class="prereq-header" onclick="togglePrereq(2)">
+        <div class="prereq-icon" style="background:#FEF3C7;">🔺</div>
+        <div class="prereq-meta">
+          <div class="prereq-title">Delta Lake &amp; Delta Tables</div>
+          <div class="prereq-tagline">The file format that powers every table in this project</div>
+        </div>
+        <div class="prereq-badges">
+          <span class="badge badge-required">Required</span>
+          <span class="badge badge-medium">Intermediate</span>
+        </div>
+        <span class="toggle-arrow" id="ta-2">▼</span>
+      </div>
+      <div class="prereq-body" id="pb-2">
+        <p class="prereq-summary">
+          Delta Lake is an open-source storage layer that adds ACID transactions,
+          schema enforcement, and time travel on top of regular Parquet files stored in
+          a data lake. In Microsoft Fabric, every managed table in a Lakehouse is a
+          Delta table — meaning it gets a transaction log (<code>_delta_log</code>) that
+          records every change, supports merge/upsert operations, and can be queried
+          by both Spark (PySpark) and SQL (T-SQL via the SQL Endpoint) simultaneously.
+          You will use Delta as the write format for every layer in this project:
+          Bronze, Silver, Gold, and Platinum.
+        </p>
+
+        <div class="prereq-what-you-need">
+          <div class="prereq-what-title">What you need to know for this project</div>
+          <ul class="prereq-checklist">
+            <li>How to write a DataFrame to Delta: <code>df.write.format("delta").saveAsTable("name")</code></li>
+            <li>Difference between <code>mode("overwrite")</code> and <code>mode("append")</code></li>
+            <li>What ACID transactions mean: why Delta never leaves a table in a broken state</li>
+            <li>That Delta tables in Fabric are automatically available via T-SQL — no extra steps</li>
+          </ul>
+        </div>
+
+        <div class="ref-links">
+          <a class="ref-link ref-link-ext" href="https://docs.delta.io/latest/index.html" target="_blank">Delta Lake Documentation</a>
+          <a class="ref-link ref-link-ext" href="https://learn.microsoft.com/en-us/fabric/data-engineering/lakehouse-and-delta-tables" target="_blank">Delta Tables in Fabric</a>
+          <a class="ref-link ref-link-ext" href="https://learn.microsoft.com/en-us/azure/databricks/delta/history" target="_blank">Delta Time Travel</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── 3. PySpark ──────────────────────────────────────── -->
+    <div class="prereq-card" id="pc-3">
+      <div class="prereq-header" onclick="togglePrereq(3)">
+        <div class="prereq-icon" style="background:#F0FDF4;">⚡</div>
+        <div class="prereq-meta">
+          <div class="prereq-title">PySpark Fundamentals</div>
+          <div class="prereq-tagline">Reading, transforming, and writing DataFrames with Apache Spark</div>
+        </div>
+        <div class="prereq-badges">
+          <span class="badge badge-required">Required</span>
+          <span class="badge badge-hard">Advanced</span>
+        </div>
+        <span class="toggle-arrow" id="ta-3">▼</span>
+      </div>
+      <div class="prereq-body" id="pb-3">
+        <p class="prereq-summary">
+          PySpark is the Python API for Apache Spark — a distributed computing engine that
+          processes data in parallel across a cluster. In Fabric notebooks, a SparkSession
+          is pre-configured for you; you just write PySpark code and Fabric handles the cluster.
+          The key mental model is that a <strong>DataFrame</strong> is an immutable, lazily-evaluated
+          distributed table — transformations like <code>.withColumn()</code> and <code>.filter()</code>
+          build a query plan but don't execute until you call an action like <code>.count()</code>
+          or <code>.write()</code>. All columns are referenced using <code>F.col("name")</code>
+          from <code>pyspark.sql.functions</code>.
+        </p>
+
+        <div class="prereq-what-you-need">
+          <div class="prereq-what-title">What you need to know for this project</div>
+          <ul class="prereq-checklist">
+            <li>Reading a table: <code>spark.table("table_name")</code></li>
+            <li>Adding/transforming columns: <code>df.withColumn("col", F.expr(...))</code></li>
+            <li>Filtering rows: <code>df.filter(F.col("x").isNotNull())</code></li>
+            <li>Joining two DataFrames: <code>df1.join(df2, "key_col", "left")</code></li>
+            <li>Window functions for row numbers: <code>F.row_number().over(Window.orderBy("col"))</code></li>
+            <li>Writing to Delta: <code>df.write.format("delta").mode("overwrite").saveAsTable("name")</code></li>
+          </ul>
+        </div>
+
+        <div class="ref-links">
+          <a class="ref-link ref-link-ext" href="https://spark.apache.org/docs/latest/api/python/index.html" target="_blank">PySpark Official Docs</a>
+          <a class="ref-link ref-link-ext" href="https://learn.microsoft.com/en-us/fabric/data-engineering/how-to-use-notebook" target="_blank">Fabric Notebooks Guide</a>
+          <a class="ref-link ref-link-ext" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/functions.html" target="_blank">PySpark Functions Reference</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── 4. Medallion Architecture ──────────────────────── -->
+    <div class="prereq-card" id="pc-4">
+      <div class="prereq-header" onclick="togglePrereq(4)">
+        <div class="prereq-icon" style="background:#FEF9EC;">🏗️</div>
+        <div class="prereq-meta">
+          <div class="prereq-title">Medallion Architecture</div>
+          <div class="prereq-tagline">Why we layer data: Bronze, Silver, Gold, Platinum</div>
+        </div>
+        <div class="prereq-badges">
+          <span class="badge badge-recommended">Recommended</span>
+          <span class="badge badge-easy">Foundational</span>
+        </div>
+        <span class="toggle-arrow" id="ta-4">▼</span>
+      </div>
+      <div class="prereq-body" id="pb-4">
+        <p class="prereq-summary">
+          The medallion architecture (also called multi-hop architecture) is a data design
+          pattern that organizes a data lakehouse into layers of progressively increasing
+          quality and structure. The Bronze layer holds raw, unmodified source data as an
+          immutable archive. Silver cleans, types, and applies business rules.
+          Gold builds analytics-ready structures like star schemas. Platinum serves
+          consumption layers like Power BI. Each layer has a clear contract and a single
+          direction of data flow — you never write back to a previous layer.
+          This pattern improves reliability, debuggability, and reprocessing without data loss.
+        </p>
+
+        <div class="prereq-what-you-need">
+          <div class="prereq-what-title">What you need to know for this project</div>
+          <ul class="prereq-checklist">
+            <li>Bronze is write-once, read-always — never mutate raw data</li>
+            <li>Silver resolves nulls, casts types, renames columns, deduplicates</li>
+            <li>Gold applies business logic: star schema, surrogate keys, joins</li>
+            <li>Platinum optimizes for the consumer: DirectLake, pre-aggregations, RLS</li>
+          </ul>
+        </div>
+
+        <div class="ref-links">
+          <a class="ref-link ref-link-ext" href="https://www.databricks.com/glossary/medallion-architecture" target="_blank">Medallion Architecture (Databricks)</a>
+          <a class="ref-link ref-link-ext" href="https://learn.microsoft.com/en-us/azure/databricks/lakehouse/medallion" target="_blank">Microsoft Docs — Medallion</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── 5. Star Schema ──────────────────────────────────── -->
+    <div class="prereq-card" id="pc-5">
+      <div class="prereq-header" onclick="togglePrereq(5)">
+        <div class="prereq-icon" style="background:#FDF4FF;">⭐</div>
+        <div class="prereq-meta">
+          <div class="prereq-title">Star Schema &amp; Dimensional Modeling</div>
+          <div class="prereq-tagline">Fact tables, dimension tables, and surrogate keys</div>
+        </div>
+        <div class="prereq-badges">
+          <span class="badge badge-recommended">Recommended</span>
+          <span class="badge badge-medium">Intermediate</span>
+        </div>
+        <span class="toggle-arrow" id="ta-5">▼</span>
+      </div>
+      <div class="prereq-body" id="pb-5">
+        <p class="prereq-summary">
+          A star schema is a dimensional modeling pattern where a central <strong>fact table</strong>
+          (containing measurable business events like sales transactions) is surrounded by
+          <strong>dimension tables</strong> (containing descriptive attributes like customer name,
+          product category, or date). The fact table contains numeric measures (sales, quantity,
+          profit) and foreign key references to each dimension via <strong>surrogate keys</strong>
+          — integer keys generated by the data platform that replace natural business keys.
+          Power BI performs best on star schemas because they minimize join complexity and
+          allow VertiPaq (the Power BI engine) to compress dimension data aggressively.
+        </p>
+
+        <div class="prereq-what-you-need">
+          <div class="prereq-what-title">What you need to know for this project</div>
+          <ul class="prereq-checklist">
+            <li>What a fact table contains: measures (sales, profit) + foreign keys (date_key, customer_sk)</li>
+            <li>What a dimension table contains: descriptive attributes (name, category, region)</li>
+            <li>Why we use surrogate keys (integers) instead of natural keys (order IDs, strings)</li>
+            <li>Why single-direction filtering is the default in Power BI star schemas</li>
+          </ul>
+        </div>
+
+        <div class="ref-links">
+          <a class="ref-link ref-link-ext" href="https://learn.microsoft.com/en-us/power-bi/guidance/star-schema" target="_blank">Star Schema in Power BI (Microsoft)</a>
+          <a class="ref-link ref-link-ext" href="https://www.kimballgroup.com/data-warehouse-business-intelligence-resources/kimball-techniques/dimensional-modeling-techniques/" target="_blank">Kimball Dimensional Modeling</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── 6. Power Query M ────────────────────────────────── -->
+    <div class="prereq-card" id="pc-6">
+      <div class="prereq-header" onclick="togglePrereq(6)">
+        <div class="prereq-icon" style="background:#EEF2FF;">🔧</div>
+        <div class="prereq-meta">
+          <div class="prereq-title">Power Query M Language</div>
+          <div class="prereq-tagline">Used in Dataflow Gen2 to transform the Sales CSV</div>
+        </div>
+        <div class="prereq-badges">
+          <span class="badge badge-recommended">Recommended</span>
+          <span class="badge badge-easy">Beginner</span>
+        </div>
+        <span class="toggle-arrow" id="ta-6">▼</span>
+      </div>
+      <div class="prereq-body" id="pb-6">
+        <p class="prereq-summary">
+          M (Power Query Formula Language) is the functional transformation language
+          used inside Power BI Dataflows, Power BI Desktop, and Microsoft Fabric's
+          Dataflow Gen2. An M query is a series of <code>let</code> steps where each
+          step builds on the previous one — similar to a pipeline of transformations.
+          In this project you use M inside Dataflow Gen2 to read the Superstore CSV
+          from GitHub, rename all 21 columns to snake_case, and cast types —
+          all without writing any Python or SQL.
+          You don't need to write M from scratch; we provide the code and you need to
+          understand what each step does.
+        </p>
+
+        <div class="prereq-what-you-need">
+          <div class="prereq-what-title">What you need to know for this project</div>
+          <ul class="prereq-checklist">
+            <li>The structure of an M query: <code>let ... in result</code></li>
+            <li>How <code>Table.RenameColumns</code> renames multiple columns at once</li>
+            <li>How <code>Table.TransformColumnTypes</code> sets data types</li>
+            <li>How to open the Advanced Editor in DFG2 and paste M code</li>
+          </ul>
+        </div>
+
+        <div class="ref-links">
+          <a class="ref-link ref-link-ext" href="https://learn.microsoft.com/en-us/powerquery-m/power-query-m-language-specification" target="_blank">M Language Specification</a>
+          <a class="ref-link ref-link-ext" href="https://learn.microsoft.com/en-us/power-query/power-query-what-is-power-query" target="_blank">Power Query Overview</a>
+          <a class="ref-link ref-link-ext" href="https://learn.microsoft.com/en-us/fabric/data-factory/dataflows-gen2-overview" target="_blank">Dataflow Gen2 in Fabric</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── 7. DAX ──────────────────────────────────────────── -->
+    <div class="prereq-card" id="pc-7">
+      <div class="prereq-header" onclick="togglePrereq(7)">
+        <div class="prereq-icon" style="background:#FFF7ED;">📐</div>
+        <div class="prereq-meta">
+          <div class="prereq-title">DAX Basics</div>
+          <div class="prereq-tagline">Writing measures for the Power BI semantic model</div>
+        </div>
+        <div class="prereq-badges">
+          <span class="badge badge-recommended">Recommended</span>
+          <span class="badge badge-medium">Intermediate</span>
+        </div>
+        <span class="toggle-arrow" id="ta-7">▼</span>
+      </div>
+      <div class="prereq-body" id="pb-7">
+        <p class="prereq-summary">
+          DAX (Data Analysis Expressions) is the formula language used in Power BI,
+          Analysis Services, and Microsoft Fabric semantic models to define measures,
+          calculated columns, and calculation groups. Unlike Excel formulas that operate
+          on cells, DAX measures operate on <em>filter context</em> — the set of filters
+          active when a visual evaluates the measure. The most important function is
+          <code>CALCULATE()</code>, which modifies filter context. In this project you
+          write 8 measures covering aggregations, ratios, time intelligence (YoY comparison),
+          and averages — all using the VAR / RETURN pattern for clean, readable code.
+        </p>
+
+        <div class="prereq-what-you-need">
+          <div class="prereq-what-title">What you need to know for this project</div>
+          <ul class="prereq-checklist">
+            <li>The difference between a <strong>measure</strong> (dynamic, context-aware) and a calculated column (row-by-row)</li>
+            <li>How to use <code>VAR ... RETURN</code> for readable multi-step measures</li>
+            <li>How <code>CALCULATE()</code> modifies filter context</li>
+            <li>How <code>DATEADD()</code> shifts the date context for time intelligence</li>
+            <li>How <code>DIVIDE(numerator, denominator, alternate)</code> avoids division-by-zero errors</li>
+          </ul>
+        </div>
+
+        <div class="ref-links">
+          <a class="ref-link ref-link-ext" href="https://learn.microsoft.com/en-us/dax/dax-overview" target="_blank">DAX Overview (Microsoft)</a>
+          <a class="ref-link ref-link-ext" href="https://dax.guide/" target="_blank">DAX.guide — Function Reference</a>
+          <a class="ref-link ref-link-ext" href="https://learn.microsoft.com/en-us/dax/best-practices/dax-variables" target="_blank">DAX Variables Best Practices</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── 8. REST APIs & JSON ─────────────────────────────── -->
+    <div class="prereq-card" id="pc-8">
+      <div class="prereq-header" onclick="togglePrereq(8)">
+        <div class="prereq-icon" style="background:#ECFDF5;">🌐</div>
+        <div class="prereq-meta">
+          <div class="prereq-title">REST APIs &amp; JSON</div>
+          <div class="prereq-tagline">How to call a public API and parse the response in Python</div>
+        </div>
+        <div class="prereq-badges">
+          <span class="badge badge-bonus">Bonus</span>
+          <span class="badge badge-easy">Beginner</span>
+        </div>
+        <span class="toggle-arrow" id="ta-8">▼</span>
+      </div>
+      <div class="prereq-body" id="pb-8">
+        <p class="prereq-summary">
+          REST (Representational State Transfer) is the architectural style behind most
+          public web APIs. You interact with a REST API by sending HTTP requests (GET, POST,
+          etc.) to a URL endpoint, and the server responds with data — almost always formatted
+          as JSON (JavaScript Object Notation), a human-readable key-value structure.
+          In Lab 2 of this project, you call the REST Countries API using Python's
+          <code>requests</code> library, receive a JSON array of 250 country objects,
+          parse each object into a Python dict with a helper function, and load the result
+          into a PySpark DataFrame. Understanding JSON structure (nested objects, arrays,
+          optional keys) is essential for this lab.
+        </p>
+
+        <div class="prereq-what-you-need">
+          <div class="prereq-what-title">What you need to know for this project</div>
+          <ul class="prereq-checklist">
+            <li>How to make a GET request: <code>response = requests.get(url, timeout=30)</code></li>
+            <li>How to parse JSON: <code>data = response.json()</code> returns a Python list or dict</li>
+            <li>How to safely access nested keys: <code>obj.get("key", {}).get("subkey", "")</code></li>
+            <li>How to handle optional/missing keys using <code>.get("key", default_value)</code></li>
+          </ul>
+        </div>
+
+        <div class="ref-links">
+          <a class="ref-link ref-link-ext" href="https://requests.readthedocs.io/en/latest/" target="_blank">Python requests library</a>
+          <a class="ref-link ref-link-ext" href="https://restcountries.com/" target="_blank">REST Countries API docs</a>
+          <a class="ref-link ref-link-ext" href="https://docs.python.org/3/library/json.html" target="_blank">Python json module</a>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end prereq-grid -->
+
+
+  <!-- ═══════════════════════════════════════════════════════════
+       SELF-ASSESSMENT CHECKLIST
+       ═══════════════════════════════════════════════════════════ -->
+  <div class="divider"></div>
+  <div class="card card-accent-green">
+    <div class="section-label">Before you open Fabric</div>
+    <h2>Am I ready? — Self-assessment</h2>
+    <p style="margin-top:8px; margin-bottom:14px;">
+      Check off each item honestly. If you can't check more than 6 of these,
+      spend 30 minutes on the reference links above before the live session.
+    </p>
+
+    <div class="readiness-bar-wrap">
+      <div class="readiness-bar" id="readiness-bar"></div>
+    </div>
+    <p class="readiness-text" id="readiness-text">0 / 10 ready</p>
+
+    <div class="checklist-grid" style="margin-top:12px;">
+
+      <label class="check-item" id="ci-1" onclick="updateReadiness()">
+        <input type="checkbox">
+        <div class="check-text">
+          <div class="check-title">I have a Microsoft account and can log in to app.fabric.microsoft.com</div>
+          <div class="check-desc">Any Microsoft 365 account (Outlook, work, school) works</div>
+        </div>
+      </label>
+
+      <label class="check-item" id="ci-2" onclick="updateReadiness()">
+        <input type="checkbox">
+        <div class="check-text">
+          <div class="check-title">I have activated the Fabric free trial (60 days)</div>
+          <div class="check-desc">Account icon (top-right) → Start Fabric trial</div>
+        </div>
+      </label>
+
+      <label class="check-item" id="ci-3" onclick="updateReadiness()">
+        <input type="checkbox">
+        <div class="check-text">
+          <div class="check-title">I understand what a DataFrame is and can read/write one in PySpark</div>
+          <div class="check-desc">spark.table(), df.withColumn(), df.write.format("delta").saveAsTable()</div>
+        </div>
+      </label>
+
+      <label class="check-item" id="ci-4" onclick="updateReadiness()">
+        <input type="checkbox">
+        <div class="check-text">
+          <div class="check-title">I understand the difference between Bronze / Silver / Gold layers</div>
+          <div class="check-desc">Raw → Cleaned → Analytics-ready</div>
+        </div>
+      </label>
+
+      <label class="check-item" id="ci-5" onclick="updateReadiness()">
+        <input type="checkbox">
+        <div class="check-text">
+          <div class="check-title">I know what a star schema is (fact + dimension tables)</div>
+          <div class="check-desc">fact_sales in the center, dim_date / dim_customer / dim_product around it</div>
+        </div>
+      </label>
+
+      <label class="check-item" id="ci-6" onclick="updateReadiness()">
+        <input type="checkbox">
+        <div class="check-text">
+          <div class="check-title">I have written at least one basic DAX measure (SUM, CALCULATE, DIVIDE)</div>
+          <div class="check-desc">Power BI Desktop or a Fabric semantic model</div>
+        </div>
+      </label>
+
+      <label class="check-item" id="ci-7" onclick="updateReadiness()">
+        <input type="checkbox">
+        <div class="check-text">
+          <div class="check-title">I know how to call a REST API in Python using requests.get()</div>
+          <div class="check-desc">response = requests.get(url); data = response.json()</div>
+        </div>
+      </label>
+
+      <label class="check-item" id="ci-8" onclick="updateReadiness()">
+        <input type="checkbox">
+        <div class="check-text">
+          <div class="check-title">I understand what DirectLake mode means in Power BI</div>
+          <div class="check-desc">No data import, no scheduled refresh — reads Delta files directly from OneLake</div>
+        </div>
+      </label>
+
+      <label class="check-item" id="ci-9" onclick="updateReadiness()">
+        <input type="checkbox">
+        <div class="check-text">
+          <div class="check-title">I know how to create a workspace in Fabric and assign it to a capacity</div>
+          <div class="check-desc">Left panel → Workspaces → + New → Advanced → Trial capacity</div>
+        </div>
+      </label>
+
+      <label class="check-item" id="ci-10" onclick="updateReadiness()">
+        <input type="checkbox">
+        <div class="check-text">
+          <div class="check-title">I have read the project scenario and understand the data sources we will use</div>
+          <div class="check-desc">Superstore CSV (GitHub) + REST Countries API (restcountries.com)</div>
+        </div>
+      </label>
+
+    </div>
+
+    <div class="info-box info-green" style="margin-top:16px; margin-bottom:0;" id="readiness-msg">
+      <span class="info-box-icon">📋</span>
+      <span>Check off items above to see your readiness level.</span>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════════
+       WHAT'S NEXT
+       ═══════════════════════════════════════════════════════════ -->
+  <div class="divider"></div>
+  <div class="card">
+    <div class="section-label">Up next</div>
+    <h2>Section 2 — Architecture &amp; Platform Design</h2>
+    <p style="margin-top:8px; margin-bottom:0;">
+      In the next section you will see the full architecture diagram of the RetailX platform,
+      a complete table reference for all Delta tables across all 4 layers,
+      and the pipeline DAG (Directed Acyclic Graph) that orchestrates all notebooks.
+      That section gives you the "big picture" before you write a single line of code.
+    </p>
+  </div>
+
+</div><!-- end page-wrapper -->
+
+<!-- ============================================================
+     JAVASCRIPT
+     ============================================================ -->
+<script>
+
+  /* ── PREREQUISITE TOGGLE ────────────────────────────────── */
+  function togglePrereq(n) {
+    var body  = document.getElementById('pb-' + n);
+    var arrow = document.getElementById('ta-' + n);
+    var isOpen = body.classList.contains('open');
+    body.classList.toggle('open', !isOpen);
+    arrow.classList.toggle('open', !isOpen);
+  }
+
+  /* ── READINESS CHECKLIST ────────────────────────────────── */
+  function updateReadiness() {
+    // Small delay so checkbox state is updated before we count
+    setTimeout(function() {
+      var items  = document.querySelectorAll('.check-item');
+      var total  = items.length;
+      var done   = 0;
+
+      items.forEach(function(item) {
+        var cb = item.querySelector('input[type="checkbox"]');
+        if (cb && cb.checked) {
+          done++;
+          item.classList.add('checked');
+        } else {
+          item.classList.remove('checked');
+        }
+      });
+
+      var pct = Math.round((done / total) * 100);
+      document.getElementById('readiness-bar').style.width = pct + '%';
+      document.getElementById('readiness-text').textContent = done + ' / ' + total + ' ready';
+
+      var msg    = document.getElementById('readiness-msg');
+      var icon   = msg.querySelector('.info-box-icon');
+      var span   = msg.querySelectorAll('span')[1];
+
+      if (done === total) {
+        msg.className = 'info-box info-green';
+        icon.textContent = '🚀';
+        span.textContent = 'You are fully ready! Open Fabric and let\'s build.';
+      } else if (done >= 7) {
+        msg.className = 'info-box info-green';
+        icon.textContent = '✅';
+        span.textContent = 'You are ready to start. Review the unchecked items during the session if needed.';
+      } else if (done >= 4) {
+        msg.className = 'info-box info-amber';
+        icon.textContent = '⚠️';
+        span.textContent = 'Almost there. Spend 20–30 minutes on the unchecked prerequisite topics before starting.';
+      } else {
+        msg.className = 'info-box info-amber';
+        icon.textContent = '📚';
+        span.textContent = 'Take some time to review the prerequisites above. The reference links will get you up to speed quickly.';
+      }
+    }, 50);
+  }
+
+</script>
+</body>
+</html>

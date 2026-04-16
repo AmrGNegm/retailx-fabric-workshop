@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RetailX Fabric Workshop — Lab 3: Silver Layer &amp; Pipeline</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;background:#F0F4F8;color:#1A202C;font-size:14px;line-height:1.6}
+.page-wrapper{max-width:860px;margin:0 auto;padding:32px 24px 60px}
+h1{font-size:26px;font-weight:700;color:#0F172A;margin-bottom:4px}
+h2{font-size:19px;font-weight:700;color:#1E293B;margin-bottom:6px}
+p{color:#475569;line-height:1.75;margin-bottom:10px}
+code{font-family:'Consolas','Courier New',monospace;font-size:12px;background:#F1F5F9;border:1px solid #E2E8F0;border-radius:4px;padding:1px 6px;color:#0F172A}
+.section-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#94A3B8;margin-bottom:6px}
+.divider{height:1px;background:#E2E8F0;margin:24px 0}
+.card{background:#FFF;border:1px solid #E2E8F0;border-radius:12px;padding:18px 20px;margin-bottom:18px}
+.info-box{border-radius:8px;padding:11px 14px;font-size:13px;line-height:1.65;margin:10px 0;display:flex;gap:10px;align-items:flex-start}
+.ib-icon{font-size:15px;flex-shrink:0;margin-top:1px}
+.info-blue{background:#EFF6FF;border:1px solid #BFDBFE;color:#1E40AF}
+.info-amber{background:#FFFBEB;border:1px solid #FDE68A;color:#92400E}
+.info-green{background:#F0FDF4;border:1px solid #BBF7D0;color:#14532D}
+.info-purple{background:#F5F3FF;border:1px solid #DDD6FE;color:#4C1D95}
+
+/* LAB HEADER */
+.lab-header{background:#FFF;border:1px solid #E2E8F0;border-radius:12px;padding:18px 20px;margin-bottom:20px;border-left:4px solid #94A3B8}
+.lab-meta-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.badge{font-size:10px;font-weight:700;padding:3px 9px;border-radius:4px;text-transform:uppercase;letter-spacing:.04em}
+.b-silver{background:#F1F5F9;color:#475569;border:1px solid #CBD5E1}
+.b-gray{background:#F1F5F9;color:#475569;border:1px solid #E2E8F0}
+.b-blue{background:#EFF6FF;color:#1D4ED8}
+.b-purple{background:#F5F3FF;color:#6D28D9;border:1px solid #DDD6FE}
+.tag-pill{font-size:11px;padding:2px 8px;border-radius:10px;background:#F1F5F9;border:1px solid #E2E8F0;color:#475569}
+.prog-wrap{margin-top:14px}
+.prog-label{font-size:12px;color:#64748B;margin-bottom:5px}
+.prog-bar{height:6px;background:#E2E8F0;border-radius:3px;overflow:hidden}
+.prog-fill{height:100%;background:#94A3B8;border-radius:3px;transition:width .3s;width:0%}
+
+/* STEP CARDS */
+.step-card{background:#FFF;border:1px solid #E2E8F0;border-radius:10px;margin-bottom:10px;overflow:hidden;transition:border-color .15s,box-shadow .15s}
+.step-card:hover{box-shadow:0 2px 8px rgba(0,0,0,.05)}
+.step-card.done{border-color:#86EFAC}
+.step-header{display:flex;align-items:center;gap:10px;padding:12px 16px;cursor:pointer;user-select:none}
+.step-header:hover{background:#FAFAFA}
+.step-chk{width:16px;height:16px;accent-color:#16A34A;cursor:pointer;flex-shrink:0}
+.step-num{width:24px;height:24px;border-radius:50%;background:#F1F5F9;border:1px solid #E2E8F0;font-size:11px;font-weight:700;color:#64748B;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.step-card.done .step-num{background:#DCFCE7;border-color:#86EFAC;color:#15803D}
+.step-title-wrap{flex:1;min-width:0}
+.step-title{font-size:13px;font-weight:600;color:#1E293B;line-height:1.35}
+.step-card.done .step-title{color:#15803D}
+.step-subtitle{font-size:11px;color:#94A3B8;margin-top:1px}
+.step-badges{display:flex;gap:5px;align-items:center;flex-shrink:0}
+.type-badge{font-size:9px;font-weight:700;padding:2px 6px;border-radius:3px;text-transform:uppercase;letter-spacing:.04em}
+.type-ui{background:#EFF6FF;color:#1D4ED8}
+.type-code{background:#F5F3FF;color:#6D28D9}
+.type-quiz{background:#FFF7ED;color:#C2410C}
+.step-toggle{font-size:12px;color:#94A3B8;transition:transform .2s;flex-shrink:0}
+.step-toggle.open{transform:rotate(180deg)}
+.step-body{display:none;border-top:1px solid #F1F5F9}
+.step-body.open{display:block}
+.task-block{padding:14px 16px 12px}
+.task-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#94A3B8;margin-bottom:8px}
+.task-content{font-size:13px;color:#334155;line-height:1.75;white-space:pre-line}
+.task-steps{list-style:none;margin:10px 0}
+.task-steps li{display:flex;align-items:flex-start;gap:9px;padding:5px 0;font-size:13px;color:#334155;line-height:1.55;border-bottom:1px solid #F8FAFC}
+.task-steps li:last-child{border:none}
+.step-arrow{color:#3B82F6;font-weight:700;flex-shrink:0;margin-top:1px}
+.tier-buttons{display:flex;gap:8px;padding:0 16px 12px;flex-wrap:wrap}
+.tier-btn{font-size:12px;font-weight:600;padding:6px 14px;border-radius:6px;border:1.5px solid;cursor:pointer;font-family:inherit;transition:all .15s;display:flex;align-items:center;gap:5px}
+.btn-hint{background:#FFFBEB;border-color:#FDE68A;color:#92400E}
+.btn-hint:hover{background:#FEF3C7}
+.btn-hint.active{background:#FEF3C7;border-color:#F59E0B}
+.btn-answer{background:#F5F3FF;border-color:#DDD6FE;color:#4C1D95}
+.btn-answer:hover{background:#EDE9FE}
+.btn-answer.active{background:#EDE9FE;border-color:#8B5CF6}
+.btn-instructor{background:#F8FAFC;border-color:#E2E8F0;color:#64748B;font-size:11px;padding:5px 10px}
+.btn-instructor:hover{background:#F1F5F9}
+.hint-block{display:none;margin:0 16px 12px;background:#FFFBEB;border:1.5px solid #FDE68A;border-radius:8px;overflow:hidden}
+.hint-block.open{display:block}
+.hint-header{padding:8px 12px;background:#FEF3C7;border-bottom:1px solid #FDE68A;font-size:11px;font-weight:700;color:#92400E;display:flex;align-items:center;gap:6px}
+.hint-content{padding:12px 14px;font-size:13px;color:#78350F;line-height:1.7;white-space:pre-line}
+.hint-skeleton{font-family:'Consolas','Courier New',monospace;font-size:12px;background:#FFFBEB;padding:12px 14px;line-height:1.8;color:#78350F;overflow-x:auto;white-space:pre;border-top:1px solid #FDE68A}
+.answer-block{display:none;margin:0 16px 12px;background:#F5F3FF;border:1.5px solid #C4B5FD;border-radius:8px;overflow:hidden}
+.answer-block.open{display:block}
+.answer-header{padding:8px 12px;background:#EDE9FE;border-bottom:1px solid #C4B5FD;font-size:11px;font-weight:700;color:#4C1D95;display:flex;align-items:center;justify-content:space-between;gap:6px}
+.answer-note{font-size:10px;font-weight:400;color:#7C3AED}
+.answer-explain{padding:8px 14px 12px;font-size:12px;color:#4C1D95;line-height:1.65;border-top:1px solid #DDD6FE}
+.instructor-block{display:none;margin:0 16px 14px;background:#F8FAFC;border:1px dashed #CBD5E1;border-radius:8px;padding:10px 13px;font-size:12px;color:#64748B;line-height:1.65}
+.instructor-block.open{display:block}
+.instructor-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#94A3B8;margin-bottom:5px}
+.code-block{border-radius:8px;overflow:hidden;margin:8px 0;border:1px solid #334155}
+.code-hdr{display:flex;justify-content:space-between;align-items:center;padding:7px 14px;background:#1E293B;border-bottom:1px solid #334155}
+.code-lbl{font-family:'Consolas','Courier New',monospace;font-size:11px;color:#38BDF8}
+.copy-btn{font-size:11px;padding:3px 10px;border-radius:4px;background:transparent;border:1px solid #475569;color:#94A3B8;cursor:pointer;font-family:inherit;transition:all .15s}
+.copy-btn:hover{background:#334155;color:#E2E8F0}
+.copy-btn.ok{border-color:#22C55E!important;color:#22C55E!important}
+pre{margin:0;padding:14px 16px;background:#0F172A;color:#E2E8F0;font-size:12px;line-height:1.75;font-family:'Consolas','Courier New',monospace;overflow-x:auto;white-space:pre}
+.kc-block{margin:0 16px 14px;background:#FFF7ED;border:1.5px solid #FED7AA;border-radius:8px;overflow:hidden}
+.kc-header{padding:8px 13px;background:#FFEDD5;border-bottom:1px solid #FED7AA;font-size:11px;font-weight:700;color:#C2410C;display:flex;align-items:center;gap:6px}
+.kc-question{padding:12px 13px 8px;font-size:13px;font-weight:500;color:#431407;line-height:1.55}
+.kc-options{padding:0 13px 12px;display:flex;flex-direction:column;gap:6px}
+.kc-option{display:flex;align-items:flex-start;gap:9px;padding:8px 11px;border-radius:6px;border:1.5px solid #FED7AA;background:#FFFBEB;cursor:pointer;font-size:12px;color:#431407;line-height:1.4;transition:all .15s;user-select:none}
+.kc-option:hover{background:#FEF3C7;border-color:#F59E0B}
+.kc-option.correct{background:#DCFCE7;border-color:#86EFAC;color:#14532D}
+.kc-option.wrong{background:#FEE2E2;border-color:#FECACA;color:#7F1D1D}
+.kc-option.reveal{background:#DCFCE7;border-color:#86EFAC;color:#14532D}
+.kc-opt-icon{font-size:12px;flex-shrink:0;font-weight:700}
+.kc-feedback{margin:0 13px 12px;padding:8px 11px;border-radius:6px;font-size:12px;line-height:1.55;display:none}
+.kc-feedback.show{display:block}
+.kc-feedback.fb-correct{background:#DCFCE7;color:#14532D;border:1px solid #86EFAC}
+.kc-feedback.fb-wrong{background:#FEE2E2;color:#7F1D1D;border:1px solid #FECACA}
+
+/* PIPELINE DAG visual */
+.dag-visual{background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:16px;margin:10px 0;overflow-x:auto}
+.dag-row{display:flex;align-items:center;gap:0;min-width:580px;justify-content:center}
+.dag-node{border-radius:8px;padding:10px 12px;text-align:center;min-width:120px;cursor:default}
+.dn-br{background:#FEF3C7;border:1.5px solid #F59E0B}
+.dn-sl{background:#F1F5F9;border:1.5px solid #94A3B8}
+.dn-go{background:#FFFBEB;border:1.5px solid #D97706}
+.dag-label{font-size:11px;font-weight:700;color:#1E293B;margin-bottom:2px}
+.dag-sub{font-size:10px;color:#64748B}
+.dag-tool{font-size:9px;margin-top:4px;padding:2px 6px;border-radius:3px;display:inline-block}
+.dn-br .dag-tool{background:#F59E0B33;color:#92400E}
+.dn-sl .dag-tool{background:#94A3B833;color:#334155}
+.dn-go .dag-tool{background:#D9770633;color:#92400E}
+.dag-arr{display:flex;flex-direction:column;align-items:center;justify-content:center;width:40px;flex-shrink:0;font-size:10px;color:#94A3B8}
+.dag-parallel{display:flex;flex-direction:column;gap:8px}
+.dep-type{font-size:9px;color:#94A3B8;margin-bottom:2px;text-align:center}
+
+/* COMPLETION */
+.completion-card{background:linear-gradient(135deg,#F1F5F9 0%,#F0FDF4 100%);border:1.5px solid #86EFAC;border-radius:12px;padding:20px;margin-top:20px;text-align:center}
+.completion-icon{font-size:36px;margin-bottom:8px}
+.completion-title{font-size:18px;font-weight:700;color:#14532D;margin-bottom:6px}
+.tables-built{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.table-built-tag{font-family:'Consolas','Courier New',monospace;font-size:12px;padding:4px 12px;border-radius:5px;background:#F1F5F9;border:1px solid #CBD5E1;color:#334155;font-weight:600}
+
+@media(max-width:640px){.page-wrapper{padding:14px 10px 40px}}
+</style>
+</head>
+<body>
+<div class="page-wrapper">
+
+<!-- ═══ LAB HEADER ══════════════════════════════════════════ -->
+<div class="section-label">RetailX Data Platform · Microsoft Fabric Workshop</div>
+<h1>Lab 3 — Silver Layer &amp; Data Pipeline</h1>
+
+<div class="lab-header">
+  <div class="lab-meta-row">
+    <span class="badge b-silver">🥈 Silver Layer</span>
+    <span class="badge b-purple">🔄 Data Pipeline</span>
+    <span class="badge b-gray">⏱ 25 minutes</span>
+    <span class="badge b-blue">Lab 3 of 5</span>
+  </div>
+  <p style="margin-bottom:10px">
+    Build two Silver notebooks that clean, type, and enrich the Bronze tables.
+    Then wire all three notebooks into a <strong>Data Pipeline</strong> with serial
+    and parallel execution — creating your first orchestration DAG.
+  </p>
+  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">
+    <span class="tag-pill">NB-02-SILVER-Sales</span>
+    <span class="tag-pill">NB-02-SILVER-Countries</span>
+    <span class="tag-pill">F.when / F.coalesce</span>
+    <span class="tag-pill">Data Pipeline</span>
+    <span class="tag-pill">Parallel execution</span>
+    <span class="tag-pill">DAG dependencies</span>
+  </div>
+
+  <!-- Objectives -->
+  <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:12px 14px;margin-bottom:14px">
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#94A3B8;margin-bottom:8px">By end of this lab you will have</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:12px;color:#475569">
+      <div>✅ silver_sales Delta table (~9,994 rows)</div>
+      <div>✅ silver_countries Delta table (~245 rows)</div>
+      <div>✅ PL-RetailX-Daily pipeline with 3 notebook activities</div>
+      <div>✅ Pipeline with fork → parallel → join DAG pattern</div>
+    </div>
+  </div>
+
+  <!-- Pipeline DAG preview -->
+  <div class="dag-visual">
+    <div style="font-size:11px;font-weight:600;color:#64748B;margin-bottom:10px;text-align:center">PL-RetailX-Daily — Execution order</div>
+    <div class="dag-row">
+      <div class="dag-node dn-br">
+        <div class="dag-label">NB-01-BRONZE</div>
+        <div class="dag-sub">Countries API</div>
+        <div class="dag-tool">🥉 ~3 min</div>
+      </div>
+      <div class="dag-arr">
+        <div class="dep-type">On success</div>
+        <div style="width:22px;height:1.5px;background:#CBD5E1;position:relative">
+          <span style="position:absolute;right:-1px;top:-3.5px;border-left:6px solid #CBD5E1;border-top:4px solid transparent;border-bottom:4px solid transparent"></span>
+        </div>
+        <div class="dep-type">↓ fork</div>
+      </div>
+      <div class="dag-parallel">
+        <div class="dag-node dn-sl">
+          <div class="dag-label">NB-02-SILVER</div>
+          <div class="dag-sub">Sales</div>
+          <div class="dag-tool">🥈 ~2 min</div>
+        </div>
+        <div class="dag-node dn-sl">
+          <div class="dag-label">NB-02-SILVER</div>
+          <div class="dag-sub">Countries</div>
+          <div class="dag-tool">🥈 ~1 min</div>
+        </div>
+      </div>
+      <div class="dag-arr">
+        <div class="dep-type">Both done</div>
+        <div style="width:22px;height:1.5px;background:#CBD5E1;position:relative">
+          <span style="position:absolute;right:-1px;top:-3.5px;border-left:6px solid #CBD5E1;border-top:4px solid transparent;border-bottom:4px solid transparent"></span>
+        </div>
+        <div class="dep-type">↓ join</div>
+      </div>
+      <div class="dag-node dn-go" style="opacity:.4">
+        <div class="dag-label">NB-03-GOLD</div>
+        <div class="dag-sub">Star Schema</div>
+        <div class="dag-tool">🥇 Lab 4</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="prog-wrap">
+    <div class="prog-label" id="prog-label">Progress: 0 / 10 steps completed</div>
+    <div class="prog-bar"><div class="prog-fill" id="prog-fill"></div></div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     STEP 1 — Create NB-02-SILVER-Sales
+═══════════════════════════════════════════════════════ -->
+<div class="step-card" id="sc-1">
+  <div class="step-header" onclick="toggleStep(1)">
+    <input type="checkbox" class="step-chk" id="chk-1" onclick="event.stopPropagation()" onchange="markDone(1,10)">
+    <div class="step-num" id="sn-1">1</div>
+    <div class="step-title-wrap">
+      <div class="step-title">Create notebook 'NB-02-SILVER-Sales' &amp; add parameters</div>
+      <div class="step-subtitle">New notebook · Attach LH_RetailX · Parameters cell</div>
+    </div>
+    <div class="step-badges"><span class="type-badge type-ui">UI</span></div>
+    <span class="step-toggle" id="tog-1">▼</span>
+  </div>
+  <div class="step-body" id="sb-1">
+    <div class="task-block">
+      <div class="task-label">🎯 Your Task</div>
+      <div class="task-content">Create a new notebook for the Silver Sales transformation. Follow the naming convention and attach the Lakehouse before adding any code.</div>
+      <ul class="task-steps">
+        <li><span class="step-arrow">→</span>Workspace → + New → Notebook → rename to: <code>NB-02-SILVER-Sales</code></li>
+        <li><span class="step-arrow">→</span>Attach <code>LH_RetailX</code> Lakehouse</li>
+        <li><span class="step-arrow">→</span>Add Markdown header cell (Cell 1) documenting Source → <code>raw_sales</code>, Target → <code>silver_sales</code>, Layer → 🥈 Silver</li>
+        <li><span class="step-arrow">→</span>Add parameters cell (Cell 2) — toggle it as a parameter cell</li>
+      </ul>
+    </div>
+    <div class="tier-buttons">
+      <button class="tier-btn btn-answer" onclick="toggleTier('ans-1',this)">✅ Show Parameters Cell</button>
+    </div>
+    <div class="answer-block" id="ans-1">
+      <div class="answer-header">✅ Cell 2 — Parameters<span class="answer-note">Toggle as parameter cell</span></div>
+      <div class="code-block" style="margin:12px 14px">
+        <div class="code-hdr"><span class="code-lbl">Parameters &amp; Imports</span><button class="copy-btn" onclick="cp(this,'p1')">Copy</button></div>
+        <pre id="code-p1"># Parameters
+p_FullLoad = True
+SRC_TABLE  = "raw_sales"
+DEST_TABLE = "silver_sales"
+
+from pyspark.sql import functions as F
+from pyspark.sql.types import DoubleType, IntegerType</pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     STEP 2 — CODE CHALLENGE 1: Renaming + type casts
+═══════════════════════════════════════════════════════ -->
+<div class="step-card" id="sc-2">
+  <div class="step-header" onclick="toggleStep(2)">
+    <input type="checkbox" class="step-chk" id="chk-2" onclick="event.stopPropagation()" onchange="markDone(2,10)">
+    <div class="step-num" id="sn-2">2</div>
+    <div class="step-title-wrap">
+      <div class="step-title">🧩 Challenge 1 — Read Bronze + defensive column renaming</div>
+      <div class="step-subtitle">spark.table · for loop with if-in-columns guard · type casts</div>
+    </div>
+    <div class="step-badges"><span class="type-badge type-code">CODE</span></div>
+    <span class="step-toggle" id="tog-2">▼</span>
+  </div>
+  <div class="step-body" id="sb-2">
+    <div class="task-block">
+      <div class="task-label">🎯 Code Challenge 1</div>
+      <div class="task-content">Read raw_sales from the Lakehouse. Rename any columns that still have their original Title Case names (from before DFG2 renamed them). Then cast numeric columns to their correct types.</div>
+      <ul class="task-steps">
+        <li><span class="step-arrow">→</span>Read: <code>df = spark.table(SRC_TABLE)</code></li>
+        <li><span class="step-arrow">→</span>Build a <code>rmap</code> dict of <code>{"Original Name": "snake_name"}</code> pairs for all 21 columns</li>
+        <li><span class="step-arrow">→</span>Loop through rmap and rename <strong>only if the old name exists</strong> — this is the defensive guard</li>
+        <li><span class="step-arrow">→</span>Cast <code>sales</code>, <code>profit</code>, <code>discount</code> to <code>DoubleType</code></li>
+        <li><span class="step-arrow">→</span>Cast <code>quantity</code> to <code>IntegerType</code></li>
+      </ul>
+      <div class="info-box info-amber" style="margin-top:8px;margin-bottom:0">
+        <span class="ib-icon">💡</span>
+        <span><strong>Why the guard?</strong> If DFG2 already renamed the columns to snake_case (which it should have in Lab 1), trying to rename <code>"Row ID"</code> again would cause a ColumnNotFoundException. The <code>if old in df.columns</code> check makes this notebook safe to run regardless of DFG2's state.</span>
+      </div>
+    </div>
+    <div class="tier-buttons">
+      <button class="tier-btn btn-hint" onclick="toggleTier('hint-2',this)">💡 Show Hint</button>
+      <button class="tier-btn btn-answer" onclick="toggleTier('ans-2',this)">✅ Show Answer</button>
+    </div>
+    <div class="hint-block" id="hint-2">
+      <div class="hint-header">💡 Hint — defensive rename pattern</div>
+      <div class="hint-skeleton">df = spark.table(_____)
+
+rmap = {
+    "Row ID":        "row_id",
+    "Order ID":      "order_id",
+    "Order Date":    "order_date",
+    # ... all 21 columns ...
+    "Profit":        "profit"
+}
+
+for old, new in rmap._____():       # iterate key-value pairs
+    if old in _____.columns:        # guard: only rename if old name exists
+        df = df.withColumnRenamed(old, new)
+
+# Type casts (defensive — safe even if already correct type)
+df = (df
+    .withColumn("sales",    F.col("sales").cast(_____()))
+    .withColumn("quantity", F.col("quantity").cast(_____()))
+    .withColumn("discount", F.col("discount").cast(_____()))
+    .withColumn("profit",   F.col("profit").cast(_____())))
+
+print(f"Columns after rename: {df.columns[:5]}...")</div>
+    </div>
+    <div class="answer-block" id="ans-2">
+      <div class="answer-header">✅ Challenge 1 Answer<span class="answer-note">Cell 3</span></div>
+      <div class="code-block" style="margin:12px 14px">
+        <div class="code-hdr"><span class="code-lbl">Cell 3 — Read + Rename + Type casts</span><button class="copy-btn" onclick="cp(this,'rename')">Copy</button></div>
+        <pre id="code-rename"># ── Read from Bronze ──────────────────────────────────────────
+df = spark.table(SRC_TABLE)
+
+# ── Defensive column rename ────────────────────────────────────
+# If DFG2 already renamed columns → guard skips. If not → renames them.
+rmap = {
+    "Row ID":"row_id",       "Order ID":"order_id",
+    "Order Date":"order_date",  "Ship Date":"ship_date",
+    "Ship Mode":"ship_mode",    "Customer ID":"customer_id",
+    "Customer Name":"customer_name", "Segment":"segment",
+    "Country":"country",        "City":"city",
+    "State":"state",            "Postal Code":"postal_code",
+    "Region":"region",          "Product ID":"product_id",
+    "Category":"category",      "Sub-Category":"sub_category",
+    "Product Name":"product_name", "Sales":"sales",
+    "Quantity":"quantity",      "Discount":"discount",
+    "Profit":"profit"
+}
+for old, new in rmap.items():
+    if old in df.columns:
+        df = df.withColumnRenamed(old, new)
+
+# ── Defensive type casts ───────────────────────────────────────
+df = (df
+    .withColumn("sales",    F.col("sales").cast(DoubleType()))
+    .withColumn("quantity", F.col("quantity").cast(IntegerType()))
+    .withColumn("discount", F.col("discount").cast(DoubleType()))
+    .withColumn("profit",   F.col("profit").cast(DoubleType())))
+
+print(f"Read {df.count()} rows from {SRC_TABLE}")
+print(f"Columns: {df.columns}")</pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     STEP 3 — CODE CHALLENGE 2: Business derived columns
+═══════════════════════════════════════════════════════ -->
+<div class="step-card" id="sc-3">
+  <div class="step-header" onclick="toggleStep(3)">
+    <input type="checkbox" class="step-chk" id="chk-3" onclick="event.stopPropagation()" onchange="markDone(3,10)">
+    <div class="step-num" id="sn-3">3</div>
+    <div class="step-title-wrap">
+      <div class="step-title">🧩 Challenge 2 — Add business-derived columns</div>
+      <div class="step-subtitle">F.year · F.datediff · F.when for safe division · F.round</div>
+    </div>
+    <div class="step-badges">
+      <span class="type-badge type-code">CODE</span>
+      <span class="type-badge type-quiz">Quiz</span>
+    </div>
+    <span class="step-toggle" id="tog-3">▼</span>
+  </div>
+  <div class="step-body" id="sb-3">
+    <div class="task-block">
+      <div class="task-label">🎯 Code Challenge 2 — The key Silver transformation</div>
+      <div class="task-content">Add 6 derived columns that turn raw transaction data into analytics-ready metrics. These columns do not exist in the Bronze layer — they are the Silver layer's business value.</div>
+      <ul class="task-steps">
+        <li><span class="step-arrow">→</span><code>order_year</code> — extract year from order_date</li>
+        <li><span class="step-arrow">→</span><code>order_month</code> — extract month number</li>
+        <li><span class="step-arrow">→</span><code>order_quarter</code> — extract quarter (1–4)</li>
+        <li><span class="step-arrow">→</span><code>days_to_ship</code> — date difference: ship_date minus order_date</li>
+        <li><span class="step-arrow">→</span><code>profit_margin</code> — <strong>safe division</strong>: only divide when sales &gt; 0, else 0.0. Round to 2 dp.</li>
+        <li><span class="step-arrow">→</span><code>net_revenue</code> — sales × (1 − discount), rounded to 2 dp</li>
+        <li><span class="step-arrow">→</span>Then: deduplicate on <code>["order_id","product_id"]</code>, filter null order_dates, add <code>_ingestion_ts</code></li>
+      </ul>
+    </div>
+    <div class="tier-buttons">
+      <button class="tier-btn btn-hint" onclick="toggleTier('hint-3',this)">💡 Show Hint</button>
+      <button class="tier-btn btn-answer" onclick="toggleTier('ans-3',this)">✅ Show Answer</button>
+      <button class="tier-btn btn-instructor" onclick="toggleTier('inst-3',this)">👨‍🏫 Instructor Note</button>
+    </div>
+    <div class="hint-block" id="hint-3">
+      <div class="hint-header">💡 Hint — Spark functions reference</div>
+      <div class="hint-skeleton">df = (df
+    .withColumn("order_year",    F._____(F.col("order_date")))
+    .withColumn("order_month",   F._____(F.col("order_date")))
+    .withColumn("order_quarter", F._____(F.col("order_date")))
+    .withColumn("days_to_ship",  F.datediff(F.col("_____"), F.col("_____")))
+
+    # Safe division: avoid divide-by-zero when sales = 0
+    .withColumn("profit_margin", F.round(
+        F.when(F.col("sales") != _____, F.col("profit") / F.col("_____") * 100)
+         .otherwise(F.lit(_____)), _____))
+
+    .withColumn("net_revenue",   F.round(F.col("sales") * (1 - F.col("_____")), 2))
+    .dropDuplicates(["_____", "_____"])
+    .filter(F.col("order_date").isNotNull())
+    .withColumn("_ingestion_ts", F._____()))</div>
+      <div class="hint-content">Spark function cheatsheet:
+  F.year(col)         → Integer year from date column
+  F.month(col)        → Integer month 1–12
+  F.quarter(col)      → Integer quarter 1–4
+  F.datediff(end,start) → Integer days between two dates (end - start)
+  F.when(cond, val).otherwise(else_val) → conditional expression
+  F.lit(value)        → literal constant column
+  F.round(col, scale) → round to N decimal places
+  F.current_timestamp() → Timestamp column with current time</div>
+    </div>
+    <div class="answer-block" id="ans-3">
+      <div class="answer-header">✅ Challenge 2 Answer<span class="answer-note">Cell 4 — tested with real Superstore data</span></div>
+      <div class="code-block" style="margin:12px 14px">
+        <div class="code-hdr"><span class="code-lbl">Cell 4 — Derived columns + dedup + filter</span><button class="copy-btn" onclick="cp(this,'derived')">Copy</button></div>
+        <pre id="code-derived"># ── Add derived business columns ──────────────────────────────
+df = (df
+    .withColumn("order_year",    F.year(F.col("order_date")))
+    .withColumn("order_month",   F.month(F.col("order_date")))
+    .withColumn("order_quarter", F.quarter(F.col("order_date")))
+    .withColumn("days_to_ship",  F.datediff(F.col("ship_date"), F.col("order_date")))
+
+    # Safe profit margin — handles edge case of sales = 0
+    .withColumn("profit_margin", F.round(
+        F.when(F.col("sales") != 0, F.col("profit") / F.col("sales") * 100)
+         .otherwise(F.lit(0.0)), 2))
+
+    .withColumn("net_revenue",   F.round(F.col("sales") * (1 - F.col("discount")), 2))
+    .dropDuplicates(["order_id", "product_id"])
+    .filter(F.col("order_date").isNotNull())
+    .withColumn("_ingestion_ts", F.current_timestamp()))
+
+print(f"Transformed: {df.count()} rows, {len(df.columns)} columns")
+display(df.select("order_id","order_date","days_to_ship",
+                  "profit_margin","net_revenue","order_year","order_quarter").limit(5))</pre>
+      </div>
+      <div class="answer-explain">
+        <strong>Why F.when() for profit_margin?</strong> In PySpark, dividing a double by zero gives <code>Infinity</code> or <code>NaN</code> — not an error, but those values cause problems in Power BI aggregations. <code>F.when(sales != 0, ...)</code> returns null instead of Infinity when sales is 0, which Power BI handles cleanly as a blank.<br><br>
+        <strong>Why datediff(ship_date, order_date)?</strong> The argument order matters: <code>datediff(end, start)</code> = end − start. If reversed, you get negative days_to_ship which is nonsensical.
+      </div>
+    </div>
+    <div class="instructor-block" id="inst-3">
+      <div class="instructor-label">Instructor Note</div>
+      The F.when() safe division pattern is one of the most important patterns in production PySpark. Ask students: "What does Infinity look like in a Power BI card visual?" It breaks the visual entirely. The safe pattern costs nothing extra in performance and prevents an entire class of downstream bugs. Also note: datediff argument order is a very common mistake — always test with a known date pair to verify positive values.
+    </div>
+    <!-- Knowledge Check -->
+    <div class="kc-block">
+      <div class="kc-header">🧠 Knowledge Check</div>
+      <div class="kc-question">You run the Silver Sales notebook and notice that <code>order_year</code> is <code>null</code> for all rows. What is the most likely cause?</div>
+      <div class="kc-options" id="kc-3-opts">
+        <div class="kc-option" onclick="answerKC(3,0,false)"><span class="kc-opt-icon">A</span> F.year() is not a valid PySpark function</div>
+        <div class="kc-option" onclick="answerKC(3,1,true)"><span class="kc-opt-icon">B</span> order_date is stored as a string type in raw_sales, not as a Date. F.year() on a string returns null.</div>
+        <div class="kc-option" onclick="answerKC(3,2,false)"><span class="kc-opt-icon">C</span> The Superstore dataset does not have year information</div>
+        <div class="kc-option" onclick="answerKC(3,3,false)"><span class="kc-opt-icon">D</span> null order_years are expected because some orders have no date</div>
+      </div>
+      <div class="kc-feedback" id="kc-3-fb"></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     STEP 4 — DQ + Write for Sales
+═══════════════════════════════════════════════════════ -->
+<div class="step-card" id="sc-4">
+  <div class="step-header" onclick="toggleStep(4)">
+    <input type="checkbox" class="step-chk" id="chk-4" onclick="event.stopPropagation()" onchange="markDone(4,10)">
+    <div class="step-num" id="sn-4">4</div>
+    <div class="step-title-wrap">
+      <div class="step-title">🧩 Challenge 3 — DQ checks &amp; write silver_sales</div>
+      <div class="step-subtitle">3 assertions · delta write · verify output</div>
+    </div>
+    <div class="step-badges"><span class="type-badge type-code">CODE</span></div>
+    <span class="step-toggle" id="tog-4">▼</span>
+  </div>
+  <div class="step-body" id="sb-4">
+    <div class="task-block">
+      <div class="task-label">🎯 Code Challenge 3</div>
+      <div class="task-content">Add DQ checks for the Silver layer, then write to <code>silver_sales</code>. Silver DQ checks are stricter than Bronze because the data has been cleaned — nulls that were acceptable in Bronze should not exist here.</div>
+      <ul class="task-steps">
+        <li><span class="step-arrow">→</span>Assert: no null <code>order_id</code></li>
+        <li><span class="step-arrow">→</span>Assert: no null <code>order_date</code> (already filtered, but double-check)</li>
+        <li><span class="step-arrow">→</span>Assert: no null <code>sales</code></li>
+        <li><span class="step-arrow">→</span>Write to Delta with <code>DEST_TABLE</code>, overwrite mode, overwriteSchema</li>
+        <li><span class="step-arrow">→</span>Print confirmation + display 5 rows</li>
+      </ul>
+    </div>
+    <div class="tier-buttons">
+      <button class="tier-btn btn-hint" onclick="toggleTier('hint-4',this)">💡 Show Hint</button>
+      <button class="tier-btn btn-answer" onclick="toggleTier('ans-4',this)">✅ Show Answer</button>
+    </div>
+    <div class="hint-block" id="hint-4">
+      <div class="hint-header">💡 Hint</div>
+      <div class="hint-content">Use isNull() for null checks in Silver (unlike Bronze where we checked for empty strings):
+
+  assert df.filter(F.col("order_id").isNull()).count()   == 0, "DQ: ..."
+  assert df.filter(F.col("order_date").isNull()).count() == 0, "DQ: ..."
+  assert df.filter(F.col("sales").isNull()).count()      == 0, "DQ: ..."
+
+Then the same write pattern as Lab 2:
+  (df.write.format("delta").mode("overwrite")
+     .option("overwriteSchema","true").saveAsTable(DEST_TABLE))</div>
+    </div>
+    <div class="answer-block" id="ans-4">
+      <div class="answer-header">✅ Challenge 3 Answer<span class="answer-note">Cell 5</span></div>
+      <div class="code-block" style="margin:12px 14px">
+        <div class="code-hdr"><span class="code-lbl">Cell 5 — DQ + Write silver_sales</span><button class="copy-btn" onclick="cp(this,'dq-sales')">Copy</button></div>
+        <pre id="code-dq-sales"># ── Data Quality Checks (Silver is stricter than Bronze) ──────
+total = df.count()
+assert df.filter(F.col("order_id").isNull()).count()   == 0, "DQ: null order_id found"
+assert df.filter(F.col("order_date").isNull()).count() == 0, "DQ: null order_date found"
+assert df.filter(F.col("sales").isNull()).count()      == 0, "DQ: null sales found"
+print(f"[DQ] {total} rows — all checks passed")
+
+# ── Write to Silver ────────────────────────────────────────────
+(df.write
+   .format("delta")
+   .mode("overwrite")
+   .option("overwriteSchema", "true")
+   .saveAsTable(DEST_TABLE))
+
+print(f"Written {DEST_TABLE}: {total} rows")
+display(spark.table(DEST_TABLE)
+        .select("order_id","customer_name","sales","profit",
+                "profit_margin","days_to_ship","order_year","order_quarter")
+        .limit(5))</pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     STEP 5 — CODE CHALLENGE 4: Silver Countries
+═══════════════════════════════════════════════════════ -->
+<div class="step-card" id="sc-5">
+  <div class="step-header" onclick="toggleStep(5)">
+    <input type="checkbox" class="step-chk" id="chk-5" onclick="event.stopPropagation()" onchange="markDone(5,10)">
+    <div class="step-num" id="sn-5">5</div>
+    <div class="step-title-wrap">
+      <div class="step-title">🧩 Challenge 4 — Build NB-02-SILVER-Countries</div>
+      <div class="step-subtitle">F.coalesce · F.trim · population_m · dedup on country_code</div>
+    </div>
+    <div class="step-badges">
+      <span class="type-badge type-code">CODE</span>
+      <span class="type-badge type-quiz">Quiz</span>
+    </div>
+    <span class="step-toggle" id="tog-5">▼</span>
+  </div>
+  <div class="step-body" id="sb-5">
+    <div class="task-block">
+      <div class="task-label">🎯 Code Challenge 4</div>
+      <div class="task-content">Create a new notebook <code>NB-02-SILVER-Countries</code>, attach LH_RetailX, and write the complete transformation. This notebook is shorter but introduces <code>F.coalesce()</code> — Spark's null-filling function.</div>
+      <ul class="task-steps">
+        <li><span class="step-arrow">→</span>New notebook → <code>NB-02-SILVER-Countries</code> → attach LH_RetailX</li>
+        <li><span class="step-arrow">→</span>Read from <code>raw_countries</code></li>
+        <li><span class="step-arrow">→</span>Filter out rows where <code>name_common</code> is empty or <code>country_code</code> is empty</li>
+        <li><span class="step-arrow">→</span>Trim whitespace from <code>name_common</code> and <code>region</code></li>
+        <li><span class="step-arrow">→</span>Fill nulls: <code>subregion</code> → <code>"Unknown"</code>, <code>capital</code> → <code>"N/A"</code>, <code>currency_code</code> → <code>"Unknown"</code></li>
+        <li><span class="step-arrow">→</span>Add <code>population_m</code>: population divided by 1,000,000, rounded to 3 decimal places</li>
+        <li><span class="step-arrow">→</span>Deduplicate on <code>country_code</code>, add <code>_ingestion_ts</code>, run DQ, write to <code>silver_countries</code></li>
+      </ul>
+    </div>
+    <div class="tier-buttons">
+      <button class="tier-btn btn-hint" onclick="toggleTier('hint-5',this)">💡 Show Hint (F.coalesce pattern)</button>
+      <button class="tier-btn btn-answer" onclick="toggleTier('ans-5',this)">✅ Show Full Notebook</button>
+      <button class="tier-btn btn-instructor" onclick="toggleTier('inst-5',this)">👨‍🏫 Instructor Note</button>
+    </div>
+    <div class="hint-block" id="hint-5">
+      <div class="hint-header">💡 Hint — F.coalesce() pattern</div>
+      <div class="hint-content">F.coalesce(col1, col2, ...) returns the first non-null value in the list.
+Use it to fill nulls with a literal default:
+
+  F.coalesce(F.trim(F.col("subregion")),  F.lit("Unknown"))
+  # If subregion is null OR empty after trim → returns "Unknown"
+
+  F.coalesce(F.col("capital"),            F.lit("N/A"))
+  # If capital is null → returns "N/A"
+
+However: coalesce only handles NULL, not empty string "".
+If you want to handle both null AND "" → wrap with F.nullif() or use F.when():
+  F.when(F.col("subregion").isNull() | (F.col("subregion") == ""), F.lit("Unknown"))
+   .otherwise(F.col("subregion"))</div>
+      <div class="hint-skeleton">df = (df
+    .filter(F.col("name_common")  != "")
+    .filter(F.col("country_code") != "")
+    .withColumn("name_common",   F.trim(F.col("_____")))
+    .withColumn("region",        F.trim(F.col("_____")))
+    .withColumn("subregion",     F.coalesce(F.trim(F.col("subregion")), F.lit("_____")))
+    .withColumn("capital",       F.coalesce(F.col("capital"),           F.lit("_____")))
+    .withColumn("currency_code", F.coalesce(F.col("currency_code"),     F.lit("_____")))
+    .withColumn("population_m",  F.round(F.col("population") / _____, 3))
+    .dropDuplicates(["_____"])
+    .withColumn("_ingestion_ts", F.current_timestamp()))</div>
+    </div>
+    <div class="answer-block" id="ans-5">
+      <div class="answer-header">✅ Challenge 4 Answer<span class="answer-note">Complete NB-02-SILVER-Countries</span></div>
+      <div class="code-block" style="margin:12px 14px">
+        <div class="code-hdr"><span class="code-lbl">NB-02-SILVER-Countries — complete notebook code</span><button class="copy-btn" onclick="cp(this,'nb02c')">Copy</button></div>
+        <pre id="code-nb02c"># Parameters
+p_FullLoad = True
+SRC_TABLE  = "raw_countries"
+DEST_TABLE = "silver_countries"
+
+from pyspark.sql import functions as F
+
+# ── Read from Bronze ──────────────────────────────────────────
+df = spark.table(SRC_TABLE)
+
+# ── Clean and standardise ─────────────────────────────────────
+df = (df
+    .filter(F.col("name_common")  != "")
+    .filter(F.col("country_code") != "")
+    .withColumn("name_common",   F.trim(F.col("name_common")))
+    .withColumn("region",        F.trim(F.col("region")))
+    .withColumn("subregion",     F.coalesce(F.trim(F.col("subregion")),  F.lit("Unknown")))
+    .withColumn("capital",       F.coalesce(F.col("capital"),            F.lit("N/A")))
+    .withColumn("currency_code", F.coalesce(F.col("currency_code"),      F.lit("Unknown")))
+    .withColumn("population_m",  F.round(F.col("population") / 1e6, 3))
+    .dropDuplicates(["country_code"])
+    .withColumn("_ingestion_ts", F.current_timestamp()))
+
+# ── DQ Checks ─────────────────────────────────────────────────
+total = df.count()
+assert df.filter(F.col("country_code").isNull()).count() == 0, "DQ: null country_code"
+assert df.filter(F.col("name_common") == "").count()     == 0, "DQ: empty name_common"
+print(f"[DQ] {total} countries — all checks passed")
+
+# ── Write to Silver ────────────────────────────────────────────
+(df.write
+   .format("delta")
+   .mode("overwrite")
+   .option("overwriteSchema", "true")
+   .saveAsTable(DEST_TABLE))
+
+print(f"Written {DEST_TABLE}: {total} rows")
+display(spark.table(DEST_TABLE)
+        .select("country_code","name_common","region","subregion",
+                "capital","population_m","currency_code")
+        .limit(5))</pre>
+      </div>
+      <div class="answer-explain"><strong>Why filter empty strings AND use coalesce?</strong> The filter at the top removes rows where critical keys are empty — these records aren't useful at all. The coalesce inside handles optional/nullable fields that we want to keep but fill with a default. Two different problems, two different solutions.</div>
+    </div>
+    <div class="instructor-block" id="inst-5">
+      <div class="instructor-label">Instructor Note</div>
+      F.coalesce() is one of the most-used functions in production data pipelines. Ask students: "What is the difference between null and an empty string in Spark?" The answer: null means "no value at all", empty string means "a value that is blank". coalesce handles null; an explicit filter or F.when handles empty string. Both need to be handled — that's why this notebook has both a .filter() and .withColumn(coalesce) pattern.
+    </div>
+    <!-- Knowledge Check -->
+    <div class="kc-block">
+      <div class="kc-header">🧠 Knowledge Check</div>
+      <div class="kc-question"><code>F.coalesce(F.trim(F.col("subregion")), F.lit("Unknown"))</code> — Antarctica has <code>subregion = None</code> in raw_countries. What does this expression return for that row?</div>
+      <div class="kc-options" id="kc-5-opts">
+        <div class="kc-option" onclick="answerKC(5,0,false)"><span class="kc-opt-icon">A</span> None — because F.trim(null) is still null and coalesce needs a non-null first argument</div>
+        <div class="kc-option" onclick="answerKC(5,1,true)"><span class="kc-opt-icon">B</span> "Unknown" — F.trim(null) returns null, coalesce then returns the second argument F.lit("Unknown")</div>
+        <div class="kc-option" onclick="answerKC(5,2,false)"><span class="kc-opt-icon">C</span> "" (empty string) — F.trim converts null to empty string</div>
+        <div class="kc-option" onclick="answerKC(5,3,false)"><span class="kc-opt-icon">D</span> An error — you cannot call F.trim() on a null value</div>
+      </div>
+      <div class="kc-feedback" id="kc-5-fb"></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     STEP 6 — Verify both Silver tables
+═══════════════════════════════════════════════════════ -->
+<div class="step-card" id="sc-6">
+  <div class="step-header" onclick="toggleStep(6)">
+    <input type="checkbox" class="step-chk" id="chk-6" onclick="event.stopPropagation()" onchange="markDone(6,10)">
+    <div class="step-num" id="sn-6">6</div>
+    <div class="step-title-wrap">
+      <div class="step-title">Run both Silver notebooks and verify output</div>
+      <div class="step-subtitle">4 tables in Lakehouse · Compare Bronze vs Silver</div>
+    </div>
+    <div class="step-badges"><span class="type-badge type-ui">UI</span></div>
+    <span class="step-toggle" id="tog-6">▼</span>
+  </div>
+  <div class="step-body" id="sb-6">
+    <div class="task-block">
+      <div class="task-label">🎯 Your Task</div>
+      <div class="task-content">Run both Silver notebooks individually, then verify the results in the Lakehouse.</div>
+      <ul class="task-steps">
+        <li><span class="step-arrow">→</span>In NB-02-SILVER-Sales → <strong>Run all</strong> → expected: <code>[DQ] ~9,994 rows — all checks passed</code></li>
+        <li><span class="step-arrow">→</span>In NB-02-SILVER-Countries → <strong>Run all</strong> → expected: <code>[DQ] ~245 countries — all checks passed</code></li>
+        <li><span class="step-arrow">→</span>In LH_RetailX → Tables: you should now see <strong>4 tables</strong>: raw_sales, raw_countries, silver_sales, silver_countries</li>
+        <li><span class="step-arrow">→</span>Compare raw_sales vs silver_sales: silver_sales has 6 extra columns</li>
+        <li><span class="step-arrow">→</span>Run this SQL in the endpoint: <code>SELECT order_year, COUNT(*) AS orders, ROUND(SUM(sales),0) AS revenue FROM silver_sales GROUP BY order_year ORDER BY order_year</code></li>
+      </ul>
+    </div>
+    <div class="tier-buttons">
+      <button class="tier-btn btn-hint" onclick="toggleTier('hint-6',this)">💡 Expected SQL result</button>
+    </div>
+    <div class="hint-block" id="hint-6">
+      <div class="hint-header">💡 Expected SQL result</div>
+      <div class="hint-content">ORDER_YEAR | ORDERS | REVENUE
+2014       |  1849  |  484,247
+2015       |  2131  |  470,533
+2016       |  2855  |  609,206
+2017       |  3312  |  733,215
+
+If order_year is NULL → order_date wasn't cast to Date in DFG2.
+  Fix: re-run the DFG2 with TypedCols step → re-run NB-02-SILVER-Sales.
+
+If you see 0 revenue → sales column was not cast to DoubleType.
+  Fix: verify the F.col("sales").cast(DoubleType()) step ran without error.</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     STEP 7 — Create Data Pipeline
+═══════════════════════════════════════════════════════ -->
+<div class="step-card" id="sc-7">
+  <div class="step-header" onclick="toggleStep(7)">
+    <input type="checkbox" class="step-chk" id="chk-7" onclick="event.stopPropagation()" onchange="markDone(7,10)">
+    <div class="step-num" id="sn-7">7</div>
+    <div class="step-title-wrap">
+      <div class="step-title">Create Data Pipeline 'PL-RetailX-Daily'</div>
+      <div class="step-subtitle">Fabric orchestration · Equivalent to ADF v2</div>
+    </div>
+    <div class="step-badges"><span class="type-badge type-ui">UI</span></div>
+    <span class="step-toggle" id="tog-7">▼</span>
+  </div>
+  <div class="step-body" id="sb-7">
+    <div class="task-block">
+      <div class="task-label">🎯 Your Task</div>
+      <div class="task-content">Create the orchestration pipeline that will run all notebooks in the correct order.</div>
+      <ul class="task-steps">
+        <li><span class="step-arrow">→</span>RetailX-Analytics workspace → <strong>+ New → Data pipeline</strong></li>
+        <li><span class="step-arrow">→</span>Name it: <code>PL-RetailX-Daily</code></li>
+        <li><span class="step-arrow">→</span>The pipeline canvas opens — this is identical to Azure Data Factory v2</li>
+        <li><span class="step-arrow">→</span>Familiarise yourself with: Activities panel (left), Canvas (center), Properties panel (right)</li>
+      </ul>
+    </div>
+    <div class="tier-buttons">
+      <button class="tier-btn btn-instructor" onclick="toggleTier('inst-7',this)">👨‍🏫 Instructor Note</button>
+    </div>
+    <div class="instructor-block" id="inst-7">
+      <div class="instructor-label">Instructor Note</div>
+      Fabric Data Pipelines share the exact same JSON schema as ADF pipelines. Students who have used ADF will immediately recognise: Notebook activity, Copy data, If Condition, ForEach, Web activity, Execute Pipeline. The canvas, activity configuration panes, and debugging experience are identical. Key difference: in Fabric, Notebook activities directly reference notebooks in the same workspace — no linked service configuration needed.
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     STEP 8 — Add notebook activities
+═══════════════════════════════════════════════════════ -->
+<div class="step-card" id="sc-8">
+  <div class="step-header" onclick="toggleStep(8)">
+    <input type="checkbox" class="step-chk" id="chk-8" onclick="event.stopPropagation()" onchange="markDone(8,10)">
+    <div class="step-num" id="sn-8">8</div>
+    <div class="step-title-wrap">
+      <div class="step-title">Add 3 Notebook activities to the pipeline</div>
+      <div class="step-subtitle">One per notebook · Name each clearly · Set timeouts</div>
+    </div>
+    <div class="step-badges"><span class="type-badge type-ui">UI</span></div>
+    <span class="step-toggle" id="tog-8">▼</span>
+  </div>
+  <div class="step-body" id="sb-8">
+    <div class="task-block">
+      <div class="task-label">🎯 Your Task</div>
+      <div class="task-content">Add one Notebook activity for each of the three notebooks. Name each activity clearly so the pipeline canvas is self-documenting.</div>
+      <ul class="task-steps">
+        <li><span class="step-arrow">→</span>Canvas → <strong>+ Add activity → Notebook</strong></li>
+        <li><span class="step-arrow">→</span>Activity 1: Name = <code>BRONZE-Countries</code>, Settings → Notebook = <code>NB-01-BRONZE-Countries-API</code></li>
+        <li><span class="step-arrow">→</span>Activity 2: Name = <code>SILVER-Sales</code>, Settings → Notebook = <code>NB-02-SILVER-Sales</code></li>
+        <li><span class="step-arrow">→</span>Activity 3: Name = <code>SILVER-Countries</code>, Settings → Notebook = <code>NB-02-SILVER-Countries</code></li>
+        <li><span class="step-arrow">→</span>For each activity: Settings → Timeout = <strong>00:30:00</strong> (30 minutes)</li>
+      </ul>
+    </div>
+    <div class="tier-buttons">
+      <button class="tier-btn btn-hint" onclick="toggleTier('hint-8',this)">💡 Show Hint</button>
+      <button class="tier-btn btn-instructor" onclick="toggleTier('inst-8',this)">👨‍🏫 Instructor Note</button>
+    </div>
+    <div class="hint-block" id="hint-8">
+      <div class="hint-header">💡 Hint — Finding Notebook activity settings</div>
+      <div class="hint-content">After adding a Notebook activity to the canvas:
+→ Click on the activity to select it
+→ Right panel (Properties) → click the "Settings" tab
+→ "Notebook" dropdown → browse to your notebook
+→ "Timeout" field → type: 00:30:00
+→ "Retry" → 0 (no retry for development)
+
+Activity names are set in the Properties panel → "Name" field (top of panel).
+Good activity names = self-documenting pipeline. Use LAYER-Entity format:
+  BRONZE-Countries, SILVER-Sales, SILVER-Countries, GOLD-StarSchema</div>
+    </div>
+    <div class="instructor-block" id="inst-8">
+      <div class="instructor-label">Instructor Note</div>
+      Always set a timeout on Notebook activities in production. Without it, if a Spark session hangs (e.g., waiting for a cluster that never starts), the pipeline runs forever and blocks the schedule. 30 minutes is generous for these notebooks. In production, set it to 2× the expected runtime. Also: the retry count should be 0 during development — retrying a failed notebook without investigating the cause just masks the problem.
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     STEP 9 — Wire dependencies
+═══════════════════════════════════════════════════════ -->
+<div class="step-card" id="sc-9">
+  <div class="step-header" onclick="toggleStep(9)">
+    <input type="checkbox" class="step-chk" id="chk-9" onclick="event.stopPropagation()" onchange="markDone(9,10)">
+    <div class="step-num" id="sn-9">9</div>
+    <div class="step-title-wrap">
+      <div class="step-title">Wire the DAG — serial + parallel execution</div>
+      <div class="step-subtitle">On success connectors · Fork to parallel · Verify order</div>
+    </div>
+    <div class="step-badges">
+      <span class="type-badge type-ui">UI</span>
+      <span class="type-badge type-quiz">Quiz</span>
+    </div>
+    <span class="step-toggle" id="tog-9">▼</span>
+  </div>
+  <div class="step-body" id="sb-9">
+    <div class="task-block">
+      <div class="task-label">🎯 Your Task</div>
+      <div class="task-content">Connect the activities so Bronze runs first, then both Silver notebooks run in parallel only after Bronze succeeds. This is the fork (fan-out) pattern.</div>
+      <ul class="task-steps">
+        <li><span class="step-arrow">→</span>Hover over <code>BRONZE-Countries</code> — green tick (On success) and red X (On failure) appear</li>
+        <li><span class="step-arrow">→</span>Drag from the green <strong>On success</strong> connector → to <code>SILVER-Sales</code></li>
+        <li><span class="step-arrow">→</span>Drag from the green <strong>On success</strong> connector → to <code>SILVER-Countries</code></li>
+        <li><span class="step-arrow">→</span>Verify: BRONZE-Countries has 2 outgoing arrows (one to each Silver activity)</li>
+        <li><span class="step-arrow">→</span>Verify: SILVER-Sales and SILVER-Countries have no connection between them (they run in parallel)</li>
+      </ul>
+    </div>
+    <div class="tier-buttons">
+      <button class="tier-btn btn-hint" onclick="toggleTier('hint-9',this)">💡 Show Hint</button>
+      <button class="tier-btn btn-instructor" onclick="toggleTier('inst-9',this)">👨‍🏫 Instructor Note</button>
+    </div>
+    <div class="hint-block" id="hint-9">
+      <div class="hint-header">💡 Hint — Dependency types</div>
+      <div class="hint-content">Fabric pipelines have 4 dependency types:
+→ ✅ On success   — next activity runs only if previous succeeded
+→ ❌ On failure   — next activity runs only if previous FAILED (useful for alerts)
+→ ✔️ On completion — next activity always runs regardless of outcome
+→ ⚠️ On skip      — runs if the previous activity was skipped
+
+For this project: always use "On success" unless building failure-handling branches.
+
+The visual result should look like this:
+  [BRONZE-Countries] ──success──→ [SILVER-Sales]
+                    └─success──→ [SILVER-Countries]
+
+Both Silver activities start simultaneously as soon as Bronze completes successfully.
+This saves ~1–2 minutes per pipeline run vs running them sequentially.</div>
+    </div>
+    <div class="instructor-block" id="inst-9">
+      <div class="instructor-label">Instructor Note</div>
+      The fork pattern (one → many) is the most important pipeline topology to understand. When BRONZE-Countries succeeds, the pipeline engine evaluates all outgoing dependencies simultaneously. SILVER-Sales and SILVER-Countries both become eligible to run and are dispatched in parallel to available Spark clusters. There is no extra configuration for this — the parallel execution is implicit from the topology.
+    </div>
+    <!-- Knowledge Check -->
+    <div class="kc-block">
+      <div class="kc-header">🧠 Knowledge Check</div>
+      <div class="kc-question">SILVER-Sales runs in 2 minutes and SILVER-Countries runs in 1 minute — they run in parallel. What is the total time for the entire pipeline (Bronze=3min, Silver parallel, Gold will be added in Lab 4 at 3min)?</div>
+      <div class="kc-options" id="kc-9-opts">
+        <div class="kc-option" onclick="answerKC(9,0,false)"><span class="kc-opt-icon">A</span> 9 minutes (3 + 2 + 1 + 3)</div>
+        <div class="kc-option" onclick="answerKC(9,1,true)"><span class="kc-opt-icon">B</span> 8 minutes (3 + max(2,1) + 3) — parallel Silver takes only as long as the slowest one</div>
+        <div class="kc-option" onclick="answerKC(9,2,false)"><span class="kc-opt-icon">C</span> 6 minutes (3 + 3) — the Silver notebooks are so fast they don't count</div>
+        <div class="kc-option" onclick="answerKC(9,3,false)"><span class="kc-opt-icon">D</span> 7 minutes (3 + 1 + 3) — Fabric always takes the shorter path</div>
+      </div>
+      <div class="kc-feedback" id="kc-9-fb"></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     STEP 10 — Run and monitor
+═══════════════════════════════════════════════════════ -->
+<div class="step-card" id="sc-10">
+  <div class="step-header" onclick="toggleStep(10)">
+    <input type="checkbox" class="step-chk" id="chk-10" onclick="event.stopPropagation()" onchange="markDone(10,10)">
+    <div class="step-num" id="sn-10">10</div>
+    <div class="step-title-wrap">
+      <div class="step-title">Run the pipeline and monitor execution</div>
+      <div class="step-subtitle">Save and run · Monitor view · Activity drill-down</div>
+    </div>
+    <div class="step-badges"><span class="type-badge type-ui">UI</span></div>
+    <span class="step-toggle" id="tog-10">▼</span>
+  </div>
+  <div class="step-body" id="sb-10">
+    <div class="task-block">
+      <div class="task-label">🎯 Your Task</div>
+      <div class="task-content">Run the full pipeline end-to-end and use the Monitor view to observe the execution order and durations.</div>
+      <ul class="task-steps">
+        <li><span class="step-arrow">→</span>Pipeline canvas → <strong>Run → Save and run</strong></li>
+        <li><span class="step-arrow">→</span>Switch to Monitor view: left toolbar → clock icon → <strong>Pipeline runs</strong></li>
+        <li><span class="step-arrow">→</span>Observe: BRONZE-Countries starts first, then SILVER-Sales and SILVER-Countries start simultaneously</li>
+        <li><span class="step-arrow">→</span>Click on any activity → view Spark job details and notebook cell output</li>
+        <li><span class="step-arrow">→</span>Confirm: all 3 activities show ✅ green status when done</li>
+      </ul>
+    </div>
+    <div class="tier-buttons">
+      <button class="tier-btn btn-hint" onclick="toggleTier('hint-10',this)">💡 Troubleshooting</button>
+    </div>
+    <div class="hint-block" id="hint-10">
+      <div class="hint-header">💡 Common pipeline errors</div>
+      <div class="hint-content">❌ Activity shows "Failed" with red X:
+→ Click the activity → "Error" tab → read the message
+→ Most common: notebook compile error or DQ assertion failure
+→ Fix the notebook → re-run the pipeline (don't re-run notebooks manually — test via pipeline)
+
+❌ Activity shows "Queued" for more than 5 minutes:
+→ The Spark cluster is starting or all capacity is in use
+→ Wait — Fabric free trial has limited concurrent capacity
+
+❌ SILVER notebooks start before BRONZE finishes:
+→ Dependencies are not wired correctly → check the canvas arrows
+→ Arrow must originate from the GREEN tick on BRONZE-Countries
+
+✅ Expected total runtime: ~5–8 minutes for all 3 activities</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     COMPLETION
+═══════════════════════════════════════════════════════ -->
+<div class="completion-card" id="completion-card" style="display:none">
+  <div class="completion-icon">🥈</div>
+  <div class="completion-title">Lab 3 Complete — Silver Layer &amp; Pipeline Done!</div>
+  <div style="font-size:13px;color:#166534;margin-bottom:12px">All 4 Bronze + Silver tables are in place. The pipeline orchestrates them correctly.</div>
+  <div class="tables-built">
+    <span class="table-built-tag">🥉 raw_sales</span>
+    <span class="table-built-tag">🥉 raw_countries</span>
+    <span class="table-built-tag">🥈 silver_sales</span>
+    <span class="table-built-tag">🥈 silver_countries</span>
+    <span class="table-built-tag">🔄 PL-RetailX-Daily</span>
+  </div>
+  <div style="font-size:13px;color:#166534">
+    <strong>Up next → Lab 4:</strong> Build the Gold star schema (fact_sales + 4 dimension tables)
+    using PySpark Window functions, then query via the SQL Analytics Endpoint.
+  </div>
+</div>
+
+<div class="divider"></div>
+<div class="card" style="border-left:4px solid #D97706">
+  <div class="section-label">Up next</div>
+  <h2>Lab 4 — Gold Layer: Star Schema</h2>
+  <p style="margin-top:8px;margin-bottom:0">
+    In Lab 4 you build the complete star schema: <code>dim_date</code> (generated by SQL sequence),
+    <code>dim_customer</code>, <code>dim_product</code>, <code>dim_geography</code>
+    (enriched from silver_countries), and <code>fact_sales</code> with all surrogate key joins.
+    Then query the star schema using the SQL Analytics Endpoint.
+  </p>
+</div>
+
+</div><!-- end page-wrapper -->
+
+
+<!-- ============================================================
+     JAVASCRIPT
+============================================================ -->
+<script>
+function toggleStep(n){
+  var b=document.getElementById('sb-'+n),t=document.getElementById('tog-'+n);
+  if(!b)return;
+  var o=b.classList.contains('open');
+  b.classList.toggle('open',!o);t.classList.toggle('open',!o);
+}
+function toggleTier(id,btn){
+  var el=document.getElementById(id);if(!el)return;
+  var o=el.classList.contains('open');
+  el.classList.toggle('open',!o);
+  if(btn)btn.classList.toggle('active',!o);
+}
+var TOTAL=10,done=0;
+function markDone(n){
+  var c=document.getElementById('chk-'+n),card=document.getElementById('sc-'+n);
+  if(!c)return;
+  if(c.checked){card.classList.add('done');done++;}
+  else{card.classList.remove('done');done--;}
+  var pct=Math.round(done/TOTAL*100);
+  document.getElementById('prog-fill').style.width=pct+'%';
+  document.getElementById('prog-label').textContent='Progress: '+done+' / '+TOTAL+' steps completed';
+  var cc=document.getElementById('completion-card');
+  if(cc)cc.style.display=(done===TOTAL)?'block':'none';
+}
+
+/* KC */
+var KC={
+  3:{correct:1,
+    f:{ok:'✅ Correct! F.year() only works on DateType or TimestampType columns. If order_date is still a String in raw_sales (which can happen if the DFG2 TypedCols step was skipped or failed), F.year() returns null for all rows. Solution: verify the DFG2 M code ran with TypedCols step.',
+       no:'❌ Not quite. F.year() is a valid PySpark function. The most common cause of all-null order_year values is that order_date is stored as a String rather than a DateType. F.year() on a String returns null.'}},
+  5:{correct:1,
+    f:{ok:'✅ Correct! In Spark, F.trim(null) returns null — it does not convert null to an empty string. coalesce then evaluates the second argument F.lit("Unknown") and returns it. The result is "Unknown".',
+       no:'❌ Not quite. F.trim() in Spark does NOT convert null to an empty string — it returns null. coalesce(null, F.lit("Unknown")) then returns "Unknown" as the first non-null value.'}},
+  9:{correct:1,
+    f:{ok:'✅ Correct! With parallel execution, the total time is: Bronze (3 min) + max(SILVER-Sales, SILVER-Countries) (2 min) + Gold (3 min) = 8 min. Without parallelism it would be 9 min. The saving is modest here, but with 10+ notebooks in a real pipeline, parallel execution cuts hours off daily runs.',
+       no:'❌ Not quite. Parallel activities run simultaneously — the pipeline waits for the longest one to finish, not the sum. Bronze(3) + max(2,1) + Gold(3) = 8 minutes total.'}}
+};
+function answerKC(n,idx,ok){
+  var opts=document.querySelectorAll('#kc-'+n+'-opts .kc-option');
+  var fb=document.getElementById('kc-'+n+'-fb');
+  var ans=KC[n];if(!ans||!fb)return;
+  opts.forEach(function(o){o.style.pointerEvents='none';});
+  opts.forEach(function(o,i){
+    if(i===ans.correct)o.classList.add('reveal');
+    if(i===idx&&!ok)o.classList.add('wrong');
+  });
+  fb.classList.add('show',ok?'fb-correct':'fb-wrong');
+  fb.textContent=ok?ans.f.ok:ans.f.no;
+}
+
+/* COPY */
+function cp(btn,id){
+  var pre=document.getElementById('code-'+id);if(!pre)return;
+  var t=pre.textContent;
+  function ok(){btn.textContent='✓ Copied';btn.classList.add('ok');
+    setTimeout(function(){btn.textContent='Copy';btn.classList.remove('ok');},2000);}
+  function fail(){btn.textContent='Failed';}
+  if(navigator.clipboard&&window.isSecureContext){
+    navigator.clipboard.writeText(t).then(ok).catch(function(){fb(t,ok,fail);});
+  }else fb(t,ok,fail);
+}
+function fb(t,ok,fail){
+  var a=document.createElement('textarea');a.value=t;
+  a.style.cssText='position:fixed;opacity:0';document.body.appendChild(a);a.select();
+  try{document.execCommand('copy')?ok():fail();}catch(e){fail();}
+  document.body.removeChild(a);
+}
+toggleStep(1);
+</script>
+</body>
+</html>

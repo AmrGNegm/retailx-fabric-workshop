@@ -1,0 +1,1554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RetailX Fabric Workshop — Section 2: Architecture</title>
+<style>
+
+/* ============================================================
+   GLOBAL RESET & BASE
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  background: #F0F4F8;
+  color: #1A202C;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* ============================================================
+   LAYOUT
+   ============================================================ */
+.page-wrapper {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 32px 24px 60px;
+}
+
+/* ============================================================
+   TYPOGRAPHY
+   ============================================================ */
+h1 { font-size: 26px; font-weight: 700; color: #0F172A; margin-bottom: 4px; }
+h2 { font-size: 19px; font-weight: 700; color: #1E293B; margin-bottom: 6px; }
+h3 { font-size: 15px; font-weight: 600; color: #334155; margin-bottom: 8px; }
+p  { color: #475569; line-height: 1.75; margin-bottom: 10px; }
+
+code {
+  font-family: 'Consolas', 'Courier New', monospace;
+  font-size: 12px;
+  background: #F1F5F9;
+  border: 1px solid #E2E8F0;
+  border-radius: 4px;
+  padding: 1px 5px;
+  color: #0F172A;
+}
+
+/* ============================================================
+   UTILITY
+   ============================================================ */
+.card {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+  padding: 20px 22px;
+  margin-bottom: 22px;
+}
+.card-accent-blue   { border-left: 4px solid #3B82F6; }
+.card-accent-amber  { border-left: 4px solid #F59E0B; }
+.card-accent-purple { border-left: 4px solid #8B5CF6; }
+.card-accent-green  { border-left: 4px solid #22C55E; }
+
+.section-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #94A3B8;
+  margin-bottom: 6px;
+}
+
+.divider {
+  height: 1px;
+  background: #E2E8F0;
+  margin: 28px 0;
+}
+
+.info-box {
+  border-radius: 8px;
+  padding: 11px 14px;
+  font-size: 13px;
+  line-height: 1.65;
+  margin: 12px 0;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+.info-box-icon { font-size: 15px; flex-shrink: 0; margin-top: 2px; }
+.info-blue  { background: #EFF6FF; border: 1px solid #BFDBFE; color: #1E40AF; }
+.info-amber { background: #FFFBEB; border: 1px solid #FDE68A; color: #92400E; }
+.info-green { background: #F0FDF4; border: 1px solid #BBF7D0; color: #14532D; }
+.info-purple{ background: #F5F3FF; border: 1px solid #DDD6FE; color: #4C1D95; }
+
+
+/* ============================================================
+   ARCHITECTURE FLOW DIAGRAM
+   ============================================================ */
+
+/* Outer wrapper */
+.arch-flow {
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+  padding: 22px 18px;
+  margin: 16px 0;
+  overflow-x: auto;
+}
+
+/* Row of nodes */
+.arch-row {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  margin-bottom: 8px;
+  min-width: 680px;
+}
+
+/* ── Source nodes ── */
+.src-col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 140px;
+  flex-shrink: 0;
+}
+
+.src-node {
+  background: #EFF6FF;
+  border: 1px solid #BFDBFE;
+  border-radius: 8px;
+  padding: 10px 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: center;
+}
+.src-node:hover { background: #DBEAFE; border-color: #93C5FD; transform: translateY(-1px); }
+.src-node-icon { font-size: 18px; margin-bottom: 4px; }
+.src-node-name { font-size: 12px; font-weight: 600; color: #1D4ED8; }
+.src-node-sub  { font-size: 10px; color: #3B82F6; margin-top: 2px; }
+
+/* ── Arrow connector ── */
+.arch-connector {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  flex-shrink: 0;
+  gap: 3px;
+}
+.conn-line {
+  width: 28px;
+  height: 1.5px;
+  background: #CBD5E1;
+  position: relative;
+}
+.conn-line::after {
+  content: '';
+  position: absolute;
+  right: -1px;
+  top: -4px;
+  border-left: 6px solid #CBD5E1;
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+}
+.conn-label {
+  font-size: 9px;
+  color: #94A3B8;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* ── Layer columns ── */
+.layer-col {
+  flex: 1;
+  border-radius: 10px;
+  padding: 12px 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+  min-width: 120px;
+}
+.layer-col:hover { filter: brightness(0.97); transform: translateY(-1px); }
+
+.lc-bronze { background: #FEF3C7; border: 1.5px solid #F59E0B; }
+.lc-silver { background: #F1F5F9; border: 1.5px solid #94A3B8; }
+.lc-gold   { background: #FFFBEB; border: 1.5px solid #D97706; }
+.lc-plat   { background: #EFF6FF; border: 1.5px solid #3B82F6; }
+
+.lc-header {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 8px;
+}
+.lc-emoji { font-size: 16px; }
+.lc-title { font-size: 12px; font-weight: 700; }
+.lc-bronze .lc-title { color: #92400E; }
+.lc-silver .lc-title { color: #334155; }
+.lc-gold   .lc-title { color: #B45309; }
+.lc-plat   .lc-title { color: #1D4ED8; }
+
+.lc-tables { display: flex; flex-direction: column; gap: 4px; }
+
+.lc-table-tag {
+  font-size: 10px;
+  padding: 3px 7px;
+  border-radius: 4px;
+  font-family: 'Consolas', 'Courier New', monospace;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.lc-bronze .lc-table-tag { background: #FDE68A; color: #78350F; }
+.lc-silver .lc-table-tag { background: #E2E8F0; color: #334155; }
+.lc-gold   .lc-table-tag { background: #FDE68A88; color: #92400E; }
+.lc-plat   .lc-table-tag { background: #BFDBFE; color: #1E40AF; }
+
+.lc-tool {
+  margin-top: 8px;
+  font-size: 10px;
+  padding: 3px 6px;
+  border-radius: 4px;
+  display: inline-block;
+}
+.lc-bronze .lc-tool { background: #F59E0B22; color: #B45309; }
+.lc-silver .lc-tool { background: #94A3B822; color: #475569; }
+.lc-gold   .lc-tool { background: #D9770622; color: #92400E; }
+.lc-plat   .lc-tool { background: #3B82F622; color: #1D4ED8; }
+
+/* Power BI box at the end */
+.pbi-box {
+  background: #F0FDF4;
+  border: 1.5px solid #22C55E;
+  border-radius: 10px;
+  padding: 12px 10px;
+  width: 120px;
+  flex-shrink: 0;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.pbi-box:hover { background: #DCFCE7; transform: translateY(-1px); }
+.pbi-title { font-size: 12px; font-weight: 700; color: #15803D; margin: 4px 0 2px; }
+.pbi-sub   { font-size: 10px; color: #16A34A; }
+
+/* ── Detail panel (shown on click) ── */
+.layer-detail {
+  display: none;
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin-top: 10px;
+  font-size: 13px;
+  color: #475569;
+  line-height: 1.65;
+}
+.layer-detail.open { display: block; }
+.detail-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1E293B;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.detail-close {
+  margin-left: auto;
+  font-size: 11px;
+  color: #94A3B8;
+  cursor: pointer;
+  padding: 1px 7px;
+  border-radius: 4px;
+  background: #F1F5F9;
+  border: 1px solid #E2E8F0;
+}
+.detail-close:hover { background: #E2E8F0; }
+
+
+/* ============================================================
+   TABLES REFERENCE
+   ============================================================ */
+.filter-row {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+.filter-btn {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 20px;
+  border: 1.5px solid #E2E8F0;
+  background: #FFFFFF;
+  color: #64748B;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: inherit;
+}
+.filter-btn:hover { border-color: #CBD5E1; color: #1E293B; }
+.filter-btn.active { border-color: #3B82F6; background: #EFF6FF; color: #1D4ED8; }
+
+.tables-list { display: flex; flex-direction: column; gap: 10px; }
+
+.table-card {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 10px;
+  overflow: hidden;
+  transition: box-shadow 0.15s;
+}
+.table-card:hover { box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
+
+.table-hdr {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.table-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  flex-shrink: 0;
+}
+.tb-bronze { background: #FEF3C7; color: #92400E; }
+.tb-silver { background: #F1F5F9; color: #334155; border: 1px solid #E2E8F0; }
+.tb-gold   { background: #FFFBEB; color: #B45309; }
+.tb-plat   { background: #EFF6FF; color: #1D4ED8; }
+
+.table-name {
+  font-size: 14px;
+  font-weight: 600;
+  font-family: 'Consolas', 'Courier New', monospace;
+  color: #1E293B;
+  flex: 1;
+}
+
+.table-meta {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-shrink: 0;
+}
+.table-rows {
+  font-size: 11px;
+  color: #94A3B8;
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 4px;
+  padding: 2px 7px;
+}
+.table-tog { font-size: 12px; color: #94A3B8; transition: transform 0.2s; }
+.table-tog.open { transform: rotate(180deg); }
+
+.table-body {
+  display: none;
+  border-top: 1px solid #F1F5F9;
+  padding: 14px 16px;
+}
+.table-body.open { display: block; }
+
+.table-desc {
+  font-size: 13px;
+  color: #475569;
+  margin-bottom: 12px;
+  line-height: 1.65;
+}
+
+/* Column table */
+.col-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  margin-bottom: 10px;
+}
+.col-table th {
+  text-align: left;
+  padding: 6px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #64748B;
+  background: #F8FAFC;
+  border-bottom: 1px solid #E2E8F0;
+}
+.col-table td {
+  padding: 6px 10px;
+  border-bottom: 1px solid #F8FAFC;
+  vertical-align: top;
+}
+.col-table tr:last-child td { border-bottom: none; }
+.col-name { font-family: 'Consolas', 'Courier New', monospace; color: #1D4ED8; font-size: 12px; }
+.col-type { color: #7C3AED; font-family: 'Consolas', 'Courier New', monospace; }
+.col-desc { color: #475569; }
+.col-key  { font-size: 9px; padding: 1px 5px; border-radius: 3px; }
+.pk { background: #FEF3C7; color: #92400E; }
+.fk { background: #EFF6FF; color: #1D4ED8; }
+.sk { background: #F5F3FF; color: #6D28D9; }
+
+
+/* ============================================================
+   PIPELINE DAG DIAGRAM
+   ============================================================ */
+.dag-container {
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+  padding: 22px 18px;
+  margin: 16px 0;
+  overflow-x: auto;
+}
+
+.dag-flow {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  min-width: 660px;
+  justify-content: center;
+}
+
+/* DAG node */
+.dag-node {
+  border-radius: 8px;
+  padding: 10px 12px;
+  text-align: center;
+  min-width: 110px;
+  cursor: pointer;
+  transition: all 0.15s;
+  position: relative;
+}
+.dag-node:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+
+.dn-bronze { background: #FEF3C7; border: 1.5px solid #F59E0B; }
+.dn-silver { background: #F1F5F9; border: 1.5px solid #94A3B8; }
+.dn-gold   { background: #FFFBEB; border: 1.5px solid #D97706; }
+
+.dag-node-icon { font-size: 18px; margin-bottom: 4px; }
+.dag-node-name { font-size: 11px; font-weight: 700; color: #1E293B; }
+.dag-node-sub  { font-size: 10px; color: #64748B; margin-top: 2px; }
+.dag-node-tool { font-size: 9px; margin-top: 4px; padding: 2px 6px; border-radius: 3px; display: inline-block; }
+.dn-bronze .dag-node-tool { background: #F59E0B33; color: #92400E; }
+.dn-silver .dag-node-tool { background: #94A3B833; color: #334155; }
+.dn-gold   .dag-node-tool { background: #D9770633; color: #92400E; }
+
+/* DAG connector: single arrow */
+.dag-arrow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  flex-shrink: 0;
+}
+.dag-line {
+  width: 22px;
+  height: 1.5px;
+  background: #CBD5E1;
+  position: relative;
+}
+.dag-line::after {
+  content: '';
+  position: absolute;
+  right: -1px; top: -3.5px;
+  border-left: 6px solid #CBD5E1;
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+}
+.dag-label { font-size: 9px; color: #94A3B8; white-space: nowrap; margin-top: 3px; }
+
+/* DAG fork: one→two */
+.dag-fork {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 56px;
+  flex-shrink: 0;
+  position: relative;
+  gap: 0;
+}
+.fork-label-top    { font-size: 9px; color: #94A3B8; margin-bottom: 2px; text-align: center; }
+.fork-label-bottom { font-size: 9px; color: #94A3B8; margin-top: 2px; text-align: center; }
+
+/* Two-node column (parallel) */
+.dag-parallel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* DAG join: two→one */
+.dag-join {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 46px;
+  flex-shrink: 0;
+}
+
+/* Status badges on dag nodes */
+.dag-status {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  font-size: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid #fff;
+  font-weight: 700;
+}
+.status-pending  { background: #E2E8F0; color: #64748B; }
+.status-running  { background: #FEF3C7; color: #B45309; }
+.status-done     { background: #DCFCE7; color: #15803D; }
+.status-failed   { background: #FEE2E2; color: #B91C1C; }
+
+
+/* ============================================================
+   NAMING CONVENTIONS TABLE
+   ============================================================ */
+.conv-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+.conv-table th {
+  text-align: left;
+  padding: 8px 12px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #64748B;
+  background: #F8FAFC;
+  border-bottom: 2px solid #E2E8F0;
+}
+.conv-table td {
+  padding: 9px 12px;
+  border-bottom: 1px solid #F1F5F9;
+  vertical-align: top;
+}
+.conv-table tr:last-child td { border-bottom: none; }
+.conv-table tr:hover td { background: #F8FAFC; }
+.conv-item { font-family: 'Consolas', 'Courier New', monospace; font-size: 12px; }
+.conv-example { font-family: 'Consolas', 'Courier New', monospace; font-size: 11px; color: #2563EB; }
+.conv-desc { color: #475569; font-size: 12px; }
+
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 640px) {
+  .page-wrapper { padding: 16px 12px 40px; }
+  .arch-flow, .dag-container { padding: 14px 10px; }
+}
+
+</style>
+</head>
+<body>
+
+<div class="page-wrapper">
+
+  <!-- ═══════════════════════════════════════════════════════════
+       HEADER
+       ═══════════════════════════════════════════════════════════ -->
+  <div class="section-label">RetailX Data Platform · Microsoft Fabric Workshop</div>
+  <h1>Section 2 — Architecture &amp; Platform Design</h1>
+  <p style="color:#64748B; font-size:14px; margin-bottom:28px;">
+    The full platform blueprint before you write a single line of code.
+    Click any layer or pipeline node to see its details.
+  </p>
+
+
+  <!-- ═══════════════════════════════════════════════════════════
+       2.1 - ARCHITECTURE FLOW DIAGRAM
+       ═══════════════════════════════════════════════════════════ -->
+  <div class="card card-accent-blue">
+    <div class="section-label">2.1 — Platform Overview</div>
+    <h2>End-to-End Architecture Flow</h2>
+    <p style="margin-bottom: 4px;">
+      Data flows left to right through 4 layers. Each layer has a clear responsibility.
+      <strong>Click any layer</strong> to see what happens inside it.
+    </p>
+
+    <!-- ── ARCHITECTURE DIAGRAM ────────────────────────────── -->
+    <div class="arch-flow">
+
+      <!-- Row: sources → Bronze → Silver → Gold → Platinum → PBI -->
+      <div class="arch-row">
+
+        <!-- Sources -->
+        <div class="src-col">
+          <div class="src-node" onclick="showDetail('src-csv')">
+            <div class="src-node-icon">📁</div>
+            <div class="src-node-name">GitHub CSV</div>
+            <div class="src-node-sub">Superstore<br>9,994 rows</div>
+          </div>
+          <div class="src-node" onclick="showDetail('src-api')">
+            <div class="src-node-icon">🌐</div>
+            <div class="src-node-name">REST API</div>
+            <div class="src-node-sub">Countries<br>250 records</div>
+          </div>
+        </div>
+
+        <!-- Arrow: sources → Bronze -->
+        <div class="arch-connector">
+          <div class="conn-line"></div>
+          <div class="conn-line"></div>
+          <div class="conn-label">DFG2<br>NB-01</div>
+        </div>
+
+        <!-- Bronze -->
+        <div class="layer-col lc-bronze" onclick="showDetail('bronze')">
+          <div class="lc-header">
+            <span class="lc-emoji">🥉</span>
+            <span class="lc-title">Bronze</span>
+          </div>
+          <div class="lc-tables">
+            <span class="lc-table-tag">raw_sales</span>
+            <span class="lc-table-tag">raw_countries</span>
+          </div>
+          <span class="lc-tool">Raw · Immutable</span>
+        </div>
+
+        <!-- Arrow: Bronze → Silver -->
+        <div class="arch-connector">
+          <div class="conn-line"></div>
+          <div class="conn-label">NB-02</div>
+        </div>
+
+        <!-- Silver -->
+        <div class="layer-col lc-silver" onclick="showDetail('silver')">
+          <div class="lc-header">
+            <span class="lc-emoji">🥈</span>
+            <span class="lc-title">Silver</span>
+          </div>
+          <div class="lc-tables">
+            <span class="lc-table-tag">silver_sales</span>
+            <span class="lc-table-tag">silver_countries</span>
+          </div>
+          <span class="lc-tool">Cleaned · Typed</span>
+        </div>
+
+        <!-- Arrow: Silver → Gold -->
+        <div class="arch-connector">
+          <div class="conn-line"></div>
+          <div class="conn-label">NB-03</div>
+        </div>
+
+        <!-- Gold -->
+        <div class="layer-col lc-gold" onclick="showDetail('gold')">
+          <div class="lc-header">
+            <span class="lc-emoji">🥇</span>
+            <span class="lc-title">Gold</span>
+          </div>
+          <div class="lc-tables">
+            <span class="lc-table-tag">fact_sales</span>
+            <span class="lc-table-tag">dim_date</span>
+            <span class="lc-table-tag">dim_customer</span>
+            <span class="lc-table-tag">dim_product</span>
+            <span class="lc-table-tag">dim_geography</span>
+          </div>
+          <span class="lc-tool">Star Schema · SK</span>
+        </div>
+
+        <!-- Arrow: Gold → Platinum -->
+        <div class="arch-connector">
+          <div class="conn-line"></div>
+          <div class="conn-label">DirectLake</div>
+        </div>
+
+        <!-- Platinum / Power BI -->
+        <div class="pbi-box" onclick="showDetail('platinum')">
+          <div style="font-size:24px;">💎</div>
+          <div class="pbi-title">Platinum</div>
+          <div class="pbi-sub">SM_RetailX<br>Power BI Report<br>8 DAX Measures</div>
+        </div>
+
+      </div><!-- end arch-row -->
+
+      <!-- ── Detail panels (shown on click) ─────────────────── -->
+
+      <!-- Source: CSV -->
+      <div class="layer-detail" id="detail-src-csv">
+        <div class="detail-title">
+          📁 GitHub CSV — Superstore Sales
+          <span class="detail-close" onclick="closeDetail('src-csv')">✕ close</span>
+        </div>
+        <p style="margin:0; font-size:13px; color:#475569;">
+          The Superstore dataset is hosted as a raw CSV on GitHub (Plotly's public datasets repository).
+          It contains <strong>9,994 rows</strong> of retail transactions from 2014 to 2017 across
+          the United States, with 21 columns covering order details, shipping, customer info,
+          product category, and financials (sales, profit, discount).
+          <br><br>
+          <strong>Ingested by:</strong> Dataflow Gen2 (DFG2-Sales-CSV) using Power Query M
+          <br>
+          <strong>Lands in:</strong> Bronze layer → <code>raw_sales</code> Delta table
+          <br>
+          <strong>URL:</strong> <code>https://raw.githubusercontent.com/plotly/datasets/master/superstore.csv</code>
+        </p>
+      </div>
+
+      <!-- Source: API -->
+      <div class="layer-detail" id="detail-src-api">
+        <div class="detail-title">
+          🌐 REST Countries API
+          <span class="detail-close" onclick="closeDetail('src-api')">✕ close</span>
+        </div>
+        <p style="margin:0; font-size:13px; color:#475569;">
+          The REST Countries API is a free, public, no-authentication API that returns
+          information about every country in the world — including name, region, subregion,
+          population, area, capital city, currency, and GPS coordinates.
+          It returns a JSON array of <strong>~250 country objects</strong>, each with deeply nested fields.
+          <br><br>
+          <strong>Ingested by:</strong> NB-01-BRONZE-Countries-API (PySpark notebook)
+          <br>
+          <strong>Raw JSON saved to:</strong> <code>Files/bronze/countries/countries_{ts}.json</code>
+          <br>
+          <strong>Lands in:</strong> Bronze layer → <code>raw_countries</code> Delta table
+          <br>
+          <strong>URL:</strong> <code>https://restcountries.com/v3.1/all</code>
+        </p>
+      </div>
+
+      <!-- Bronze detail -->
+      <div class="layer-detail" id="detail-bronze">
+        <div class="detail-title">
+          🥉 Bronze Layer — Raw, Immutable Landing Zone
+          <span class="detail-close" onclick="closeDetail('bronze')">✕ close</span>
+        </div>
+        <p style="margin:0 0 8px; font-size:13px; color:#475569;">
+          The Bronze layer is a <strong>write-once archive</strong> of source data. No transformations,
+          no cleaning, no business logic — just an exact copy of what arrived from the source.
+          Raw JSON files are also saved to <code>Files/bronze/</code> before parsing.
+        </p>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; font-size:12px;">
+          <div style="background:#FEF3C7; border-radius:6px; padding:9px;">
+            <div style="font-weight:700; color:#92400E; margin-bottom:5px;">Rules</div>
+            <div style="color:#78350F; line-height:1.8;">
+              ✓ Never modify after landing<br>
+              ✓ Append-only writes preferred<br>
+              ✓ Keep source column names as-is<br>
+              ✓ Store raw JSON files too
+            </div>
+          </div>
+          <div style="background:#FEF3C7; border-radius:6px; padding:9px;">
+            <div style="font-weight:700; color:#92400E; margin-bottom:5px;">Tables</div>
+            <div style="color:#78350F; line-height:1.8;">
+              <code>raw_sales</code> — ~9,994 rows<br>
+              <code>raw_countries</code> — ~250 rows<br>
+              Format: Delta (overwrite on reload)<br>
+              Audit cols: <code>_ingestion_ts</code>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Silver detail -->
+      <div class="layer-detail" id="detail-silver">
+        <div class="detail-title">
+          🥈 Silver Layer — Cleaned, Typed, Business-Ready
+          <span class="detail-close" onclick="closeDetail('silver')">✕ close</span>
+        </div>
+        <p style="margin:0 0 8px; font-size:13px; color:#475569;">
+          Silver applies standardisation and business logic to Bronze data.
+          Column names become snake_case, types are cast correctly,
+          nulls are resolved, duplicates are dropped, and derived metrics are computed.
+        </p>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; font-size:12px;">
+          <div style="background:#F1F5F9; border-radius:6px; padding:9px;">
+            <div style="font-weight:700; color:#334155; margin-bottom:5px;">Transformations</div>
+            <div style="color:#475569; line-height:1.8;">
+              ✓ Rename all columns → snake_case<br>
+              ✓ Cast dates, numbers, integers<br>
+              ✓ Derive: profit_margin, days_to_ship<br>
+              ✓ Derive: net_revenue, order_year/month<br>
+              ✓ Drop duplicates on business key<br>
+              ✓ Null-fill subregion, capital, currency
+            </div>
+          </div>
+          <div style="background:#F1F5F9; border-radius:6px; padding:9px;">
+            <div style="font-weight:700; color:#334155; margin-bottom:5px;">Tables</div>
+            <div style="color:#475569; line-height:1.8;">
+              <code>silver_sales</code> — ~9,994 rows<br>
+              <code>silver_countries</code> — ~245 rows<br>
+              Format: Delta (overwrite on reload)<br>
+              Tool: NB-02 (two separate notebooks)
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Gold detail -->
+      <div class="layer-detail" id="detail-gold">
+        <div class="detail-title">
+          🥇 Gold Layer — Star Schema, Surrogate Keys
+          <span class="detail-close" onclick="closeDetail('gold')">✕ close</span>
+        </div>
+        <p style="margin:0 0 8px; font-size:13px; color:#475569;">
+          Gold builds the analytics-ready star schema. Natural keys are replaced with
+          integer surrogate keys. Dimension tables are denormalized.
+          The fact table holds only measures and foreign keys — no descriptive text.
+        </p>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; font-size:12px;">
+          <div style="background:#FFFBEB; border-radius:6px; padding:9px;">
+            <div style="font-weight:700; color:#B45309; margin-bottom:5px;">Star schema</div>
+            <div style="color:#92400E; line-height:1.8;">
+              <code>fact_sales</code> (center)<br>
+              → <code>dim_date</code> (1,461 rows)<br>
+              → <code>dim_customer</code> (~793)<br>
+              → <code>dim_product</code> (~1,850)<br>
+              → <code>dim_geography</code> (~632)
+            </div>
+          </div>
+          <div style="background:#FFFBEB; border-radius:6px; padding:9px;">
+            <div style="font-weight:700; color:#B45309; margin-bottom:5px;">Key patterns</div>
+            <div style="color:#92400E; line-height:1.8;">
+              ✓ Surrogate keys via Window + row_number<br>
+              ✓ dim_geography enriched from silver_countries<br>
+              ✓ dim_date generated via SQL sequence<br>
+              ✓ All joins: left join from fact → dim<br>
+              Tool: NB-03 (single notebook)
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Platinum detail -->
+      <div class="layer-detail" id="detail-platinum">
+        <div class="detail-title">
+          💎 Platinum Layer — Power BI DirectLake Serving
+          <span class="detail-close" onclick="closeDetail('platinum')">✕ close</span>
+        </div>
+        <p style="margin:0 0 8px; font-size:13px; color:#475569;">
+          Platinum is the consumer-facing layer. The semantic model reads Delta files
+          directly from OneLake — no import, no scheduled refresh. Any new data written
+          by the pipeline is instantly visible in the Power BI report on the next query.
+        </p>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; font-size:12px;">
+          <div style="background:#EFF6FF; border-radius:6px; padding:9px;">
+            <div style="font-weight:700; color:#1D4ED8; margin-bottom:5px;">Semantic model</div>
+            <div style="color:#1E40AF; line-height:1.8;">
+              Name: <code>SM_RetailX</code><br>
+              Mode: DirectLake<br>
+              Tables: 5 (1 fact + 4 dims)<br>
+              Relationships: 4 (M:1, single-dir)<br>
+              DAX Measures: 8
+            </div>
+          </div>
+          <div style="background:#EFF6FF; border-radius:6px; padding:9px;">
+            <div style="font-weight:700; color:#1D4ED8; margin-bottom:5px;">Power BI Report</div>
+            <div style="color:#1E40AF; line-height:1.8;">
+              Name: <code>RPT-RetailX-Overview</code><br>
+              Visuals: Line chart, Bar, Map,<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Cards (×4), Table, Slicers<br>
+              Zero refresh lag vs. pipeline output
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end arch-flow -->
+
+    <div class="info-box info-blue" style="margin-bottom:0;">
+      <span class="info-box-icon">💡</span>
+      <span>
+        <strong>OneLake means one copy.</strong> All Fabric items in the same workspace
+        read from the same underlying Delta files. A notebook writes to Gold;
+        Power BI DirectLake reads the same files immediately — no ETL, no movement.
+      </span>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════════
+       2.2 - PIPELINE DAG
+       ═══════════════════════════════════════════════════════════ -->
+  <div class="card card-accent-purple">
+    <div class="section-label">2.2 — Orchestration</div>
+    <h2>Pipeline DAG — PL-RetailX-Daily</h2>
+    <p style="margin-bottom:6px;">
+      The Data Pipeline executes all notebooks in the correct dependency order.
+      Bronze runs first, then Silver notebooks run <strong>in parallel</strong>,
+      then Gold waits for both to finish.
+    </p>
+
+    <div class="dag-container">
+      <div class="dag-flow">
+
+        <!-- Node 1: NB-01 Bronze -->
+        <div class="dag-node dn-bronze" onclick="showDagDetail('nb01')">
+          <div class="dag-status status-done">✓</div>
+          <div class="dag-node-icon">📓</div>
+          <div class="dag-node-name">NB-01-BRONZE<br>Countries-API</div>
+          <div class="dag-node-sub">REST API → raw_countries</div>
+          <div class="dag-node-tool">🥉 Bronze · ~3 min</div>
+        </div>
+
+        <!-- Fork arrow (1 → 2 parallel) -->
+        <div style="display:flex; flex-direction:column; align-items:center; width:50px; flex-shrink:0; position:relative; justify-content:center; gap:4px;">
+          <div style="font-size:9px; color:#94A3B8; margin-bottom:2px;">On success ↓</div>
+          <div style="display:flex; flex-direction:column; gap:22px; align-items:flex-end; width:100%;">
+            <div style="width:28px; height:1.5px; background:#CBD5E1; position:relative; align-self:flex-end;">
+              <span style="position:absolute; right:-1px; top:-3.5px; border-left:6px solid #CBD5E1; border-top:4px solid transparent; border-bottom:4px solid transparent;"></span>
+            </div>
+            <div style="width:28px; height:1.5px; background:#CBD5E1; position:relative; align-self:flex-end;">
+              <span style="position:absolute; right:-1px; top:-3.5px; border-left:6px solid #CBD5E1; border-top:4px solid transparent; border-bottom:4px solid transparent;"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Parallel Silver nodes -->
+        <div class="dag-parallel">
+          <div class="dag-node dn-silver" onclick="showDagDetail('nb02s')">
+            <div class="dag-status status-done">✓</div>
+            <div class="dag-node-icon">📓</div>
+            <div class="dag-node-name">NB-02-SILVER<br>Sales</div>
+            <div class="dag-node-sub">raw → silver_sales</div>
+            <div class="dag-node-tool">🥈 Silver · ~2 min</div>
+          </div>
+          <div class="dag-node dn-silver" onclick="showDagDetail('nb02c')">
+            <div class="dag-status status-done">✓</div>
+            <div class="dag-node-icon">📓</div>
+            <div class="dag-node-name">NB-02-SILVER<br>Countries</div>
+            <div class="dag-node-sub">raw → silver_countries</div>
+            <div class="dag-node-tool">🥈 Silver · ~1 min</div>
+          </div>
+        </div>
+
+        <!-- Join arrow (2 → 1) -->
+        <div style="display:flex; flex-direction:column; align-items:center; width:50px; flex-shrink:0; position:relative; justify-content:center; gap:4px;">
+          <div style="display:flex; flex-direction:column; gap:22px; align-items:flex-start; width:100%;">
+            <div style="width:28px; height:1.5px; background:#CBD5E1; position:relative; align-self:flex-start;">
+              <span style="position:absolute; right:-1px; top:-3.5px; border-left:6px solid #CBD5E1; border-top:4px solid transparent; border-bottom:4px solid transparent;"></span>
+            </div>
+            <div style="width:28px; height:1.5px; background:#CBD5E1; position:relative; align-self:flex-start;">
+              <span style="position:absolute; right:-1px; top:-3.5px; border-left:6px solid #CBD5E1; border-top:4px solid transparent; border-bottom:4px solid transparent;"></span>
+            </div>
+          </div>
+          <div style="font-size:9px; color:#94A3B8; margin-top:2px;">Both done ↓</div>
+        </div>
+
+        <!-- Node 3: NB-03 Gold -->
+        <div class="dag-node dn-gold" onclick="showDagDetail('nb03')">
+          <div class="dag-status status-done">✓</div>
+          <div class="dag-node-icon">📓</div>
+          <div class="dag-node-name">NB-03-GOLD<br>StarSchema</div>
+          <div class="dag-node-sub">silver → fact + dims</div>
+          <div class="dag-node-tool">🥇 Gold · ~3 min</div>
+        </div>
+
+      </div><!-- end dag-flow -->
+
+      <!-- DAG detail panels -->
+      <div id="dag-detail-nb01" style="display:none; background:#FEF3C7; border:1px solid #F59E0B; border-radius:8px; padding:12px 14px; margin-top:14px; font-size:13px; color:#78350F;">
+        <strong>NB-01-BRONZE-Countries-API</strong> — Calls the REST Countries API, saves the raw JSON to Files/bronze/countries/, parses 250 country objects into a PySpark DataFrame, runs DQ assertions, and writes to <code>raw_countries</code> Delta table. Runtime ~3 min (includes Spark session start).
+        <span style="float:right; cursor:pointer; color:#B45309;" onclick="closeDagDetail('nb01')">✕</span>
+      </div>
+      <div id="dag-detail-nb02s" style="display:none; background:#F1F5F9; border:1px solid #94A3B8; border-radius:8px; padding:12px 14px; margin-top:14px; font-size:13px; color:#334155;">
+        <strong>NB-02-SILVER-Sales</strong> — Reads <code>raw_sales</code>, renames all 21 columns to snake_case, casts types, adds business columns (profit_margin, days_to_ship, net_revenue), drops duplicates, and writes to <code>silver_sales</code> Delta table. Runs in parallel with NB-02-SILVER-Countries.
+        <span style="float:right; cursor:pointer; color:#64748B;" onclick="closeDagDetail('nb02s')">✕</span>
+      </div>
+      <div id="dag-detail-nb02c" style="display:none; background:#F1F5F9; border:1px solid #94A3B8; border-radius:8px; padding:12px 14px; margin-top:14px; font-size:13px; color:#334155;">
+        <strong>NB-02-SILVER-Countries</strong> — Reads <code>raw_countries</code>, trims whitespace, fills nulls, adds population_m (millions), deduplicates on country_code, and writes to <code>silver_countries</code>. Runs in parallel with NB-02-SILVER-Sales.
+        <span style="float:right; cursor:pointer; color:#64748B;" onclick="closeDagDetail('nb02c')">✕</span>
+      </div>
+      <div id="dag-detail-nb03" style="display:none; background:#FFFBEB; border:1px solid #D97706; border-radius:8px; padding:12px 14px; margin-top:14px; font-size:13px; color:#92400E;">
+        <strong>NB-03-GOLD-StarSchema</strong> — Builds the complete star schema from Silver tables: <code>dim_date</code> (SQL sequence), <code>dim_customer</code>, <code>dim_product</code>, <code>dim_geography</code> (enriched with silver_countries), and <code>fact_sales</code> with all surrogate key joins. Waits for both Silver notebooks to succeed before starting.
+        <span style="float:right; cursor:pointer; color:#B45309;" onclick="closeDagDetail('nb03')">✕</span>
+      </div>
+
+    </div><!-- end dag-container -->
+
+    <!-- Timeline -->
+    <h3 style="margin-bottom:8px;">Expected pipeline runtime</h3>
+    <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:4px;">
+      <div style="flex:1; min-width:140px; background:#FEF3C7; border:1px solid #F59E0B; border-radius:8px; padding:10px; text-align:center;">
+        <div style="font-size:20px; font-weight:700; color:#B45309;">~3 min</div>
+        <div style="font-size:11px; color:#92400E; margin-top:3px;">NB-01 Bronze</div>
+        <div style="font-size:10px; color:#B45309;">(inc. Spark start)</div>
+      </div>
+      <div style="flex:1; min-width:140px; background:#F1F5F9; border:1px solid #94A3B8; border-radius:8px; padding:10px; text-align:center;">
+        <div style="font-size:20px; font-weight:700; color:#475569;">~2 min</div>
+        <div style="font-size:11px; color:#334155; margin-top:3px;">NB-02 Silver ×2</div>
+        <div style="font-size:10px; color:#64748B;">(parallel)</div>
+      </div>
+      <div style="flex:1; min-width:140px; background:#FFFBEB; border:1px solid #D97706; border-radius:8px; padding:10px; text-align:center;">
+        <div style="font-size:20px; font-weight:700; color:#B45309;">~3 min</div>
+        <div style="font-size:11px; color:#92400E; margin-top:3px;">NB-03 Gold</div>
+        <div style="font-size:10px; color:#B45309;">(star schema build)</div>
+      </div>
+      <div style="flex:1; min-width:140px; background:#F0FDF4; border:1px solid #22C55E; border-radius:8px; padding:10px; text-align:center;">
+        <div style="font-size:20px; font-weight:700; color:#15803D;">~8 min</div>
+        <div style="font-size:11px; color:#14532D; margin-top:3px;">Total pipeline</div>
+        <div style="font-size:10px; color:#15803D;">(end-to-end)</div>
+      </div>
+    </div>
+
+    <div class="info-box info-purple" style="margin-bottom:0; margin-top:12px;">
+      <span class="info-box-icon">🔀</span>
+      <span>
+        The parallel execution of the two Silver notebooks saves ~2 minutes per run.
+        In production pipelines with many notebooks, this pattern can reduce total
+        runtime by 30–50%.
+      </span>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════════
+       2.3 - TABLES REFERENCE
+       ═══════════════════════════════════════════════════════════ -->
+  <div class="card card-accent-amber">
+    <div class="section-label">2.3 — Data Catalogue</div>
+    <h2>All Delta Tables — Full Reference</h2>
+    <p>
+      Every table across all four layers. Click a table to see its columns,
+      types, and notes. Use the filters to show tables by layer.
+    </p>
+
+    <!-- Filter buttons -->
+    <div class="filter-row">
+      <button class="filter-btn active" onclick="filterTables('all', this)">All (9)</button>
+      <button class="filter-btn" onclick="filterTables('bronze', this)">🥉 Bronze (2)</button>
+      <button class="filter-btn" onclick="filterTables('silver', this)">🥈 Silver (2)</button>
+      <button class="filter-btn" onclick="filterTables('gold',   this)">🥇 Gold (5)</button>
+    </div>
+
+    <div class="tables-list">
+
+      <!-- ── raw_sales ──────────────────────────────────────── -->
+      <div class="table-card" data-layer="bronze">
+        <div class="table-hdr" onclick="toggleTable('raw-sales')">
+          <span class="table-badge tb-bronze">🥉 Bronze</span>
+          <span class="table-name">raw_sales</span>
+          <div class="table-meta">
+            <span class="table-rows">~9,994 rows</span>
+            <span class="table-rows">21 cols</span>
+            <span class="table-tog" id="tt-raw-sales">▼</span>
+          </div>
+        </div>
+        <div class="table-body" id="tb-raw-sales">
+          <p class="table-desc">Exact copy of the Superstore Sales CSV ingested by Dataflow Gen2. Column names are snake_case (renamed by DFG2 Power Query). Types are cast by DFG2. Audit columns added by DFG2 destination step. Never modified after landing.</p>
+          <table class="col-table">
+            <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>Notes</th></tr></thead>
+            <tbody>
+              <tr><td class="col-name">row_id</td><td class="col-type">Int64</td><td></td><td class="col-desc">Source row number — not used as key</td></tr>
+              <tr><td class="col-name">order_id</td><td class="col-type">String</td><td></td><td class="col-desc">Business order key (e.g. CA-2014-100006)</td></tr>
+              <tr><td class="col-name">order_date</td><td class="col-type">Date</td><td></td><td class="col-desc">Order placement date — cast by DFG2</td></tr>
+              <tr><td class="col-name">ship_date</td><td class="col-type">Date</td><td></td><td class="col-desc">Shipment date — cast by DFG2</td></tr>
+              <tr><td class="col-name">ship_mode</td><td class="col-type">String</td><td></td><td class="col-desc">First Class / Second Class / Standard</td></tr>
+              <tr><td class="col-name">customer_id</td><td class="col-type">String</td><td></td><td class="col-desc">Natural key (e.g. CG-12520)</td></tr>
+              <tr><td class="col-name">customer_name</td><td class="col-type">String</td><td></td><td class="col-desc">Full name of customer</td></tr>
+              <tr><td class="col-name">segment</td><td class="col-type">String</td><td></td><td class="col-desc">Consumer / Corporate / Home Office</td></tr>
+              <tr><td class="col-name">country</td><td class="col-type">String</td><td></td><td class="col-desc">Always "United States" in this dataset</td></tr>
+              <tr><td class="col-name">city</td><td class="col-type">String</td><td></td><td class="col-desc">US city name</td></tr>
+              <tr><td class="col-name">state</td><td class="col-type">String</td><td></td><td class="col-desc">US state name</td></tr>
+              <tr><td class="col-name">postal_code</td><td class="col-type">String</td><td></td><td class="col-desc">US ZIP code</td></tr>
+              <tr><td class="col-name">region</td><td class="col-type">String</td><td></td><td class="col-desc">East / West / Central / South</td></tr>
+              <tr><td class="col-name">product_id</td><td class="col-type">String</td><td></td><td class="col-desc">Natural key (e.g. FUR-BO-10001798)</td></tr>
+              <tr><td class="col-name">category</td><td class="col-type">String</td><td></td><td class="col-desc">Furniture / Office Supplies / Technology</td></tr>
+              <tr><td class="col-name">sub_category</td><td class="col-type">String</td><td></td><td class="col-desc">17 sub-categories (e.g. Chairs, Phones)</td></tr>
+              <tr><td class="col-name">product_name</td><td class="col-type">String</td><td></td><td class="col-desc">Full product name</td></tr>
+              <tr><td class="col-name">sales</td><td class="col-type">Double</td><td></td><td class="col-desc">Revenue in USD</td></tr>
+              <tr><td class="col-name">quantity</td><td class="col-type">Int64</td><td></td><td class="col-desc">Units ordered</td></tr>
+              <tr><td class="col-name">discount</td><td class="col-type">Double</td><td></td><td class="col-desc">Discount rate (0.0 to 0.8)</td></tr>
+              <tr><td class="col-name">profit</td><td class="col-type">Double</td><td></td><td class="col-desc">Profit in USD (can be negative)</td></tr>
+              <tr><td class="col-name">_ingestion_ts</td><td class="col-type">Timestamp</td><td></td><td class="col-desc">Added by DFG2 — load timestamp</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ── raw_countries ─────────────────────────────────── -->
+      <div class="table-card" data-layer="bronze">
+        <div class="table-hdr" onclick="toggleTable('raw-countries')">
+          <span class="table-badge tb-bronze">🥉 Bronze</span>
+          <span class="table-name">raw_countries</span>
+          <div class="table-meta">
+            <span class="table-rows">~250 rows</span>
+            <span class="table-rows">12 cols</span>
+            <span class="table-tog" id="tt-raw-countries">▼</span>
+          </div>
+        </div>
+        <div class="table-body" id="tb-raw-countries">
+          <p class="table-desc">Parsed from the REST Countries API JSON response by NB-01. Each row represents one country. The raw JSON file is also saved to Files/bronze/countries/ before parsing. Audit columns added in the notebook.</p>
+          <table class="col-table">
+            <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>Notes</th></tr></thead>
+            <tbody>
+              <tr><td class="col-name">country_code</td><td class="col-type">String</td><td><span class="col-key pk">NK</span></td><td class="col-desc">ISO 3166-1 alpha-2 code (e.g. "SA", "EG")</td></tr>
+              <tr><td class="col-name">name_common</td><td class="col-type">String</td><td></td><td class="col-desc">Common English name (e.g. "Saudi Arabia")</td></tr>
+              <tr><td class="col-name">region</td><td class="col-type">String</td><td></td><td class="col-desc">Continent region (e.g. "Asia", "Africa")</td></tr>
+              <tr><td class="col-name">subregion</td><td class="col-type">String</td><td></td><td class="col-desc">Sub-region (e.g. "Western Asia") — can be null</td></tr>
+              <tr><td class="col-name">population</td><td class="col-type">Long</td><td></td><td class="col-desc">Estimated population (integer)</td></tr>
+              <tr><td class="col-name">area_km2</td><td class="col-type">Double</td><td></td><td class="col-desc">Land area in km²</td></tr>
+              <tr><td class="col-name">capital</td><td class="col-type">String</td><td></td><td class="col-desc">Capital city — some countries have none (null)</td></tr>
+              <tr><td class="col-name">currency_code</td><td class="col-type">String</td><td></td><td class="col-desc">First listed currency code (e.g. "SAR", "USD")</td></tr>
+              <tr><td class="col-name">currency_name</td><td class="col-type">String</td><td></td><td class="col-desc">Full currency name</td></tr>
+              <tr><td class="col-name">latitude</td><td class="col-type">Double</td><td></td><td class="col-desc">Geographic center latitude</td></tr>
+              <tr><td class="col-name">longitude</td><td class="col-type">Double</td><td></td><td class="col-desc">Geographic center longitude</td></tr>
+              <tr><td class="col-name">_ingestion_ts</td><td class="col-type">Timestamp</td><td></td><td class="col-desc">Notebook load timestamp</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ── silver_sales ──────────────────────────────────── -->
+      <div class="table-card" data-layer="silver">
+        <div class="table-hdr" onclick="toggleTable('silver-sales')">
+          <span class="table-badge tb-silver">🥈 Silver</span>
+          <span class="table-name">silver_sales</span>
+          <div class="table-meta">
+            <span class="table-rows">~9,994 rows</span>
+            <span class="table-rows">26 cols</span>
+            <span class="table-tog" id="tt-silver-sales">▼</span>
+          </div>
+        </div>
+        <div class="table-body" id="tb-silver-sales">
+          <p class="table-desc">Cleaned and enriched version of raw_sales. All source columns are preserved plus 5 derived business columns. Duplicates on (order_id, product_id) removed. Rows with null order_date dropped. Built by NB-02-SILVER-Sales.</p>
+          <table class="col-table">
+            <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>Notes</th></tr></thead>
+            <tbody>
+              <tr><td class="col-name">order_id</td><td class="col-type">String</td><td><span class="col-key pk">NK</span></td><td class="col-desc">Business order key</td></tr>
+              <tr><td class="col-name">order_date</td><td class="col-type">Date</td><td></td><td class="col-desc">Correctly cast with M/d/yyyy format</td></tr>
+              <tr><td class="col-name">ship_date</td><td class="col-type">Date</td><td></td><td class="col-desc">Correctly cast with M/d/yyyy format</td></tr>
+              <tr><td class="col-name">customer_id</td><td class="col-type">String</td><td></td><td class="col-desc">Natural customer key</td></tr>
+              <tr><td class="col-name">product_id</td><td class="col-type">String</td><td></td><td class="col-desc">Natural product key</td></tr>
+              <tr><td class="col-name">sales</td><td class="col-type">Double</td><td></td><td class="col-desc">Revenue in USD</td></tr>
+              <tr><td class="col-name">quantity</td><td class="col-type">Integer</td><td></td><td class="col-desc">Units ordered</td></tr>
+              <tr><td class="col-name">discount</td><td class="col-type">Double</td><td></td><td class="col-desc">Discount rate 0.0–0.8</td></tr>
+              <tr><td class="col-name">profit</td><td class="col-type">Double</td><td></td><td class="col-desc">Profit (can be negative)</td></tr>
+              <tr><td class="col-name" style="color:#16A34A; font-weight:600;">order_year</td><td class="col-type">Integer</td><td></td><td class="col-desc">✨ Derived: year(order_date)</td></tr>
+              <tr><td class="col-name" style="color:#16A34A; font-weight:600;">order_month</td><td class="col-type">Integer</td><td></td><td class="col-desc">✨ Derived: month(order_date)</td></tr>
+              <tr><td class="col-name" style="color:#16A34A; font-weight:600;">order_quarter</td><td class="col-type">Integer</td><td></td><td class="col-desc">✨ Derived: quarter(order_date)</td></tr>
+              <tr><td class="col-name" style="color:#16A34A; font-weight:600;">days_to_ship</td><td class="col-type">Integer</td><td></td><td class="col-desc">✨ Derived: datediff(ship_date, order_date)</td></tr>
+              <tr><td class="col-name" style="color:#16A34A; font-weight:600;">profit_margin</td><td class="col-type">Double</td><td></td><td class="col-desc">✨ Derived: round(profit/sales×100, 2)</td></tr>
+              <tr><td class="col-name" style="color:#16A34A; font-weight:600;">net_revenue</td><td class="col-type">Double</td><td></td><td class="col-desc">✨ Derived: round(sales×(1−discount), 2)</td></tr>
+              <tr><td class="col-name">_ingestion_ts</td><td class="col-type">Timestamp</td><td></td><td class="col-desc">Notebook load timestamp</td></tr>
+            </tbody>
+          </table>
+          <div class="info-box info-green" style="margin-top:0; margin-bottom:0;">
+            <span class="info-box-icon">✨</span>
+            <span>Green-highlighted columns are <strong>derived</strong> — they don't exist in the Bronze layer. They are computed during the Silver transformation and carry business value.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── silver_countries ──────────────────────────────── -->
+      <div class="table-card" data-layer="silver">
+        <div class="table-hdr" onclick="toggleTable('silver-countries')">
+          <span class="table-badge tb-silver">🥈 Silver</span>
+          <span class="table-name">silver_countries</span>
+          <div class="table-meta">
+            <span class="table-rows">~245 rows</span>
+            <span class="table-rows">13 cols</span>
+            <span class="table-tog" id="tt-silver-countries">▼</span>
+          </div>
+        </div>
+        <div class="table-body" id="tb-silver-countries">
+          <p class="table-desc">Cleaned version of raw_countries. Null subregions, capitals, and currencies are filled with defaults. population_m (millions) added. Deduplicated on country_code. Built by NB-02-SILVER-Countries.</p>
+          <table class="col-table">
+            <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>Notes</th></tr></thead>
+            <tbody>
+              <tr><td class="col-name">country_code</td><td class="col-type">String</td><td><span class="col-key pk">NK</span></td><td class="col-desc">ISO alpha-2, deduplicated</td></tr>
+              <tr><td class="col-name">name_common</td><td class="col-type">String</td><td></td><td class="col-desc">Trimmed, no empty strings</td></tr>
+              <tr><td class="col-name">region</td><td class="col-type">String</td><td></td><td class="col-desc">Trimmed</td></tr>
+              <tr><td class="col-name">subregion</td><td class="col-type">String</td><td></td><td class="col-desc">Null → "Unknown"</td></tr>
+              <tr><td class="col-name">capital</td><td class="col-type">String</td><td></td><td class="col-desc">Null → "N/A"</td></tr>
+              <tr><td class="col-name">currency_code</td><td class="col-type">String</td><td></td><td class="col-desc">Null → "USD"</td></tr>
+              <tr><td class="col-name">population</td><td class="col-type">Long</td><td></td><td class="col-desc">Raw integer population</td></tr>
+              <tr><td class="col-name" style="color:#16A34A; font-weight:600;">population_m</td><td class="col-type">Double</td><td></td><td class="col-desc">✨ Derived: round(population/1e6, 3)</td></tr>
+              <tr><td class="col-name">area_km2</td><td class="col-type">Double</td><td></td><td class="col-desc">Land area in km²</td></tr>
+              <tr><td class="col-name">latitude</td><td class="col-type">Double</td><td></td><td class="col-desc">Geographic center</td></tr>
+              <tr><td class="col-name">longitude</td><td class="col-type">Double</td><td></td><td class="col-desc">Geographic center</td></tr>
+              <tr><td class="col-name">currency_name</td><td class="col-type">String</td><td></td><td class="col-desc">Full currency name</td></tr>
+              <tr><td class="col-name">_ingestion_ts</td><td class="col-type">Timestamp</td><td></td><td class="col-desc">Notebook load timestamp</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ── dim_date ─────────────────────────────────────── -->
+      <div class="table-card" data-layer="gold">
+        <div class="table-hdr" onclick="toggleTable('dim-date')">
+          <span class="table-badge tb-gold">🥇 Gold</span>
+          <span class="table-name">dim_date</span>
+          <div class="table-meta">
+            <span class="table-rows">1,461 rows</span>
+            <span class="table-rows">10 cols</span>
+            <span class="table-tog" id="tt-dim-date">▼</span>
+          </div>
+        </div>
+        <div class="table-body" id="tb-dim-date">
+          <p class="table-desc">Generated entirely by SQL using <code>sequence(date('2014-01-01'), date('2017-12-31'), interval 1 day)</code>. One row per calendar day. date_key is an 8-digit integer (YYYYMMDD) used as the primary key and foreign key in fact_sales.</p>
+          <table class="col-table">
+            <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>Notes</th></tr></thead>
+            <tbody>
+              <tr><td class="col-name">date_key</td><td class="col-type">Integer</td><td><span class="col-key pk">PK</span></td><td class="col-desc">Format YYYYMMDD (e.g. 20140103)</td></tr>
+              <tr><td class="col-name">date</td><td class="col-type">Date</td><td></td><td class="col-desc">Actual calendar date</td></tr>
+              <tr><td class="col-name">year</td><td class="col-type">Integer</td><td></td><td class="col-desc">2014 to 2017</td></tr>
+              <tr><td class="col-name">quarter</td><td class="col-type">Integer</td><td></td><td class="col-desc">1 to 4</td></tr>
+              <tr><td class="col-name">month_num</td><td class="col-type">Integer</td><td></td><td class="col-desc">1 to 12</td></tr>
+              <tr><td class="col-name">month_name</td><td class="col-type">String</td><td></td><td class="col-desc">Full name (e.g. "January")</td></tr>
+              <tr><td class="col-name">month_short</td><td class="col-type">String</td><td></td><td class="col-desc">Abbreviated (e.g. "Jan")</td></tr>
+              <tr><td class="col-name">is_weekend</td><td class="col-type">Boolean</td><td></td><td class="col-desc">True if Saturday or Sunday</td></tr>
+              <tr><td class="col-name">year_month</td><td class="col-type">String</td><td></td><td class="col-desc">Format yyyy-MM (e.g. "2014-03") — used in line charts</td></tr>
+              <tr><td class="col-name">quarter_label</td><td class="col-type">String</td><td></td><td class="col-desc">Format "Q1", "Q2", etc.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ── dim_customer ──────────────────────────────────── -->
+      <div class="table-card" data-layer="gold">
+        <div class="table-hdr" onclick="toggleTable('dim-customer')">
+          <span class="table-badge tb-gold">🥇 Gold</span>
+          <span class="table-name">dim_customer</span>
+          <div class="table-meta">
+            <span class="table-rows">~793 rows</span>
+            <span class="table-rows">4 cols</span>
+            <span class="table-tog" id="tt-dim-customer">▼</span>
+          </div>
+        </div>
+        <div class="table-body" id="tb-dim-customer">
+          <p class="table-desc">Unique customers extracted from silver_sales. Deduplicated on customer_id. Surrogate key generated using Window.orderBy("customer_id") for stable, deterministic ordering.</p>
+          <table class="col-table">
+            <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>Notes</th></tr></thead>
+            <tbody>
+              <tr><td class="col-name">customer_sk</td><td class="col-type">Integer</td><td><span class="col-key sk">SK</span></td><td class="col-desc">Surrogate key — generated by row_number()</td></tr>
+              <tr><td class="col-name">customer_id</td><td class="col-type">String</td><td><span class="col-key pk">NK</span></td><td class="col-desc">Natural business key (e.g. CG-12520)</td></tr>
+              <tr><td class="col-name">customer_name</td><td class="col-type">String</td><td></td><td class="col-desc">Full customer name</td></tr>
+              <tr><td class="col-name">segment</td><td class="col-type">String</td><td></td><td class="col-desc">Consumer / Corporate / Home Office</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ── dim_product ───────────────────────────────────── -->
+      <div class="table-card" data-layer="gold">
+        <div class="table-hdr" onclick="toggleTable('dim-product')">
+          <span class="table-badge tb-gold">🥇 Gold</span>
+          <span class="table-name">dim_product</span>
+          <div class="table-meta">
+            <span class="table-rows">~1,850 rows</span>
+            <span class="table-rows">5 cols</span>
+            <span class="table-tog" id="tt-dim-product">▼</span>
+          </div>
+        </div>
+        <div class="table-body" id="tb-dim-product">
+          <p class="table-desc">Unique products extracted from silver_sales. Deduplicated on product_id. Includes the category hierarchy (category + sub_category) which will be used in Power BI drill-down visuals.</p>
+          <table class="col-table">
+            <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>Notes</th></tr></thead>
+            <tbody>
+              <tr><td class="col-name">product_sk</td><td class="col-type">Integer</td><td><span class="col-key sk">SK</span></td><td class="col-desc">Surrogate key — generated by row_number()</td></tr>
+              <tr><td class="col-name">product_id</td><td class="col-type">String</td><td><span class="col-key pk">NK</span></td><td class="col-desc">Natural key (e.g. FUR-BO-10001798)</td></tr>
+              <tr><td class="col-name">product_name</td><td class="col-type">String</td><td></td><td class="col-desc">Full product description</td></tr>
+              <tr><td class="col-name">category</td><td class="col-type">String</td><td></td><td class="col-desc">Furniture / Office Supplies / Technology</td></tr>
+              <tr><td class="col-name">sub_category</td><td class="col-type">String</td><td></td><td class="col-desc">17 sub-categories (Chairs, Phones, Binders, etc.)</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ── dim_geography ─────────────────────────────────── -->
+      <div class="table-card" data-layer="gold">
+        <div class="table-hdr" onclick="toggleTable('dim-geography')">
+          <span class="table-badge tb-gold">🥇 Gold</span>
+          <span class="table-name">dim_geography</span>
+          <div class="table-meta">
+            <span class="table-rows">~632 rows</span>
+            <span class="table-rows">7 cols</span>
+            <span class="table-tog" id="tt-dim-geography">▼</span>
+          </div>
+        </div>
+        <div class="table-body" id="tb-dim-geography">
+          <p class="table-desc">Unique location combinations (country + state + city) from silver_sales, enriched with country_code and subregion from silver_countries via a left join on country name. This is where the two data sources are merged in the Gold layer.</p>
+          <table class="col-table">
+            <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>Notes</th></tr></thead>
+            <tbody>
+              <tr><td class="col-name">geo_sk</td><td class="col-type">Integer</td><td><span class="col-key sk">SK</span></td><td class="col-desc">Surrogate key — generated by row_number()</td></tr>
+              <tr><td class="col-name">country</td><td class="col-type">String</td><td></td><td class="col-desc">Country name (used for join with silver_countries)</td></tr>
+              <tr><td class="col-name">state</td><td class="col-type">String</td><td></td><td class="col-desc">US state name</td></tr>
+              <tr><td class="col-name">city</td><td class="col-type">String</td><td></td><td class="col-desc">City name</td></tr>
+              <tr><td class="col-name">region</td><td class="col-type">String</td><td></td><td class="col-desc">East / West / Central / South (from sales data)</td></tr>
+              <tr><td class="col-name">postal_code</td><td class="col-type">String</td><td></td><td class="col-desc">US ZIP code</td></tr>
+              <tr><td class="col-name">country_code</td><td class="col-type">String</td><td><span class="col-key fk">FK→countries</span></td><td class="col-desc">Joined from silver_countries</td></tr>
+              <tr><td class="col-name">subregion</td><td class="col-type">String</td><td></td><td class="col-desc">Joined from silver_countries</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ── fact_sales ────────────────────────────────────── -->
+      <div class="table-card" data-layer="gold">
+        <div class="table-hdr" onclick="toggleTable('fact-sales')">
+          <span class="table-badge tb-gold">🥇 Gold — Fact</span>
+          <span class="table-name">fact_sales</span>
+          <div class="table-meta">
+            <span class="table-rows">~9,994 rows</span>
+            <span class="table-rows">16 cols</span>
+            <span class="table-tog" id="tt-fact-sales">▼</span>
+          </div>
+        </div>
+        <div class="table-body" id="tb-fact-sales">
+          <p class="table-desc">The central fact table of the star schema. Contains all numeric measures plus foreign key references to all four dimension tables. No descriptive text — only keys and numbers. Joined to all four dims using surrogate keys.</p>
+          <table class="col-table">
+            <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>Notes</th></tr></thead>
+            <tbody>
+              <tr><td class="col-name">fact_sk</td><td class="col-type">Long</td><td><span class="col-key pk">PK</span></td><td class="col-desc">Surrogate key — monotonically_increasing_id()</td></tr>
+              <tr><td class="col-name">order_id</td><td class="col-type">String</td><td></td><td class="col-desc">Business order key — not used as FK in Power BI</td></tr>
+              <tr><td class="col-name">order_date_key</td><td class="col-type">Integer</td><td><span class="col-key fk">FK→dim_date</span></td><td class="col-desc">YYYYMMDD integer — joins to dim_date[date_key]</td></tr>
+              <tr><td class="col-name">ship_date_key</td><td class="col-type">Integer</td><td><span class="col-key fk">FK→dim_date</span></td><td class="col-desc">YYYYMMDD integer — optional second join to dim_date</td></tr>
+              <tr><td class="col-name">customer_sk</td><td class="col-type">Integer</td><td><span class="col-key fk">FK→dim_customer</span></td><td class="col-desc">Surrogate key from dim_customer</td></tr>
+              <tr><td class="col-name">product_sk</td><td class="col-type">Integer</td><td><span class="col-key fk">FK→dim_product</span></td><td class="col-desc">Surrogate key from dim_product</td></tr>
+              <tr><td class="col-name">geo_sk</td><td class="col-type">Integer</td><td><span class="col-key fk">FK→dim_geography</span></td><td class="col-desc">Surrogate key from dim_geography</td></tr>
+              <tr><td class="col-name">sales</td><td class="col-type">Double</td><td></td><td class="col-desc">Revenue measure in USD</td></tr>
+              <tr><td class="col-name">quantity</td><td class="col-type">Integer</td><td></td><td class="col-desc">Units sold measure</td></tr>
+              <tr><td class="col-name">discount</td><td class="col-type">Double</td><td></td><td class="col-desc">Discount rate measure</td></tr>
+              <tr><td class="col-name">profit</td><td class="col-type">Double</td><td></td><td class="col-desc">Profit measure (negative = loss)</td></tr>
+              <tr><td class="col-name">days_to_ship</td><td class="col-type">Integer</td><td></td><td class="col-desc">Shipping speed measure — from silver_sales</td></tr>
+              <tr><td class="col-name">profit_margin</td><td class="col-type">Double</td><td></td><td class="col-desc">Pre-computed margin % — from silver_sales</td></tr>
+              <tr><td class="col-name">net_revenue</td><td class="col-type">Double</td><td></td><td class="col-desc">Post-discount revenue — from silver_sales</td></tr>
+              <tr><td class="col-name">_ingestion_ts</td><td class="col-type">Timestamp</td><td></td><td class="col-desc">Audit timestamp from silver_sales</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- end tables-list -->
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════════
+       2.4 - NAMING CONVENTIONS
+       ═══════════════════════════════════════════════════════════ -->
+  <div class="card card-accent-green">
+    <div class="section-label">2.4 — Standards</div>
+    <h2>Naming Conventions</h2>
+    <p>Consistent naming across all Fabric items, notebooks, tables, and columns.</p>
+
+    <table class="conv-table">
+      <thead>
+        <tr>
+          <th>Item type</th>
+          <th>Pattern</th>
+          <th>Example</th>
+          <th>Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Lakehouse</td>
+          <td class="conv-item">LH_{ProjectName}</td>
+          <td class="conv-example">LH_RetailX</td>
+          <td class="conv-desc">One Lakehouse per project domain</td>
+        </tr>
+        <tr>
+          <td>Dataflow Gen2</td>
+          <td class="conv-item">DFG2-{Source}-{Entity}</td>
+          <td class="conv-example">DFG2-Sales-CSV</td>
+          <td class="conv-desc">DFG2 prefix, kebab-case</td>
+        </tr>
+        <tr>
+          <td>Notebooks</td>
+          <td class="conv-item">NB-{seq}-{LAYER}-{Name}</td>
+          <td class="conv-example">NB-01-BRONZE-Countries-API</td>
+          <td class="conv-desc">Seq ensures pipeline ordering is obvious</td>
+        </tr>
+        <tr>
+          <td>Data Pipeline</td>
+          <td class="conv-item">PL-{ProjectName}-{Schedule}</td>
+          <td class="conv-example">PL-RetailX-Daily</td>
+          <td class="conv-desc">PL prefix, schedule makes frequency explicit</td>
+        </tr>
+        <tr>
+          <td>Bronze tables</td>
+          <td class="conv-item">raw_{entity}</td>
+          <td class="conv-example">raw_sales, raw_countries</td>
+          <td class="conv-desc">raw_ prefix signals no transformation applied</td>
+        </tr>
+        <tr>
+          <td>Silver tables</td>
+          <td class="conv-item">silver_{entity}</td>
+          <td class="conv-example">silver_sales, silver_countries</td>
+          <td class="conv-desc">Layer name as prefix — layer is always obvious</td>
+        </tr>
+        <tr>
+          <td>Gold fact tables</td>
+          <td class="conv-item">fact_{process}</td>
+          <td class="conv-example">fact_sales</td>
+          <td class="conv-desc">Kimball convention — process name, not entity name</td>
+        </tr>
+        <tr>
+          <td>Gold dim tables</td>
+          <td class="conv-item">dim_{entity}</td>
+          <td class="conv-example">dim_date, dim_customer</td>
+          <td class="conv-desc">Kimball convention — singular entity name</td>
+        </tr>
+        <tr>
+          <td>Column names</td>
+          <td class="conv-item">snake_case</td>
+          <td class="conv-example">order_date, profit_margin</td>
+          <td class="conv-desc">All lowercase, underscores. No spaces. No camelCase.</td>
+        </tr>
+        <tr>
+          <td>Surrogate keys</td>
+          <td class="conv-item">{entity}_sk</td>
+          <td class="conv-example">customer_sk, product_sk</td>
+          <td class="conv-desc">_sk suffix — distinguishes from natural keys</td>
+        </tr>
+        <tr>
+          <td>Natural keys</td>
+          <td class="conv-item">{entity}_id</td>
+          <td class="conv-example">customer_id, product_id</td>
+          <td class="conv-desc">_id suffix — the original source system key</td>
+        </tr>
+        <tr>
+          <td>Audit columns</td>
+          <td class="conv-item">_{name}</td>
+          <td class="conv-example">_ingestion_ts, _source, _batch_id</td>
+          <td class="conv-desc">Underscore prefix — signals system-generated column</td>
+        </tr>
+        <tr>
+          <td>Semantic model</td>
+          <td class="conv-item">SM_{ProjectName}</td>
+          <td class="conv-example">SM_RetailX</td>
+          <td class="conv-desc">SM prefix — distinguishes from reports</td>
+        </tr>
+        <tr>
+          <td>Power BI report</td>
+          <td class="conv-item">RPT-{ProjectName}-{Page}</td>
+          <td class="conv-example">RPT-RetailX-Overview</td>
+          <td class="conv-desc">RPT prefix, kebab-case, page/scope suffix</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="info-box info-amber" style="margin-bottom:0; margin-top:12px;">
+      <span class="info-box-icon">⚠️</span>
+      <span>
+        Follow these conventions from the very first lab. Inconsistent naming
+        causes confusion in pipelines, broken references in Power BI,
+        and makes onboarding new team members significantly harder.
+        <strong>Convention is documentation.</strong>
+      </span>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════════
+       WHAT'S NEXT
+       ═══════════════════════════════════════════════════════════ -->
+  <div class="divider"></div>
+  <div class="card">
+    <div class="section-label">Up next</div>
+    <h2>Section 3 — Lab 1: Lakehouse &amp; Dataflow Gen2</h2>
+    <p style="margin-top:8px; margin-bottom:0;">
+      In the next section you will build the Fabric workspace, create the LH_RetailX Lakehouse,
+      and ingest the Superstore Sales CSV into the Bronze layer using Dataflow Gen2.
+      Labs use a <strong>3-tier interactive format</strong>: instructions only →
+      hints if you need them → full answer as a last resort.
+    </p>
+  </div>
+
+</div><!-- end page-wrapper -->
+
+
+<!-- ============================================================
+     JAVASCRIPT
+     ============================================================ -->
+<script>
+
+  /* ── ARCHITECTURE DETAIL PANELS ─────────────────────────── */
+  var openDetail = null;
+  function showDetail(id) {
+    // Close previous
+    if (openDetail && openDetail !== id) {
+      document.getElementById('detail-' + openDetail).classList.remove('open');
+    }
+    var el = document.getElementById('detail-' + id);
+    if (!el) return;
+    var isOpen = el.classList.contains('open');
+    el.classList.toggle('open', !isOpen);
+    openDetail = isOpen ? null : id;
+  }
+  function closeDetail(id) {
+    var el = document.getElementById('detail-' + id);
+    if (el) el.classList.remove('open');
+    if (openDetail === id) openDetail = null;
+  }
+
+  /* ── DAG DETAIL PANELS ──────────────────────────────────── */
+  function showDagDetail(id) {
+    var el = document.getElementById('dag-detail-' + id);
+    if (!el) return;
+    var isOpen = el.style.display === 'block';
+    // close all
+    document.querySelectorAll('[id^="dag-detail-"]').forEach(function(d) {
+      d.style.display = 'none';
+    });
+    if (!isOpen) el.style.display = 'block';
+  }
+  function closeDagDetail(id) {
+    var el = document.getElementById('dag-detail-' + id);
+    if (el) el.style.display = 'none';
+  }
+
+  /* ── TABLE TOGGLE ───────────────────────────────────────── */
+  function toggleTable(id) {
+    var body  = document.getElementById('tb-' + id);
+    var arrow = document.getElementById('tt-' + id);
+    if (!body) return;
+    var isOpen = body.classList.contains('open');
+    body.classList.toggle('open', !isOpen);
+    arrow.classList.toggle('open', !isOpen);
+  }
+
+  /* ── TABLE LAYER FILTER ─────────────────────────────────── */
+  function filterTables(layer, btn) {
+    // Update active button
+    document.querySelectorAll('.filter-btn').forEach(function(b) {
+      b.classList.remove('active');
+    });
+    btn.classList.add('active');
+
+    // Show/hide table cards
+    document.querySelectorAll('.table-card').forEach(function(card) {
+      if (layer === 'all') {
+        card.style.display = '';
+      } else {
+        card.style.display = card.dataset.layer === layer ? '' : 'none';
+      }
+    });
+  }
+
+</script>
+</body>
+</html>

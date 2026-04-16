@@ -1,0 +1,1600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RetailX Fabric Workshop — Lab 1: Lakehouse &amp; Dataflow Gen2</title>
+<style>
+
+/* ============================================================
+   GLOBAL RESET & BASE
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  background: #F0F4F8;
+  color: #1A202C;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* ============================================================
+   LAYOUT
+   ============================================================ */
+.page-wrapper {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 32px 24px 60px;
+}
+
+/* ============================================================
+   TYPOGRAPHY
+   ============================================================ */
+h1 { font-size: 26px; font-weight: 700; color: #0F172A; margin-bottom: 4px; }
+h2 { font-size: 19px; font-weight: 700; color: #1E293B; margin-bottom: 6px; }
+h3 { font-size: 15px; font-weight: 600; color: #334155; margin-bottom: 8px; }
+p  { color: #475569; line-height: 1.75; margin-bottom: 10px; }
+
+code {
+  font-family: 'Consolas', 'Courier New', monospace;
+  font-size: 12px;
+  background: #F1F5F9;
+  border: 1px solid #E2E8F0;
+  border-radius: 4px;
+  padding: 1px 6px;
+  color: #0F172A;
+}
+
+/* ============================================================
+   UTILITY
+   ============================================================ */
+.section-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #94A3B8;
+  margin-bottom: 6px;
+}
+
+.divider { height: 1px; background: #E2E8F0; margin: 24px 0; }
+
+.card {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+  padding: 18px 20px;
+  margin-bottom: 18px;
+}
+
+.info-box {
+  border-radius: 8px;
+  padding: 11px 14px;
+  font-size: 13px;
+  line-height: 1.65;
+  margin: 10px 0;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+.ib-icon { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+.info-blue   { background: #EFF6FF; border: 1px solid #BFDBFE; color: #1E40AF; }
+.info-amber  { background: #FFFBEB; border: 1px solid #FDE68A; color: #92400E; }
+.info-green  { background: #F0FDF4; border: 1px solid #BBF7D0; color: #14532D; }
+.info-purple { background: #F5F3FF; border: 1px solid #DDD6FE; color: #4C1D95; }
+
+/* ============================================================
+   LAB HEADER
+   ============================================================ */
+.lab-header {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+  padding: 18px 20px;
+  margin-bottom: 20px;
+  border-left: 4px solid #F59E0B;
+}
+
+.lab-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.b-bronze { background: #FEF3C7; color: #92400E; }
+.b-gray   { background: #F1F5F9; color: #475569; border: 1px solid #E2E8F0; }
+.b-blue   { background: #EFF6FF; color: #1D4ED8; }
+
+.tag-pill {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: #F1F5F9;
+  border: 1px solid #E2E8F0;
+  color: #475569;
+}
+
+/* Progress bar */
+.prog-wrap { margin-top: 14px; }
+.prog-label { font-size: 12px; color: #64748B; margin-bottom: 5px; }
+.prog-bar { height: 6px; background: #E2E8F0; border-radius: 3px; overflow: hidden; }
+.prog-fill { height: 100%; background: #F59E0B; border-radius: 3px; transition: width .3s; width: 0%; }
+
+/* ============================================================
+   STEP CARDS — 3-TIER INTERACTIVE FORMAT
+   ============================================================ */
+
+/*
+  STRUCTURE:
+  .step-card
+    .step-header          ← always visible, click to expand/collapse
+    .step-body            ← expanded content
+      .task-block         ← the actual task instructions (always shown when body open)
+      .hint-block         ← collapsed by default, revealed on button click
+      .answer-block       ← collapsed by default, revealed on button click
+      .knowledge-check    ← optional quiz question at end of step
+*/
+
+.step-card {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  overflow: hidden;
+  transition: border-color .15s, box-shadow .15s;
+}
+.step-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+.step-card.done  { border-color: #86EFAC; }
+
+/* Step header */
+.step-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  cursor: pointer;
+  user-select: none;
+  transition: background .1s;
+}
+.step-header:hover { background: #FAFAFA; }
+
+.step-chk {
+  width: 16px;
+  height: 16px;
+  accent-color: #16A34A;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.step-num {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #F1F5F9;
+  border: 1px solid #E2E8F0;
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748B;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.step-card.done .step-num {
+  background: #DCFCE7;
+  border-color: #86EFAC;
+  color: #15803D;
+}
+
+.step-title-wrap { flex: 1; min-width: 0; }
+.step-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1E293B;
+  line-height: 1.35;
+}
+.step-card.done .step-title { color: #15803D; }
+.step-subtitle {
+  font-size: 11px;
+  color: #94A3B8;
+  margin-top: 1px;
+}
+
+.step-badges { display: flex; gap: 5px; align-items: center; flex-shrink: 0; }
+
+.type-badge {
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.type-ui   { background: #EFF6FF; color: #1D4ED8; }
+.type-code { background: #F5F3FF; color: #6D28D9; }
+.type-quiz { background: #FFF7ED; color: #C2410C; }
+
+.step-toggle { font-size: 12px; color: #94A3B8; transition: transform .2s; flex-shrink: 0; }
+.step-toggle.open { transform: rotate(180deg); }
+
+/* Step body */
+.step-body { display: none; border-top: 1px solid #F1F5F9; }
+.step-body.open { display: block; }
+
+/* ── TASK BLOCK (always shown when body is open) ── */
+.task-block {
+  padding: 14px 16px 12px 16px;
+}
+
+.task-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: #94A3B8;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.task-content {
+  font-size: 13px;
+  color: #334155;
+  line-height: 1.75;
+  white-space: pre-line;
+}
+
+.task-steps {
+  list-style: none;
+  margin: 10px 0;
+}
+.task-steps li {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  padding: 5px 0;
+  font-size: 13px;
+  color: #334155;
+  line-height: 1.55;
+  border-bottom: 1px solid #F8FAFC;
+}
+.task-steps li:last-child { border: none; }
+.task-steps li .step-arrow {
+  color: #3B82F6;
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+/* ── HINT/ANSWER BUTTON ROW ── */
+.tier-buttons {
+  display: flex;
+  gap: 8px;
+  padding: 0 16px 12px;
+  flex-wrap: wrap;
+}
+
+.tier-btn {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 6px;
+  border: 1.5px solid;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all .15s;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.btn-hint {
+  background: #FFFBEB;
+  border-color: #FDE68A;
+  color: #92400E;
+}
+.btn-hint:hover { background: #FEF3C7; }
+.btn-hint.active { background: #FEF3C7; border-color: #F59E0B; }
+
+.btn-answer {
+  background: #F5F3FF;
+  border-color: #DDD6FE;
+  color: #4C1D95;
+}
+.btn-answer:hover { background: #EDE9FE; }
+.btn-answer.active { background: #EDE9FE; border-color: #8B5CF6; }
+
+.btn-instructor {
+  background: #F8FAFC;
+  border-color: #E2E8F0;
+  color: #64748B;
+  font-size: 11px;
+  padding: 5px 10px;
+}
+.btn-instructor:hover { background: #F1F5F9; }
+
+/* ── HINT BLOCK ── */
+.hint-block {
+  display: none;
+  margin: 0 16px 12px;
+  background: #FFFBEB;
+  border: 1.5px solid #FDE68A;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.hint-block.open { display: block; }
+
+.hint-header {
+  padding: 8px 12px;
+  background: #FEF3C7;
+  border-bottom: 1px solid #FDE68A;
+  font-size: 11px;
+  font-weight: 700;
+  color: #92400E;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hint-content {
+  padding: 12px 14px;
+  font-size: 13px;
+  color: #78350F;
+  line-height: 1.7;
+  white-space: pre-line;
+}
+
+.hint-skeleton {
+  font-family: 'Consolas', 'Courier New', monospace;
+  font-size: 12px;
+  background: #FFFBEB;
+  padding: 12px 14px;
+  line-height: 1.75;
+  color: #78350F;
+  overflow-x: auto;
+  white-space: pre;
+}
+
+.blank {
+  display: inline-block;
+  min-width: 80px;
+  border-bottom: 2px solid #F59E0B;
+  color: #F59E0B;
+  font-style: italic;
+}
+
+/* ── ANSWER BLOCK ── */
+.answer-block {
+  display: none;
+  margin: 0 16px 12px;
+  background: #F5F3FF;
+  border: 1.5px solid #C4B5FD;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.answer-block.open { display: block; }
+
+.answer-header {
+  padding: 8px 12px;
+  background: #EDE9FE;
+  border-bottom: 1px solid #C4B5FD;
+  font-size: 11px;
+  font-weight: 700;
+  color: #4C1D95;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.answer-content {
+  padding: 12px 14px;
+  font-size: 13px;
+  color: #2E1065;
+  line-height: 1.7;
+  white-space: pre-line;
+}
+
+/* Code block inside answer */
+.code-block {
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 8px 0;
+  border: 1px solid #334155;
+}
+.code-hdr {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 7px 14px;
+  background: #1E293B;
+  border-bottom: 1px solid #334155;
+}
+.code-lbl {
+  font-family: 'Consolas', 'Courier New', monospace;
+  font-size: 11px;
+  color: #38BDF8;
+}
+.copy-btn {
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 4px;
+  background: transparent;
+  border: 1px solid #475569;
+  color: #94A3B8;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all .15s;
+}
+.copy-btn:hover { background: #334155; color: #E2E8F0; }
+.copy-btn.ok { border-color: #22C55E !important; color: #22C55E !important; }
+
+pre {
+  margin: 0;
+  padding: 14px 16px;
+  background: #0F172A;
+  color: #E2E8F0;
+  font-size: 12px;
+  line-height: 1.75;
+  font-family: 'Consolas', 'Courier New', monospace;
+  overflow-x: auto;
+  white-space: pre;
+}
+
+/* ── INSTRUCTOR BLOCK ── */
+.instructor-block {
+  display: none;
+  margin: 0 16px 14px;
+  background: #F8FAFC;
+  border: 1px dashed #CBD5E1;
+  border-radius: 8px;
+  padding: 10px 13px;
+  font-size: 12px;
+  color: #64748B;
+  line-height: 1.65;
+}
+.instructor-block.open { display: block; }
+.instructor-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: #94A3B8;
+  margin-bottom: 5px;
+}
+
+/* ============================================================
+   KNOWLEDGE CHECK
+   ============================================================ */
+.kc-block {
+  margin: 0 16px 14px;
+  background: #FFF7ED;
+  border: 1.5px solid #FED7AA;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.kc-header {
+  padding: 8px 13px;
+  background: #FFEDD5;
+  border-bottom: 1px solid #FED7AA;
+  font-size: 11px;
+  font-weight: 700;
+  color: #C2410C;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.kc-question {
+  padding: 12px 13px 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #431407;
+  line-height: 1.55;
+}
+.kc-options {
+  padding: 0 13px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.kc-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  padding: 8px 11px;
+  border-radius: 6px;
+  border: 1.5px solid #FED7AA;
+  background: #FFFBEB;
+  cursor: pointer;
+  font-size: 12px;
+  color: #431407;
+  line-height: 1.4;
+  transition: all .15s;
+  user-select: none;
+}
+.kc-option:hover { background: #FEF3C7; border-color: #F59E0B; }
+.kc-option.correct { background: #DCFCE7; border-color: #86EFAC; color: #14532D; }
+.kc-option.wrong   { background: #FEE2E2; border-color: #FECACA; color: #7F1D1D; }
+.kc-option.reveal  { background: #DCFCE7; border-color: #86EFAC; color: #14532D; }
+.kc-opt-icon { font-size: 13px; flex-shrink: 0; margin-top: 0; }
+.kc-feedback {
+  margin: 0 13px 12px;
+  padding: 8px 11px;
+  border-radius: 6px;
+  font-size: 12px;
+  line-height: 1.55;
+  display: none;
+}
+.kc-feedback.show { display: block; }
+.kc-feedback.fb-correct { background: #DCFCE7; color: #14532D; border: 1px solid #86EFAC; }
+.kc-feedback.fb-wrong   { background: #FEE2E2; color: #7F1D1D;  border: 1px solid #FECACA; }
+
+/* ============================================================
+   LAB SUMMARY / COMPLETION
+   ============================================================ */
+.completion-card {
+  background: linear-gradient(135deg, #FFFBEB 0%, #F0FDF4 100%);
+  border: 1.5px solid #86EFAC;
+  border-radius: 12px;
+  padding: 20px;
+  margin-top: 20px;
+  text-align: center;
+}
+.completion-icon { font-size: 36px; margin-bottom: 8px; }
+.completion-title { font-size: 18px; font-weight: 700; color: #14532D; margin-bottom: 6px; }
+.completion-text  { font-size: 13px; color: #166534; margin-bottom: 14px; }
+
+.tables-built {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+.table-built-tag {
+  font-family: 'Consolas', 'Courier New', monospace;
+  font-size: 12px;
+  padding: 4px 12px;
+  border-radius: 5px;
+  background: #FEF9C3;
+  border: 1px solid #FDE68A;
+  color: #78350F;
+  font-weight: 600;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 640px) {
+  .page-wrapper { padding: 14px 10px 40px; }
+  .step-header { padding: 10px 12px; }
+  .task-block, .tier-buttons { padding-left: 12px; padding-right: 12px; }
+  .hint-block, .answer-block, .kc-block { margin-left: 12px; margin-right: 12px; }
+}
+
+</style>
+</head>
+<body>
+<div class="page-wrapper">
+
+  <!-- ═══════════════════════════════════════════════════════════
+       LAB HEADER
+       ═══════════════════════════════════════════════════════════ -->
+  <div class="section-label">RetailX Data Platform · Microsoft Fabric Workshop</div>
+  <h1>Lab 1 — Lakehouse &amp; Dataflow Gen2</h1>
+
+  <div class="lab-header">
+    <div class="lab-meta-row">
+      <span class="badge b-bronze">🥉 Bronze Layer</span>
+      <span class="badge b-gray">⏱ 30 minutes</span>
+      <span class="badge b-blue">Lab 1 of 5</span>
+    </div>
+
+    <p style="margin-bottom:10px;">
+      In this lab you will set up the Fabric workspace, create the <code>LH_RetailX</code> Lakehouse,
+      and use <strong>Dataflow Gen2</strong> to ingest the Superstore Sales CSV into the Bronze layer.
+      No Python yet — this lab is about the Fabric UI and Power Query M.
+    </p>
+
+    <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:14px;">
+      <span class="tag-pill">Workspace</span>
+      <span class="tag-pill">Lakehouse</span>
+      <span class="tag-pill">OneLake</span>
+      <span class="tag-pill">Dataflow Gen2</span>
+      <span class="tag-pill">Power Query M</span>
+      <span class="tag-pill">Delta Tables</span>
+    </div>
+
+    <!-- Objectives -->
+    <div style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:8px; padding:12px 14px; margin-bottom:14px;">
+      <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:#94A3B8; margin-bottom:8px;">By end of this lab you will have</div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px; font-size:12px; color:#475569;">
+        <div style="display:flex;gap:6px;">✅ A Fabric workspace with trial capacity</div>
+        <div style="display:flex;gap:6px;">✅ LH_RetailX Lakehouse created</div>
+        <div style="display:flex;gap:6px;">✅ DFG2-Sales-CSV Dataflow Gen2 published</div>
+        <div style="display:flex;gap:6px;">✅ raw_sales Delta table in Bronze layer</div>
+      </div>
+    </div>
+
+    <!-- How to use the 3-tier format -->
+    <div class="info-box info-blue" style="margin-bottom:0;">
+      <span class="ib-icon">🎮</span>
+      <div>
+        <strong>How to use these labs:</strong> Each step shows you the task. Try it yourself first.
+        If you get stuck, click <strong>💡 Show Hint</strong> for a skeleton or partial clue.
+        If you are still stuck, click <strong>✅ Show Answer</strong> to see the full solution.
+        Challenge yourself — resist going straight to the answer!
+      </div>
+    </div>
+
+    <!-- Progress bar -->
+    <div class="prog-wrap">
+      <div class="prog-label" id="prog-label">Progress: 0 / 10 steps completed</div>
+      <div class="prog-bar"><div class="prog-fill" id="prog-fill"></div></div>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════════
+       STEP 1 — Sign into Fabric
+       ═══════════════════════════════════════════════════════════ -->
+  <div class="step-card" id="sc-1">
+    <div class="step-header" onclick="toggleStep(1)">
+      <input type="checkbox" class="step-chk" id="chk-1" onclick="event.stopPropagation()" onchange="markDone(1, 10)">
+      <div class="step-num" id="sn-1">1</div>
+      <div class="step-title-wrap">
+        <div class="step-title">Sign into Microsoft Fabric</div>
+        <div class="step-subtitle">Browser setup · Account verification</div>
+      </div>
+      <div class="step-badges"><span class="type-badge type-ui">UI</span></div>
+      <span class="step-toggle" id="tog-1">▼</span>
+    </div>
+    <div class="step-body" id="sb-1">
+      <div class="task-block">
+        <div class="task-label">🎯 Your Task</div>
+        <div class="task-content">Open Microsoft Fabric in your browser and confirm your account has the Fabric trial activated. Familiarise yourself with the interface before doing anything else.</div>
+        <ul class="task-steps">
+          <li><span class="step-arrow">→</span>Open <strong>Edge or Chrome</strong> (recommended for best Fabric compatibility)</li>
+          <li><span class="step-arrow">→</span>Navigate to <code>https://app.fabric.microsoft.com</code></li>
+          <li><span class="step-arrow">→</span>Sign in with your Microsoft account</li>
+          <li><span class="step-arrow">→</span>Confirm the Fabric trial is active — look for a trial indicator near your account name</li>
+          <li><span class="step-arrow">→</span>Identify the <strong>workload switcher</strong> — the grid icon at the bottom-left of the sidebar</li>
+        </ul>
+      </div>
+      <div class="tier-buttons">
+        <button class="tier-btn btn-hint" onclick="toggleTier('hint-1', this)">💡 Show Hint</button>
+        <button class="tier-btn btn-answer" onclick="toggleTier('ans-1', this)">✅ Show Answer</button>
+        <button class="tier-btn btn-instructor" onclick="toggleTier('inst-1', this)">👨‍🏫 Instructor Note</button>
+      </div>
+      <div class="hint-block" id="hint-1">
+        <div class="hint-header">💡 Hint — What to look for</div>
+        <div class="hint-content">If you land on the Power BI home and don't see Lakehouse / Notebook in the + New menu:
+→ The workload switcher is the grid/waffle icon at the bottom-left of the left sidebar
+→ Click it and select "Data Engineering" — this changes the + New menu
+
+If you don't see a trial indicator:
+→ Click your profile picture (top-right) → look for "Start Fabric trial" or "Trial active"
+→ The trial must be activated before creating any Fabric items</div>
+      </div>
+      <div class="answer-block" id="ans-1">
+        <div class="answer-header">
+          ✅ Full Answer
+          <span style="font-size:10px; font-weight:400; color:#7C3AED;">Only check this after trying yourself</span>
+        </div>
+        <div class="answer-content">1. Open Edge or Chrome → go to https://app.fabric.microsoft.com
+2. Sign in. If redirected to Power BI, that is fine — you are in Fabric.
+3. Check trial status: Click your account icon (top-right circle) → if you see "Start trial" click it. If you see "Trial active" you are ready.
+4. Identify the bottom-left grid icon — that is the workload switcher. It currently shows "Power BI" or "Home".
+5. You should see a left sidebar with: Home, Create, Browse, Workspaces, OneLake.
+
+The interface you see is the Fabric portal — one unified UI for all Fabric workloads.</div>
+      </div>
+      <div class="instructor-block" id="inst-1">
+        <div class="instructor-label">Instructor Note</div>
+        Give students 2 minutes to log in. Walk around the room. Common issues: wrong Microsoft account (personal vs corporate), Fabric trial not started, landing on a different Microsoft portal. Spend 1 minute showing the workload switcher to the group before moving to Step 2.
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════════
+       STEP 2 — Create workspace
+       ═══════════════════════════════════════════════════════════ -->
+  <div class="step-card" id="sc-2">
+    <div class="step-header" onclick="toggleStep(2)">
+      <input type="checkbox" class="step-chk" id="chk-2" onclick="event.stopPropagation()" onchange="markDone(2, 10)">
+      <div class="step-num" id="sn-2">2</div>
+      <div class="step-title-wrap">
+        <div class="step-title">Create workspace 'RetailX-Analytics'</div>
+        <div class="step-subtitle">Assign to Fabric trial capacity</div>
+      </div>
+      <div class="step-badges"><span class="type-badge type-ui">UI</span></div>
+      <span class="step-toggle" id="tog-2">▼</span>
+    </div>
+    <div class="step-body" id="sb-2">
+      <div class="task-block">
+        <div class="task-label">🎯 Your Task</div>
+        <div class="task-content">Create a new Fabric workspace named <code>RetailX-Analytics</code> and configure it to use the Fabric trial capacity. Without this step, Lakehouse and Notebook will not be available.</div>
+        <ul class="task-steps">
+          <li><span class="step-arrow">→</span>Find the Workspaces section in the left sidebar</li>
+          <li><span class="step-arrow">→</span>Create a new workspace named exactly: <code>RetailX-Analytics</code></li>
+          <li><span class="step-arrow">→</span>Find the capacity setting and assign it to your trial capacity</li>
+          <li><span class="step-arrow">→</span>Save the workspace</li>
+          <li><span class="step-arrow">→</span>Verify the workspace opens and the <strong>+ New</strong> button is visible</li>
+        </ul>
+      </div>
+      <div class="tier-buttons">
+        <button class="tier-btn btn-hint" onclick="toggleTier('hint-2', this)">💡 Show Hint</button>
+        <button class="tier-btn btn-answer" onclick="toggleTier('ans-2', this)">✅ Show Answer</button>
+        <button class="tier-btn btn-instructor" onclick="toggleTier('inst-2', this)">👨‍🏫 Instructor Note</button>
+      </div>
+      <div class="hint-block" id="hint-2">
+        <div class="hint-header">💡 Hint — Where to look</div>
+        <div class="hint-content">Workspaces panel → look for "+ New workspace" button (usually at the bottom of the workspaces list).
+
+When the creation dialog opens:
+→ Name field: RetailX-Analytics
+→ Click "Advanced" to expand hidden options
+→ License mode: look for "Fabric capacity" or "Trial" option
+
+If you do NOT see the capacity option, your trial may not be activated yet — go back to Step 1.</div>
+      </div>
+      <div class="answer-block" id="ans-2">
+        <div class="answer-header">✅ Full Answer</div>
+        <div class="answer-content">1. Left sidebar → Workspaces (folder icon) → click "+ New workspace" at the bottom
+2. In the dialog:
+   • Name: RetailX-Analytics
+   • Description: optional
+3. Click "Advanced" to expand the capacity section
+4. License mode: select "Fabric capacity" → choose your Trial capacity from the dropdown
+5. Click Apply
+6. The workspace opens automatically. You should see an empty canvas with a "+ New" button in the top-left.
+
+✅ If you see Lakehouse, Notebook, Data pipeline in the + New menu, capacity is assigned correctly.
+❌ If you only see Power BI items, the capacity was not assigned — edit the workspace settings and retry.</div>
+      </div>
+      <div class="instructor-block" id="inst-2">
+        <div class="instructor-label">Instructor Note</div>
+        Common issue: students see only Power BI items in + New because they did not expand "Advanced" and assign the capacity. Show this step on screen. The capacity dropdown only appears when Advanced is expanded — it is not obvious.
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════════
+       STEP 3 — Switch to Data Engineering
+       ═══════════════════════════════════════════════════════════ -->
+  <div class="step-card" id="sc-3">
+    <div class="step-header" onclick="toggleStep(3)">
+      <input type="checkbox" class="step-chk" id="chk-3" onclick="event.stopPropagation()" onchange="markDone(3, 10)">
+      <div class="step-num" id="sn-3">3</div>
+      <div class="step-title-wrap">
+        <div class="step-title">Switch to the Data Engineering workload</div>
+        <div class="step-subtitle">Explore all available workloads</div>
+      </div>
+      <div class="step-badges">
+        <span class="type-badge type-ui">UI</span>
+        <span class="type-badge type-quiz">Quiz</span>
+      </div>
+      <span class="step-toggle" id="tog-3">▼</span>
+    </div>
+    <div class="step-body" id="sb-3">
+      <div class="task-block">
+        <div class="task-label">🎯 Your Task</div>
+        <div class="task-content">Switch to the Data Engineering workload using the workload switcher. Before switching, explore all available workloads and understand what each one is for.</div>
+        <ul class="task-steps">
+          <li><span class="step-arrow">→</span>Click the grid/waffle icon (bottom-left sidebar)</li>
+          <li><span class="step-arrow">→</span>Read the list of available workloads — there are 6 main ones</li>
+          <li><span class="step-arrow">→</span>Select <strong>Data Engineering</strong></li>
+          <li><span class="step-arrow">→</span>Notice how the left sidebar and + New menu change</li>
+          <li><span class="step-arrow">→</span>Answer the knowledge check below</li>
+        </ul>
+      </div>
+      <div class="tier-buttons">
+        <button class="tier-btn btn-hint" onclick="toggleTier('hint-3', this)">💡 Show Hint</button>
+        <button class="tier-btn btn-instructor" onclick="toggleTier('inst-3', this)">👨‍🏫 Instructor Note</button>
+      </div>
+      <div class="hint-block" id="hint-3">
+        <div class="hint-header">💡 Hint — The 6 Fabric Workloads</div>
+        <div class="hint-content">When you click the grid icon, you should see these workloads:
+→ Data Engineering  — Lakehouse, Notebooks, Spark
+→ Data Science      — ML models, experiments
+→ Data Warehouse    — SQL-first warehouse
+→ Real-Time Analytics — streaming, KQL
+→ Power BI          — reports, dashboards, semantic models
+→ Data Factory      — pipelines, dataflows
+
+For this project we mainly use Data Engineering and switch to Power BI at the end.
+All workloads share the SAME OneLake storage underneath.</div>
+      </div>
+      <div class="instructor-block" id="inst-3">
+        <div class="instructor-label">Instructor Note</div>
+        This is a great moment to draw the Fabric architecture on a whiteboard. Show that the workloads are "lenses" — they change what you see in the UI and what tools are available, but they all read/write the same OneLake. The Data Engineering workload is where we will spend most of our time in Labs 1–4.
+      </div>
+      <!-- Knowledge check -->
+      <div class="kc-block">
+        <div class="kc-header">🧠 Knowledge Check</div>
+        <div class="kc-question">Which Fabric workload would you use if you wanted to build a machine learning model to predict customer churn?</div>
+        <div class="kc-options" id="kc-3-opts">
+          <div class="kc-option" onclick="answerKC(3, 0, false)"><span class="kc-opt-icon">A</span> Data Engineering — it has Spark notebooks</div>
+          <div class="kc-option" onclick="answerKC(3, 1, true)"><span class="kc-opt-icon">B</span> Data Science — it includes ML experiments and model tracking</div>
+          <div class="kc-option" onclick="answerKC(3, 2, false)"><span class="kc-opt-icon">C</span> Data Warehouse — SQL is good for analysis</div>
+          <div class="kc-option" onclick="answerKC(3, 3, false)"><span class="kc-opt-icon">D</span> Power BI — it has AI visuals built in</div>
+        </div>
+        <div class="kc-feedback" id="kc-3-fb"></div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════════
+       STEP 4 — Create Lakehouse
+       ═══════════════════════════════════════════════════════════ -->
+  <div class="step-card" id="sc-4">
+    <div class="step-header" onclick="toggleStep(4)">
+      <input type="checkbox" class="step-chk" id="chk-4" onclick="event.stopPropagation()" onchange="markDone(4, 10)">
+      <div class="step-num" id="sn-4">4</div>
+      <div class="step-title-wrap">
+        <div class="step-title">Create Lakehouse 'LH_RetailX'</div>
+        <div class="step-subtitle">Your central OneLake storage for all 4 layers</div>
+      </div>
+      <div class="step-badges"><span class="type-badge type-ui">UI</span></div>
+      <span class="step-toggle" id="tog-4">▼</span>
+    </div>
+    <div class="step-body" id="sb-4">
+      <div class="task-block">
+        <div class="task-label">🎯 Your Task</div>
+        <div class="task-content">Create a Lakehouse named <code>LH_RetailX</code> inside the RetailX-Analytics workspace. This is the single storage container for all 9 Delta tables you will build across Bronze, Silver, Gold, and Platinum layers.</div>
+        <ul class="task-steps">
+          <li><span class="step-arrow">→</span>Make sure you are in the <code>RetailX-Analytics</code> workspace</li>
+          <li><span class="step-arrow">→</span>Create a new Lakehouse — find the correct option in the + New menu</li>
+          <li><span class="step-arrow">→</span>Name it exactly: <code>LH_RetailX</code></li>
+          <li><span class="step-arrow">→</span>Wait for it to open — you will see the Lakehouse explorer</li>
+          <li><span class="step-arrow">→</span>Identify the two root sections: <strong>Tables</strong> and <strong>Files</strong></li>
+        </ul>
+      </div>
+      <div class="tier-buttons">
+        <button class="tier-btn btn-hint" onclick="toggleTier('hint-4', this)">💡 Show Hint</button>
+        <button class="tier-btn btn-answer" onclick="toggleTier('ans-4', this)">✅ Show Answer</button>
+        <button class="tier-btn btn-instructor" onclick="toggleTier('inst-4', this)">👨‍🏫 Instructor Note</button>
+      </div>
+      <div class="hint-block" id="hint-4">
+        <div class="hint-header">💡 Hint — Lakehouse Structure</div>
+        <div class="hint-content">From inside the RetailX-Analytics workspace:
+→ Click "+ New" (top-left) → look for "Lakehouse" in the list
+→ Give it the name LH_RetailX → click Create
+
+When it opens, you will see two sections in the left panel:
+→ Tables  — this is where Delta tables will live (queryable via SQL)
+→ Files   — this is where raw files land (JSON, CSV, Parquet)
+
+You can also see at the bottom-left a switcher between "Lakehouse" and "SQL analytics endpoint" — that SQL endpoint lets you query Delta tables with T-SQL instantly.</div>
+      </div>
+      <div class="answer-block" id="ans-4">
+        <div class="answer-header">✅ Full Answer</div>
+        <div class="answer-content">1. In workspace RetailX-Analytics → click "+ New" (top-left ribbon)
+2. Select "Lakehouse" from the list
+3. Name: LH_RetailX → click Create
+4. The Lakehouse explorer opens. You will see:
+   Left panel:
+   • Tables (empty for now — Delta tables appear here)
+   • Files (empty for now — raw files appear here)
+   Bottom-left switcher:
+   • "Lakehouse" view (default)
+   • "SQL analytics endpoint" (T-SQL query editor)
+
+The SQL endpoint is auto-provisioned — no extra setup. Any Delta table written to Tables/ is immediately queryable with T-SQL.</div>
+      </div>
+      <div class="instructor-block" id="inst-4">
+        <div class="instructor-label">Instructor Note</div>
+        This is the right moment to explain OneLake. Draw: OneLake is the storage. LH_RetailX is a namespace inside OneLake. Tables/ maps to managed Delta tables. Files/ maps to the raw landing zone. A Power BI report and a Spark notebook both read from the same physical Parquet files — no movement, no copy.
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════════
+       STEP 5 — Explore Lakehouse UI
+       ═══════════════════════════════════════════════════════════ -->
+  <div class="step-card" id="sc-5">
+    <div class="step-header" onclick="toggleStep(5)">
+      <input type="checkbox" class="step-chk" id="chk-5" onclick="event.stopPropagation()" onchange="markDone(5, 10)">
+      <div class="step-num" id="sn-5">5</div>
+      <div class="step-title-wrap">
+        <div class="step-title">Explore the Lakehouse UI</div>
+        <div class="step-subtitle">2-minute orientation before ingestion</div>
+      </div>
+      <div class="step-badges">
+        <span class="type-badge type-ui">UI</span>
+        <span class="type-badge type-quiz">Quiz</span>
+      </div>
+      <span class="step-toggle" id="tog-5">▼</span>
+    </div>
+    <div class="step-body" id="sb-5">
+      <div class="task-block">
+        <div class="task-label">🎯 Your Task</div>
+        <div class="task-content">Spend 2 minutes exploring the Lakehouse interface. Find each item listed below and make sure you know where it is before moving on.</div>
+        <ul class="task-steps">
+          <li><span class="step-arrow">→</span>Find the <strong>Tables</strong> section — where will your Delta tables appear after ingestion?</li>
+          <li><span class="step-arrow">→</span>Find the <strong>Files</strong> section — right-click it and find "New subfolder". Create a folder: <code>bronze</code></li>
+          <li><span class="step-arrow">→</span>Switch to the <strong>SQL analytics endpoint</strong> using the bottom-left switcher. Notice the query editor.</li>
+          <li><span class="step-arrow">→</span>Switch back to Lakehouse view</li>
+          <li><span class="step-arrow">→</span>Find the <strong>Home ribbon</strong> at the top — locate "New semantic model" and "New notebook" buttons</li>
+        </ul>
+      </div>
+      <div class="tier-buttons">
+        <button class="tier-btn btn-hint" onclick="toggleTier('hint-5', this)">💡 Show Hint</button>
+        <button class="tier-btn btn-instructor" onclick="toggleTier('inst-5', this)">👨‍🏫 Instructor Note</button>
+      </div>
+      <div class="hint-block" id="hint-5">
+        <div class="hint-header">💡 Hint — Lakehouse Key Areas</div>
+        <div class="hint-content">Files section → right-click "Files" in the left panel → "New subfolder" → name it "bronze"
+(This is where NB-01 will save raw JSON files)
+
+SQL analytics endpoint:
+→ Bottom-left of the Lakehouse page, look for a mode switcher showing "Lakehouse" 
+→ Click it and switch to "SQL analytics endpoint"
+→ You see a T-SQL query editor — try: SELECT 1 AS test
+→ Switch back with the same control
+
+Home ribbon (top):
+→ "New semantic model" → creates a Power BI model from selected tables
+→ "New notebook"       → creates a Spark notebook attached to this Lakehouse
+→ "New pipeline"       → creates a Data Pipeline in the workspace</div>
+      </div>
+      <div class="instructor-block" id="inst-5">
+        <div class="instructor-label">Instructor Note</div>
+        Creating the bronze subfolder under Files now reinforces the medallion architecture naming before any data lands. When students run NB-01 later, they will save the raw JSON to Files/bronze/countries/ — the folder will already exist. Also: demoing the SQL endpoint on an empty Lakehouse helps students understand it is always available, not something that gets set up later.
+      </div>
+      <!-- Knowledge check -->
+      <div class="kc-block">
+        <div class="kc-header">🧠 Knowledge Check</div>
+        <div class="kc-question">You have just written data to a Delta table inside LH_RetailX using a Spark notebook. Without doing anything else, which of the following statements is TRUE?</div>
+        <div class="kc-options" id="kc-5-opts">
+          <div class="kc-option" onclick="answerKC(5, 0, false)"><span class="kc-opt-icon">A</span> You need to run a REFRESH command before the data appears in the SQL endpoint</div>
+          <div class="kc-option" onclick="answerKC(5, 1, false)"><span class="kc-opt-icon">B</span> You need to schedule a dataset refresh before Power BI can see the data</div>
+          <div class="kc-option" onclick="answerKC(5, 2, true)"><span class="kc-opt-icon">C</span> The table is immediately visible and queryable in the SQL analytics endpoint</div>
+          <div class="kc-option" onclick="answerKC(5, 3, false)"><span class="kc-opt-icon">D</span> You need to publish the Lakehouse before the table becomes available</div>
+        </div>
+        <div class="kc-feedback" id="kc-5-fb"></div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════════
+       STEP 6 — Create DFG2
+       ═══════════════════════════════════════════════════════════ -->
+  <div class="step-card" id="sc-6">
+    <div class="step-header" onclick="toggleStep(6)">
+      <input type="checkbox" class="step-chk" id="chk-6" onclick="event.stopPropagation()" onchange="markDone(6, 10)">
+      <div class="step-num" id="sn-6">6</div>
+      <div class="step-title-wrap">
+        <div class="step-title">Create Dataflow Gen2 'DFG2-Sales-CSV'</div>
+        <div class="step-subtitle">Open the Power Query editor in the cloud</div>
+      </div>
+      <div class="step-badges"><span class="type-badge type-ui">UI</span></div>
+      <span class="step-toggle" id="tog-6">▼</span>
+    </div>
+    <div class="step-body" id="sb-6">
+      <div class="task-block">
+        <div class="task-label">🎯 Your Task</div>
+        <div class="task-content">Create a new Dataflow Gen2 item inside the <code>RetailX-Analytics</code> workspace. Dataflow Gen2 (DFG2) is a cloud-hosted Power Query editor — it runs on Spark under the hood and can write to a Lakehouse as a data destination.</div>
+        <ul class="task-steps">
+          <li><span class="step-arrow">→</span>Navigate back to the <code>RetailX-Analytics</code> workspace (breadcrumb or left sidebar)</li>
+          <li><span class="step-arrow">→</span>Create a new Dataflow Gen2 — find it in the correct menu</li>
+          <li><span class="step-arrow">→</span>Name it: <code>DFG2-Sales-CSV</code></li>
+          <li><span class="step-arrow">→</span>Confirm the Power Query editor opens in the browser</li>
+          <li><span class="step-arrow">→</span>Identify: Get data button, Diagram view, Query settings panel, and Advanced Editor</li>
+        </ul>
+      </div>
+      <div class="tier-buttons">
+        <button class="tier-btn btn-hint" onclick="toggleTier('hint-6', this)">💡 Show Hint</button>
+        <button class="tier-btn btn-answer" onclick="toggleTier('ans-6', this)">✅ Show Answer</button>
+        <button class="tier-btn btn-instructor" onclick="toggleTier('inst-6', this)">👨‍🏫 Instructor Note</button>
+      </div>
+      <div class="hint-block" id="hint-6">
+        <div class="hint-header">💡 Hint — Finding DFG2</div>
+        <div class="hint-content">From inside the workspace (not the Lakehouse):
+→ Click "+ New" in the top ribbon
+→ Scroll down or look for "Dataflow Gen2" in the list
+→ If you only see "Dataflow (Gen2)" — that's it, same thing
+
+You can also create it from:
+→ LH_RetailX → Home ribbon → "New Dataflow Gen2"
+
+After naming, the Power Query editor opens. It looks like Power BI's dataflow editor. Key areas:
+→ Home tab → "Get data" (top-left)
+→ Home tab → "Advanced editor" (opens the raw M code editor)
+→ Bottom: "Add data destination" button (where you configure the output table)
+→ Right panel: "Query settings" (applied steps)</div>
+      </div>
+      <div class="answer-block" id="ans-6">
+        <div class="answer-header">✅ Full Answer</div>
+        <div class="answer-content">1. In RetailX-Analytics workspace → click "+ New"
+2. Select "Dataflow Gen2" from the list (may require scrolling)
+3. The editor opens. Click the title at the top ("Dataflow 1") and rename it to: DFG2-Sales-CSV
+4. The Power Query editor is now open. You are now working in a cloud-hosted M/Power Query environment.
+
+Key buttons to locate:
+→ Home → Get data       (add a new data source)
+→ Home → Advanced editor (edit raw M code directly)
+→ Bottom-right          "Add data destination" (configure where output goes)
+→ Right panel           "Query settings" → Applied steps (shows your transformation history)
+→ Top-left              Diagram view icon (shows queries as connected boxes)</div>
+      </div>
+      <div class="instructor-block" id="inst-6">
+        <div class="instructor-label">Instructor Note</div>
+        DFG2 runs serverless Power Query on a Spark cluster. There is no gateway needed for web sources. Students who have used Power BI Desktop dataflows will immediately recognise this interface — it is nearly identical. Key difference: DFG2 has a "data destination" concept at the bottom-right — this is how the output gets written to the Lakehouse. Power BI Desktop dataflows load data into the Power BI service; DFG2 loads data into a Lakehouse Delta table.
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════════
+       STEP 7 — Add GitHub CSV as source
+       ═══════════════════════════════════════════════════════════ -->
+  <div class="step-card" id="sc-7">
+    <div class="step-header" onclick="toggleStep(7)">
+      <input type="checkbox" class="step-chk" id="chk-7" onclick="event.stopPropagation()" onchange="markDone(7, 10)">
+      <div class="step-num" id="sn-7">7</div>
+      <div class="step-title-wrap">
+        <div class="step-title">Connect to the Superstore CSV on GitHub</div>
+        <div class="step-subtitle">Add a Web data source · Anonymous connection</div>
+      </div>
+      <div class="step-badges"><span class="type-badge type-ui">UI</span></div>
+      <span class="step-toggle" id="tog-7">▼</span>
+    </div>
+    <div class="step-body" id="sb-7">
+      <div class="task-block">
+        <div class="task-label">🎯 Your Task</div>
+        <div class="task-content">Add the Superstore Sales CSV from GitHub as a data source inside DFG2. You will connect to it using the Web connector with anonymous authentication.</div>
+        <ul class="task-steps">
+          <li><span class="step-arrow">→</span>In DFG2: click <strong>Get data</strong> (Home ribbon)</li>
+          <li><span class="step-arrow">→</span>Search for and select the <strong>Web</strong> connector</li>
+          <li><span class="step-arrow">→</span>Paste this URL: <code>https://raw.githubusercontent.com/plotly/datasets/master/superstore.csv</code></li>
+          <li><span class="step-arrow">→</span>When prompted for authentication: select <strong>Anonymous</strong></li>
+          <li><span class="step-arrow">→</span>Verify the preview shows ~9,994 rows and 21 columns</li>
+          <li><span class="step-arrow">→</span>Check: what are the column names in the preview? Note whether they have spaces.</li>
+        </ul>
+      </div>
+      <div class="tier-buttons">
+        <button class="tier-btn btn-hint" onclick="toggleTier('hint-7', this)">💡 Show Hint</button>
+        <button class="tier-btn btn-answer" onclick="toggleTier('ans-7', this)">✅ Show Answer</button>
+      </div>
+      <div class="hint-block" id="hint-7">
+        <div class="hint-header">💡 Hint</div>
+        <div class="hint-content">Home tab → Get data → in the search box type "Web" → select "Web page" or "Web" connector → paste the URL.
+
+Authentication level: choose "Anonymous" (GitHub raw files are public — no credentials needed).
+
+After connecting you will see a preview of the CSV. Notice the column names:
+→ "Row ID", "Order ID", "Order Date" — they have spaces and Title Case
+→ These will need to be renamed to snake_case in Step 8
+
+The data types will likely all show as "Text" or "Any" at this point — that is fine. We will fix types in the M code step.</div>
+      </div>
+      <div class="answer-block" id="ans-7">
+        <div class="answer-header">✅ Full Answer</div>
+        <div class="answer-content">1. In DFG2 → Home → Get data → search "Web" → select "Web" connector
+2. URL: https://raw.githubusercontent.com/plotly/datasets/master/superstore.csv
+3. Click Connect
+4. Authentication: select "Anonymous" → click Connect
+5. A data preview appears. Verify:
+   → Row count: ~9,994 (shown at bottom of preview or visible in Applied steps)
+   → Column count: 21 columns
+   → Column names have spaces (e.g. "Row ID", "Order Date") — these need renaming
+6. Click "Create" or "OK" to load the query into the editor
+
+The query is now named "superstore" or similar in the Queries panel on the left.
+You can rename it by right-clicking the query name → Rename → call it "raw_sales"</div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════════
+       STEP 8 — Power Query M code (CODE CHALLENGE)
+       ═══════════════════════════════════════════════════════════ -->
+  <div class="step-card" id="sc-8">
+    <div class="step-header" onclick="toggleStep(8)">
+      <input type="checkbox" class="step-chk" id="chk-8" onclick="event.stopPropagation()" onchange="markDone(8, 10)">
+      <div class="step-num" id="sn-8">8</div>
+      <div class="step-title-wrap">
+        <div class="step-title">Write the Power Query M transformation</div>
+        <div class="step-subtitle">Rename 21 columns · Cast data types · Code challenge</div>
+      </div>
+      <div class="step-badges">
+        <span class="type-badge type-code">CODE</span>
+        <span class="type-badge type-quiz">Quiz</span>
+      </div>
+      <span class="step-toggle" id="tog-8">▼</span>
+    </div>
+    <div class="step-body" id="sb-8">
+      <div class="task-block">
+        <div class="task-label">🎯 Your Task — Code Challenge</div>
+        <div class="task-content">Open the Advanced Editor in DFG2 and write an M query that:
+① Reads the CSV from the GitHub URL
+② Promotes the first row as headers
+③ Renames ALL 21 columns to snake_case
+④ Casts the correct data types (dates as date, numbers as number, integers as Int64)
+
+This is the Bronze ingestion contract — the output of this query lands in <code>raw_sales</code>.</div>
+
+        <div class="info-box info-amber" style="margin-top:10px; margin-bottom:0;">
+          <span class="ib-icon">💪</span>
+          <span><strong>Try it yourself first.</strong> Open the Advanced Editor (Home → Advanced Editor) and write the M code from scratch using the structure hint below. The column names to rename are: Row ID, Order ID, Order Date, Ship Date, Ship Mode, Customer ID, Customer Name, Segment, Country, City, State, Postal Code, Region, Product ID, Category, Sub-Category, Product Name, Sales, Quantity, Discount, Profit.</span>
+        </div>
+      </div>
+
+      <div class="tier-buttons">
+        <button class="tier-btn btn-hint" onclick="toggleTier('hint-8', this)">💡 Show Hint (skeleton code)</button>
+        <button class="tier-btn btn-answer" onclick="toggleTier('ans-8', this)">✅ Show Full Answer</button>
+        <button class="tier-btn btn-instructor" onclick="toggleTier('inst-8', this)">👨‍🏫 Instructor Note</button>
+      </div>
+
+      <!-- HINT: skeleton with blanks -->
+      <div class="hint-block" id="hint-8">
+        <div class="hint-header">💡 Hint — M code skeleton (fill in the blanks)</div>
+        <div class="hint-content">The M query has 4 steps: Source → Headers → Renamed → TypedCols.
+Fill in the blanks marked with _____ below. Use the Advanced Editor (Home → Advanced Editor) to write your answer.</div>
+        <div class="hint-skeleton">let
+  Source    = Csv.Document(Web.Contents(
+                "_____URL HERE_____"),
+                [Delimiter=",", Encoding=65001, QuoteStyle=QuoteStyle.None]),
+
+  Headers   = Table.PromoteHeaders(_____, [PromoteAllScalars=true]),
+
+  Renamed   = Table.RenameColumns(Headers, {
+    {"Row ID",        "_____"},   // snake_case version
+    {"Order ID",      "_____"},
+    {"Order Date",    "_____"},
+    {"Ship Date",     "_____"},
+    {"Ship Mode",     "_____"},
+    // ... continue for all 21 columns ...
+    {"Sales",         "_____"},
+    {"Quantity",      "_____"},
+    {"Discount",      "_____"},
+    {"Profit",        "_____"}
+  }),
+
+  TypedCols = Table.TransformColumnTypes(Renamed, {
+    {"row_id",      _____},        // integer type
+    {"order_date",  _____},        // date type
+    {"ship_date",   _____},        // date type
+    {"sales",       _____},        // number type
+    {"quantity",    _____},        // integer type
+    {"discount",    _____},        // number type
+    {"profit",      _____}         // number type
+  })
+
+in TypedCols</div>
+        <div style="padding:10px 14px; border-top:1px solid #FDE68A;">
+          <div style="font-size:11px; font-weight:700; color:#92400E; margin-bottom:5px;">M type reference</div>
+          <div style="font-size:12px; color:#78350F; line-height:2; font-family:Consolas,monospace;">
+            Int64.Type &nbsp;&nbsp;&nbsp; → integer<br>
+            type date &nbsp;&nbsp;&nbsp;&nbsp; → date<br>
+            type number &nbsp;&nbsp; → decimal number<br>
+            type text &nbsp;&nbsp;&nbsp;&nbsp; → string
+          </div>
+        </div>
+      </div>
+
+      <!-- FULL ANSWER -->
+      <div class="answer-block" id="ans-8">
+        <div class="answer-header">
+          ✅ Full M Code Answer
+          <span style="font-size:10px; font-weight:400; color:#7C3AED;">Paste into Advanced Editor → Home → Advanced Editor</span>
+        </div>
+        <div class="code-block" style="margin:12px 14px;">
+          <div class="code-hdr">
+            <span class="code-lbl">DFG2-Sales-CSV — Power Query M (full solution)</span>
+            <button class="copy-btn" onclick="cp(this, 'dfg2')">Copy</button>
+          </div>
+          <pre id="code-dfg2">let
+  Source    = Csv.Document(Web.Contents(
+                "https://raw.githubusercontent.com/plotly/datasets/master/superstore.csv"),
+                [Delimiter=",", Encoding=65001, QuoteStyle=QuoteStyle.None]),
+
+  Headers   = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+
+  Renamed   = Table.RenameColumns(Headers, {
+    {"Row ID",        "row_id"},
+    {"Order ID",      "order_id"},
+    {"Order Date",    "order_date"},
+    {"Ship Date",     "ship_date"},
+    {"Ship Mode",     "ship_mode"},
+    {"Customer ID",   "customer_id"},
+    {"Customer Name", "customer_name"},
+    {"Segment",       "segment"},
+    {"Country",       "country"},
+    {"City",          "city"},
+    {"State",         "state"},
+    {"Postal Code",   "postal_code"},
+    {"Region",        "region"},
+    {"Product ID",    "product_id"},
+    {"Category",      "category"},
+    {"Sub-Category",  "sub_category"},
+    {"Product Name",  "product_name"},
+    {"Sales",         "sales"},
+    {"Quantity",      "quantity"},
+    {"Discount",      "discount"},
+    {"Profit",        "profit"}
+  }),
+
+  TypedCols = Table.TransformColumnTypes(Renamed, {
+    {"row_id",      Int64.Type},
+    {"order_date",  type date},
+    {"ship_date",   type date},
+    {"sales",       type number},
+    {"quantity",    Int64.Type},
+    {"discount",    type number},
+    {"profit",      type number}
+  })
+
+in TypedCols</pre>
+        </div>
+        <div style="padding:0 14px 12px; font-size:12px; color:#4C1D95; line-height:1.65;">
+          <strong>Why this works:</strong><br>
+          • <code>Csv.Document + Web.Contents</code> — reads the raw file over HTTP without a gateway<br>
+          • <code>Table.PromoteHeaders</code> — makes row 1 into column headers<br>
+          • <code>Table.RenameColumns</code> — takes a list of {old, new} pairs — all 21 at once<br>
+          • <code>Table.TransformColumnTypes</code> — only the 7 columns that need non-text types are listed; the rest stay as text<br>
+          • <code>in TypedCols</code> — the final step name is the output of the query
+        </div>
+      </div>
+
+      <div class="instructor-block" id="inst-8">
+        <div class="instructor-label">Instructor Note</div>
+        Give students 5–7 minutes to attempt this from scratch. The most common mistakes: forgetting the closing }) on RenameColumns, using wrong type syntax (type int64 instead of Int64.Type), and forgetting to reference "Source" in the Table.PromoteHeaders call. Students who finish early: ask them to also rename the query (right-click → Rename) to "raw_sales" in the Queries panel.
+      </div>
+
+      <!-- Knowledge check -->
+      <div class="kc-block">
+        <div class="kc-header">🧠 Knowledge Check</div>
+        <div class="kc-question">In the M query above, what does the last line <code>in TypedCols</code> mean?</div>
+        <div class="kc-options" id="kc-8-opts">
+          <div class="kc-option" onclick="answerKC(8, 0, false)"><span class="kc-opt-icon">A</span> It creates a new step called "in TypedCols" that runs after the transformations</div>
+          <div class="kc-option" onclick="answerKC(8, 1, true)"><span class="kc-opt-icon">B</span> It declares which step's result is the final output of the entire query</div>
+          <div class="kc-option" onclick="answerKC(8, 2, false)"><span class="kc-opt-icon">C</span> It loads the data into a table called TypedCols inside the Lakehouse</div>
+          <div class="kc-option" onclick="answerKC(8, 3, false)"><span class="kc-opt-icon">D</span> It is a comment that documents the last transformation step</div>
+        </div>
+        <div class="kc-feedback" id="kc-8-fb"></div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════════
+       STEP 9 — Configure data destination
+       ═══════════════════════════════════════════════════════════ -->
+  <div class="step-card" id="sc-9">
+    <div class="step-header" onclick="toggleStep(9)">
+      <input type="checkbox" class="step-chk" id="chk-9" onclick="event.stopPropagation()" onchange="markDone(9, 10)">
+      <div class="step-num" id="sn-9">9</div>
+      <div class="step-title-wrap">
+        <div class="step-title">Configure data destination → <code>raw_sales</code></div>
+        <div class="step-subtitle">Write DFG2 output to Bronze layer Delta table</div>
+      </div>
+      <div class="step-badges"><span class="type-badge type-ui">UI</span></div>
+      <span class="step-toggle" id="tog-9">▼</span>
+    </div>
+    <div class="step-body" id="sb-9">
+      <div class="task-block">
+        <div class="task-label">🎯 Your Task</div>
+        <div class="task-content">Configure where DFG2 writes its output. The destination is a new Delta table called <code>raw_sales</code> inside <code>LH_RetailX</code>. This step wires the Power Query output to the Bronze layer.</div>
+        <ul class="task-steps">
+          <li><span class="step-arrow">→</span>Find the <strong>+ Add data destination</strong> button (bottom-right of the DFG2 editor)</li>
+          <li><span class="step-arrow">→</span>Select <strong>Lakehouse</strong> as the destination type</li>
+          <li><span class="step-arrow">→</span>Navigate to: <code>RetailX-Analytics</code> workspace → <code>LH_RetailX</code></li>
+          <li><span class="step-arrow">→</span>Choose <strong>New table</strong> and name it: <code>raw_sales</code></li>
+          <li><span class="step-arrow">→</span>Set the update method — think about which one is right for a Bronze layer table</li>
+          <li><span class="step-arrow">→</span>Save settings</li>
+        </ul>
+      </div>
+      <div class="tier-buttons">
+        <button class="tier-btn btn-hint" onclick="toggleTier('hint-9', this)">💡 Show Hint</button>
+        <button class="tier-btn btn-answer" onclick="toggleTier('ans-9', this)">✅ Show Answer</button>
+        <button class="tier-btn btn-instructor" onclick="toggleTier('inst-9', this)">👨‍🏫 Instructor Note</button>
+      </div>
+      <div class="hint-block" id="hint-9">
+        <div class="hint-header">💡 Hint — Update Method Decision</div>
+        <div class="hint-content">The "+ Add data destination" button is at the bottom-right of the canvas — you may need to scroll down or look below the query preview.
+
+After selecting Lakehouse → LH_RetailX → New table → raw_sales, you will be asked for the update method:
+
+→ Replace    — drops and recreates the table on every run ← use this for Bronze in this workshop
+→ Append     — adds new rows without removing existing ones
+→ (Upsert is not available in DFG2 natively — that requires notebook logic)
+
+For a Bronze table that is a full reload from a static CSV file, "Replace" is correct.
+In production with real streaming or incremental data, you would use "Append" or move to a notebook with Delta MERGE logic.</div>
+      </div>
+      <div class="answer-block" id="ans-9">
+        <div class="answer-header">✅ Full Answer</div>
+        <div class="answer-content">1. In DFG2 editor → bottom-right → click "+ Add data destination"
+2. Select "Lakehouse"
+3. In the connection dialog: navigate to RetailX-Analytics workspace → select LH_RetailX
+4. Table option: select "New table"
+5. Table name: raw_sales
+6. Update method: Replace (correct for a full-reload Bronze table)
+7. Click Next → review the column mapping (all columns should map automatically)
+8. Click Save settings
+
+You will see a small Lakehouse icon appear on the query in the canvas, indicating the destination is configured.
+
+✅ The destination is configured. Nothing has run yet — the data moves when you click Publish.</div>
+      </div>
+      <div class="instructor-block" id="inst-9">
+        <div class="instructor-label">Instructor Note</div>
+        Discuss the update method choice with the class. "Replace" is appropriate here because the Superstore CSV is a historical static file — we always want the full dataset. If this were a production pipeline ingesting new daily orders, we would use "Append" to avoid re-loading all historical data every day. The right choice depends entirely on the source system's behaviour and the volume of data.
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════════
+       STEP 10 — Publish and verify
+       ═══════════════════════════════════════════════════════════ -->
+  <div class="step-card" id="sc-10">
+    <div class="step-header" onclick="toggleStep(10)">
+      <input type="checkbox" class="step-chk" id="chk-10" onclick="event.stopPropagation()" onchange="markDone(10, 10)">
+      <div class="step-num" id="sn-10">10</div>
+      <div class="step-title-wrap">
+        <div class="step-title">Publish DFG2 and verify <code>raw_sales</code></div>
+        <div class="step-subtitle">Trigger the first run · Confirm Bronze table created</div>
+      </div>
+      <div class="step-badges">
+        <span class="type-badge type-ui">UI</span>
+        <span class="type-badge type-quiz">Quiz</span>
+      </div>
+      <span class="step-toggle" id="tog-10">▼</span>
+    </div>
+    <div class="step-body" id="sb-10">
+      <div class="task-block">
+        <div class="task-label">🎯 Your Task</div>
+        <div class="task-content">Publish the Dataflow Gen2. This triggers the first execution — the M query runs on a cloud Spark cluster, reads the CSV, applies your transformations, and writes the output to <code>raw_sales</code> in LH_RetailX.</div>
+        <ul class="task-steps">
+          <li><span class="step-arrow">→</span>Click the <strong>Publish</strong> button (bottom-right of the DFG2 editor)</li>
+          <li><span class="step-arrow">→</span>Wait ~60 seconds for the first run to complete</li>
+          <li><span class="step-arrow">→</span>Navigate to <code>LH_RetailX</code> → Tables → verify <code>raw_sales</code> appears</li>
+          <li><span class="step-arrow">→</span>Right-click <code>raw_sales</code> → <strong>Preview data</strong> — verify ~9,994 rows</li>
+          <li><span class="step-arrow">→</span>Check: is <code>order_date</code> showing as a Date type or as a string?</li>
+          <li><span class="step-arrow">→</span>Answer the knowledge check below</li>
+        </ul>
+      </div>
+      <div class="tier-buttons">
+        <button class="tier-btn btn-hint" onclick="toggleTier('hint-10', this)">💡 Show Hint</button>
+        <button class="tier-btn btn-answer" onclick="toggleTier('ans-10', this)">✅ Show Answer</button>
+      </div>
+      <div class="hint-block" id="hint-10">
+        <div class="hint-header">💡 Hint — If the table doesn't appear</div>
+        <div class="hint-content">After clicking Publish, the DFG2 runs asynchronously. Check status:
+→ Workspace view → find DFG2-Sales-CSV → look for a spinning icon or "Running" indicator
+→ Click the DFG2 item → "Refresh history" to see run status
+
+If it shows "Failed":
+→ Click the failed run → read the error message
+→ Common cause: M code syntax error → go back to DFG2 → edit → fix → re-publish
+
+If raw_sales doesn't appear in LH_RetailX → Tables:
+→ Click the refresh (↻) button in the Tables panel header
+→ Tables are not automatically refreshed in the UI — the data IS there, just not shown yet
+
+Correct result:
+→ raw_sales table with ~9,994 rows
+→ order_date column shows as Date type (calendar icon in column header)
+→ sales, profit, discount show as Decimal type
+→ row_id, quantity show as Int64 type</div>
+      </div>
+      <div class="answer-block" id="ans-10">
+        <div class="answer-header">✅ Full Answer</div>
+        <div class="answer-content">1. In DFG2 editor → click "Publish" (bottom-right)
+2. A notification appears: "Publishing..." or "Running"
+3. Wait 60–90 seconds. First run includes cluster startup time.
+4. Navigate to LH_RetailX:
+   → In workspace, click "LH_RetailX"
+   → Left panel → Tables → click ↻ refresh button if needed
+   → You should see "raw_sales" appear
+5. Right-click raw_sales → "Preview data"
+   → ~9,994 rows should appear
+   → Column order_date: should show as a date (e.g. 11/8/2016 or 2016-11-08)
+   → If order_date shows as "11/8/2016" text: the type cast worked but display may vary
+
+✅ Lab 1 is complete. You have your first Bronze table: raw_sales.</div>
+      </div>
+
+      <!-- Knowledge Check -->
+      <div class="kc-block">
+        <div class="kc-header">🧠 Final Lab Check — Bronze Layer Principle</div>
+        <div class="kc-question">You noticed that raw_sales has column names in snake_case and order_date is a Date type. Does this violate the Bronze layer principle of "exact copy of source"?</div>
+        <div class="kc-options" id="kc-10-opts">
+          <div class="kc-option" onclick="answerKC(10, 0, false)"><span class="kc-opt-icon">A</span> Yes — Bronze should have the original "Order Date" column name and all columns as text</div>
+          <div class="kc-option" onclick="answerKC(10, 1, true)"><span class="kc-opt-icon">B</span> No — the raw JSON file was saved to Files/bronze/ first. The DFG2 table is a pragmatic Bronze landing; what matters is the raw file is preserved.</div>
+          <div class="kc-option" onclick="answerKC(10, 2, false)"><span class="kc-opt-icon">C</span> Yes — you should have used Python to land the exact bytes of the CSV without any transformation</div>
+          <div class="kc-option" onclick="answerKC(10, 3, false)"><span class="kc-opt-icon">D</span> No — Bronze tables are always allowed to have cleaned column names and correct types</div>
+        </div>
+        <div class="kc-feedback" id="kc-10-fb"></div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════════
+       LAB COMPLETION
+       ═══════════════════════════════════════════════════════════ -->
+  <div class="completion-card" id="completion-card" style="display:none;">
+    <div class="completion-icon">🎉</div>
+    <div class="completion-title">Lab 1 Complete!</div>
+    <div class="completion-text">You have successfully built the Bronze ingestion layer using Dataflow Gen2.<br>The following table now exists in LH_RetailX:</div>
+    <div class="tables-built">
+      <span class="table-built-tag">🥉 raw_sales (9,994 rows)</span>
+    </div>
+    <div style="font-size:13px; color:#166534; margin-bottom:4px;">
+      <strong>Up next → Lab 2:</strong> Write your first PySpark notebook to call the REST Countries API,
+      save the raw JSON to Files/bronze/, and create the <code>raw_countries</code> Delta table.
+    </div>
+  </div>
+
+  <!-- Divider -->
+  <div class="divider"></div>
+  <div class="card" style="border-left:4px solid #22C55E;">
+    <div class="section-label">Up next</div>
+    <h2>Lab 2 — Bronze Layer: REST Countries API Notebook</h2>
+    <p style="margin-top:8px; margin-bottom:0;">
+      In Lab 2 you will write your first PySpark notebook from scratch.
+      You will call the REST Countries API using Python's <code>requests</code> library,
+      save the raw JSON response to <code>Files/bronze/countries/</code>,
+      parse 250 country objects into a DataFrame, run data quality checks,
+      and write to <code>raw_countries</code> — completing the Bronze layer.
+    </p>
+  </div>
+
+</div><!-- end page-wrapper -->
+
+
+<!-- ============================================================
+     JAVASCRIPT
+     ============================================================ -->
+<script>
+
+/* ── STEP EXPAND / COLLAPSE ──────────────────────────────── */
+function toggleStep(n) {
+  var body = document.getElementById('sb-' + n);
+  var tog  = document.getElementById('tog-' + n);
+  if (!body) return;
+  var isOpen = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  tog.classList.toggle('open',  !isOpen);
+}
+
+/* ── 3-TIER PANEL TOGGLE ─────────────────────────────────── */
+function toggleTier(id, btn) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  var isOpen = el.classList.contains('open');
+  el.classList.toggle('open', !isOpen);
+  btn.classList.toggle('active', !isOpen);
+}
+
+/* ── STEP CHECKBOX / PROGRESS ────────────────────────────── */
+var TOTAL_STEPS = 10;
+var stepsDone = 0;
+
+function markDone(n, total) {
+  var chk  = document.getElementById('chk-' + n);
+  var card = document.getElementById('sc-' + n);
+  var num  = document.getElementById('sn-' + n);
+  if (!chk) return;
+
+  if (chk.checked) {
+    card.classList.add('done');
+    stepsDone++;
+  } else {
+    card.classList.remove('done');
+    stepsDone--;
+  }
+
+  // Update progress
+  var pct = Math.round((stepsDone / TOTAL_STEPS) * 100);
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('prog-label').textContent =
+    'Progress: ' + stepsDone + ' / ' + TOTAL_STEPS + ' steps completed';
+
+  // Show completion card when all done
+  var cc = document.getElementById('completion-card');
+  if (cc) cc.style.display = (stepsDone === TOTAL_STEPS) ? 'block' : 'none';
+}
+
+/* ── KNOWLEDGE CHECK ─────────────────────────────────────── */
+var KC_ANSWERS = {
+  3:  { correct: 1, feedback: { correct: "Correct! Data Science is the right workload for ML model development. It includes ML experiments, model tracking with MLflow, and AutoML capabilities.", wrong: "Not quite. While Spark notebooks in Data Engineering can run ML code, the dedicated workload for ML model development is Data Science." }},
+  5:  { correct: 2, feedback: { correct: "Correct! Delta tables written to a Fabric Lakehouse are immediately available in the SQL Analytics Endpoint — no refresh, no command needed. This is the power of OneLake.", wrong: "Not quite. OneLake means there is only one copy of the data. Once a Spark notebook writes to a Delta table, the SQL endpoint sees it instantly." }},
+  8:  { correct: 1, feedback: { correct: "Correct! In M, a query is a 'let...in' expression. The 'in' keyword specifies which step's result is returned as the query output. 'in TypedCols' means: return the result of the TypedCols step.", wrong: "Not quite. The 'in' keyword in M is not a step — it is part of the let...in expression syntax. It tells M which previously defined variable (step) is the final output of the entire query." }},
+  10: { correct: 1, feedback: { correct: "Correct and nuanced! In this project, the raw JSON is saved to Files/bronze/ by NB-01, so the truly immutable raw archive is preserved there. The DFG2 table is a pragmatic choice for a CSV source. In a strict Bronze design, you might land the raw CSV too — but the principle is satisfied by the file archive.", wrong: "Not quite. The answer depends on your Bronze definition. In this project, we save the raw JSON file first (in NB-01). The DFG2 table with renamed columns is acceptable because we have the raw file as the immutable archive." }}
+};
+
+function answerKC(stepN, selectedIdx, isCorrect) {
+  var opts = document.querySelectorAll('#kc-' + stepN + '-opts .kc-option');
+  var fb   = document.getElementById('kc-' + stepN + '-fb');
+  var ans  = KC_ANSWERS[stepN];
+  if (!ans || !fb) return;
+
+  // Disable all options after answering
+  opts.forEach(function(opt) { opt.style.pointerEvents = 'none'; });
+
+  // Style options
+  opts.forEach(function(opt, idx) {
+    if (idx === ans.correct) {
+      opt.classList.add('reveal'); // always show correct
+    }
+    if (idx === selectedIdx && !isCorrect) {
+      opt.classList.add('wrong');  // show wrong selection
+    }
+  });
+
+  // Show feedback
+  fb.classList.add('show');
+  if (isCorrect) {
+    fb.classList.add('fb-correct');
+    fb.textContent = '✅ ' + ans.feedback.correct;
+  } else {
+    fb.classList.add('fb-wrong');
+    fb.textContent = '❌ ' + ans.feedback.wrong;
+  }
+}
+
+/* ── COPY TO CLIPBOARD ───────────────────────────────────── */
+function cp(btn, id) {
+  var pre = document.getElementById('code-' + id);
+  if (!pre) return;
+  var text = pre.textContent;
+
+  function done() {
+    btn.textContent = '✓ Copied';
+    btn.classList.add('ok');
+    setTimeout(function() {
+      btn.textContent = 'Copy';
+      btn.classList.remove('ok');
+    }, 2000);
+  }
+  function fail() { btn.textContent = 'Failed'; }
+
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(text).then(done).catch(function() {
+      fallback(text, done, fail);
+    });
+  } else {
+    fallback(text, done, fail);
+  }
+}
+
+function fallback(text, done, fail) {
+  var ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.cssText = 'position:fixed;opacity:0;top:0;left:0;';
+  document.body.appendChild(ta);
+  ta.focus(); ta.select();
+  try { document.execCommand('copy') ? done() : fail(); }
+  catch(e) { fail(); }
+  document.body.removeChild(ta);
+}
+
+/* ── AUTO-OPEN STEP 1 ON LOAD ────────────────────────────── */
+toggleStep(1);
+
+</script>
+</body>
+</html>

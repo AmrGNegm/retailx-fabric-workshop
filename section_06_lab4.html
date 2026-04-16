@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RetailX Fabric Workshop — Lab 4: Gold Layer Star Schema</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;background:#F0F4F8;color:#1A202C;font-size:14px;line-height:1.6}
+.page-wrapper{max-width:860px;margin:0 auto;padding:32px 24px 60px}
+h1{font-size:26px;font-weight:700;color:#0F172A;margin-bottom:4px}
+h2{font-size:19px;font-weight:700;color:#1E293B;margin-bottom:6px}
+h3{font-size:15px;font-weight:600;color:#334155;margin-bottom:8px}
+p{color:#475569;line-height:1.75;margin-bottom:10px}
+code{font-family:'Consolas','Courier New',monospace;font-size:12px;background:#F1F5F9;border:1px solid #E2E8F0;border-radius:4px;padding:1px 6px;color:#0F172A}
+.section-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#94A3B8;margin-bottom:6px}
+.divider{height:1px;background:#E2E8F0;margin:24px 0}
+.card{background:#FFF;border:1px solid #E2E8F0;border-radius:12px;padding:18px 20px;margin-bottom:18px}
+.info-box{border-radius:8px;padding:11px 14px;font-size:13px;line-height:1.65;margin:10px 0;display:flex;gap:10px;align-items:flex-start}
+.ib-icon{font-size:15px;flex-shrink:0;margin-top:1px}
+.info-blue{background:#EFF6FF;border:1px solid #BFDBFE;color:#1E40AF}
+.info-amber{background:#FFFBEB;border:1px solid #FDE68A;color:#92400E}
+.info-green{background:#F0FDF4;border:1px solid #BBF7D0;color:#14532D}
+.info-purple{background:#F5F3FF;border:1px solid #DDD6FE;color:#4C1D95}
+
+/* LAB HEADER */
+.lab-header{background:#FFF;border:1px solid #E2E8F0;border-radius:12px;padding:18px 20px;margin-bottom:20px;border-left:4px solid #D97706}
+.lab-meta-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.badge{font-size:10px;font-weight:700;padding:3px 9px;border-radius:4px;text-transform:uppercase;letter-spacing:.04em}
+.b-gold{background:#FFFBEB;color:#B45309;border:1px solid #FDE68A}
+.b-gray{background:#F1F5F9;color:#475569;border:1px solid #E2E8F0}
+.b-blue{background:#EFF6FF;color:#1D4ED8}
+.tag-pill{font-size:11px;padding:2px 8px;border-radius:10px;background:#F1F5F9;border:1px solid #E2E8F0;color:#475569}
+.prog-wrap{margin-top:14px}
+.prog-label{font-size:12px;color:#64748B;margin-bottom:5px}
+.prog-bar{height:6px;background:#E2E8F0;border-radius:3px;overflow:hidden}
+.prog-fill{height:100%;background:#D97706;border-radius:3px;transition:width .3s;width:0%}
+
+/* STAR SCHEMA VISUAL */
+.star-visual{background:#FFFBEB;border:1px solid #FDE68A;border-radius:10px;padding:16px;margin:12px 0}
+.star-title{font-size:11px;font-weight:700;color:#B45309;margin-bottom:10px;text-transform:uppercase;letter-spacing:.06em}
+.star-layout{display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:auto auto auto;gap:6px;align-items:center}
+.star-dim{background:#FFF;border:1.5px solid #FDE68A;border-radius:8px;padding:8px 10px}
+.star-fact{background:#FEF3C7;border:2px solid #F59E0B;border-radius:8px;padding:10px 12px;grid-column:2;grid-row:2;text-align:center}
+.star-dim-name{font-size:11px;font-weight:700;font-family:'Consolas','Courier New',monospace;color:#92400E}
+.star-dim-rows{font-size:10px;color:#B45309;margin-top:2px}
+.star-dim-sk{font-size:10px;color:#78350F;font-family:'Consolas','Courier New',monospace}
+.star-fact-name{font-size:12px;font-weight:700;font-family:'Consolas','Courier New',monospace;color:#78350F}
+.star-fact-rows{font-size:10px;color:#B45309;margin-top:2px}
+.star-arrow-h{text-align:center;font-size:16px;color:#FDE68A;align-self:center}
+.star-arrow-v{text-align:center;font-size:16px;color:#FDE68A}
+
+/* STEP CARDS */
+.step-card{background:#FFF;border:1px solid #E2E8F0;border-radius:10px;margin-bottom:10px;overflow:hidden;transition:border-color .15s,box-shadow .15s}
+.step-card:hover{box-shadow:0 2px 8px rgba(0,0,0,.05)}
+.step-card.done{border-color:#86EFAC}
+.step-header{display:flex;align-items:center;gap:10px;padding:12px 16px;cursor:pointer;user-select:none}
+.step-header:hover{background:#FAFAFA}
+.step-chk{width:16px;height:16px;accent-color:#16A34A;cursor:pointer;flex-shrink:0}
+.step-num{width:24px;height:24px;border-radius:50%;background:#F1F5F9;border:1px solid #E2E8F0;font-size:11px;font-weight:700;color:#64748B;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.step-card.done .step-num{background:#DCFCE7;border-color:#86EFAC;color:#15803D}
+.step-title-wrap{flex:1;min-width:0}
+.step-title{font-size:13px;font-weight:600;color:#1E293B;line-height:1.35}
+.step-card.done .step-title{color:#15803D}
+.step-subtitle{font-size:11px;color:#94A3B8;margin-top:1px}
+.step-badges{display:flex;gap:5px;align-items:center;flex-shrink:0}
+.type-badge{font-size:9px;font-weight:700;padding:2px 6px;border-radius:3px;text-transform:uppercase;letter-spacing:.04em}
+.type-ui{background:#EFF6FF;color:#1D4ED8}
+.type-code{background:#F5F3FF;color:#6D28D9}
+.type-quiz{background:#FFF7ED;color:#C2410C}
+.step-toggle{font-size:12px;color:#94A3B8;transition:transform .2s;flex-shrink:0}
+.step-toggle.open{transform:rotate(180deg)}
+.step-body{display:none;border-top:1px solid #F1F5F9}
+.step-body.open{display:block}
+.task-block{padding:14px 16px 12px}
+.task-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#94A3B8;margin-bottom:8px}
+.task-content{font-size:13px;color:#334155;line-height:1.75;white-space:pre-line}
+.task-steps{list-style:none;margin:10px 0}
+.task-steps li{display:flex;align-items:flex-start;gap:9px;padding:5px 0;font-size:13px;color:#334155;line-height:1.55;border-bottom:1px solid #F8FAFC}
+.task-steps li:last-child{border:none}
+.step-arrow{color:#3B82F6;font-weight:700;flex-shrink:0;margin-top:1px}
+.tier-buttons{display:flex;gap:8px;padding:0 16px 12px;flex-wrap:wrap}
+.tier-btn{font-size:12px;font-weight:600;padding:6px 14px;border-radius:6px;border:1.5px solid;cursor:pointer;font-family:inherit;transition:all .15s;display:flex;align-items:center;gap:5px}
+.btn-hint{background:#FFFBEB;border-color:#FDE68A;color:#92400E}
+.btn-hint:hover{background:#FEF3C7}
+.btn-hint.active{background:#FEF3C7;border-color:#F59E0B}
+.btn-answer{background:#F5F3FF;border-color:#DDD6FE;color:#4C1D95}
+.btn-answer:hover{background:#EDE9FE}
+.btn-answer.active{background:#EDE9FE;border-color:#8B5CF6}
+.btn-instructor{background:#F8FAFC;border-color:#E2E8F0;color:#64748B;font-size:11px;padding:5px 10px}
+.btn-instructor:hover{background:#F1F5F9}
+.hint-block{display:none;margin:0 16px 12px;background:#FFFBEB;border:1.5px solid #FDE68A;border-radius:8px;overflow:hidden}
+.hint-block.open{display:block}
+.hint-header{padding:8px 12px;background:#FEF3C7;border-bottom:1px solid #FDE68A;font-size:11px;font-weight:700;color:#92400E;display:flex;align-items:center;gap:6px}
+.hint-content{padding:12px 14px;font-size:13px;color:#78350F;line-height:1.7;white-space:pre-line}
+.hint-skeleton{font-family:'Consolas','Courier New',monospace;font-size:12px;background:#FFFBEB;padding:12px 14px;line-height:1.8;color:#78350F;overflow-x:auto;white-space:pre;border-top:1px solid #FDE68A}
+.answer-block{display:none;margin:0 16px 12px;background:#F5F3FF;border:1.5px solid #C4B5FD;border-radius:8px;overflow:hidden}
+.answer-block.open{display:block}
+.answer-header{padding:8px 12px;background:#EDE9FE;border-bottom:1px solid #C4B5FD;font-size:11px;font-weight:700;color:#4C1D95;display:flex;align-items:center;justify-content:space-between;gap:6px}
+.answer-note{font-size:10px;font-weight:400;color:#7C3AED}
+.answer-explain{padding:8px 14px 12px;font-size:12px;color:#4C1D95;line-height:1.65;border-top:1px solid #DDD6FE}
+.instructor-block{display:none;margin:0 16px 14px;background:#F8FAFC;border:1px dashed #CBD5E1;border-radius:8px;padding:10px 13px;font-size:12px;color:#64748B;line-height:1.65}
+.instructor-block.open{display:block}
+.instructor-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#94A3B8;margin-bottom:5px}
+.code-block{border-radius:8px;overflow:hidden;margin:8px 0;border:1px solid #334155}
+.code-hdr{display:flex;justify-content:space-between;align-items:center;padding:7px 14px;background:#1E293B;border-bottom:1px solid #334155}
+.code-lbl{font-family:'Consolas','Courier New',monospace;font-size:11px;color:#38BDF8}
+.copy-btn{font-size:11px;padding:3px 10px;border-radius:4px;background:transparent;border:1px solid #475569;color:#94A3B8;cursor:pointer;font-family:inherit;transition:all .15s}
+.copy-btn:hover{background:#334155;color:#E2E8F0}
+.copy-btn.ok{border-color:#22C55E!important;color:#22C55E!important}
+pre{margin:0;padding:14px 16px;background:#0F172A;color:#E2E8F0;font-size:12px;line-height:1.75;font-family:'Consolas','Courier New',monospace;overflow-x:auto;white-space:pre}
+.kc-block{margin:0 16px 14px;background:#FFF7ED;border:1.5px solid #FED7AA;border-radius:8px;overflow:hidden}
+.kc-header{padding:8px 13px;background:#FFEDD5;border-bottom:1px solid #FED7AA;font-size:11px;font-weight:700;color:#C2410C}
+.kc-question{padding:12px 13px 8px;font-size:13px;font-weight:500;color:#431407;line-height:1.55}
+.kc-options{padding:0 13px 12px;display:flex;flex-direction:column;gap:6px}
+.kc-option{display:flex;align-items:flex-start;gap:9px;padding:8px 11px;border-radius:6px;border:1.5px solid #FED7AA;background:#FFFBEB;cursor:pointer;font-size:12px;color:#431407;line-height:1.4;transition:all .15s;user-select:none}
+.kc-option:hover{background:#FEF3C7;border-color:#F59E0B}
+.kc-option.correct{background:#DCFCE7;border-color:#86EFAC;color:#14532D}
+.kc-option.wrong{background:#FEE2E2;border-color:#FECACA;color:#7F1D1D}
+.kc-option.reveal{background:#DCFCE7;border-color:#86EFAC;color:#14532D}
+.kc-opt-icon{font-size:12px;flex-shrink:0;font-weight:700}
+.kc-feedback{margin:0 13px 12px;padding:8px 11px;border-radius:6px;font-size:12px;line-height:1.55;display:none}
+.kc-feedback.show{display:block}
+.kc-feedback.fb-correct{background:#DCFCE7;color:#14532D;border:1px solid #86EFAC}
+.kc-feedback.fb-wrong{background:#FEE2E2;color:#7F1D1D;border:1px solid #FECACA}
+
+/* SQL Block */
+.sql-block{background:#0F172A;border-radius:8px;overflow:hidden;margin:8px 0;border:1px solid #334155}
+.sql-hdr{display:flex;justify-content:space-between;align-items:center;padding:6px 14px;background:#1E293B;border-bottom:1px solid #334155}
+.sql-lbl{font-size:11px;color:#86EFAC;font-family:'Consolas','Courier New',monospace}
+
+/* Completion */
+.completion-card{background:linear-gradient(135deg,#FFFBEB 0%,#F0FDF4 100%);border:1.5px solid #86EFAC;border-radius:12px;padding:20px;margin-top:20px;text-align:center}
+.completion-icon{font-size:36px;margin-bottom:8px}
+.completion-title{font-size:18px;font-weight:700;color:#14532D;margin-bottom:6px}
+.tables-built{display:flex;justify-content:center;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.table-built-tag{font-family:'Consolas','Courier New',monospace;font-size:11px;padding:3px 10px;border-radius:5px;background:#FFFBEB;border:1px solid #FDE68A;color:#92400E;font-weight:600}
+
+@media(max-width:640px){.page-wrapper{padding:14px 10px 40px}.star-layout{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="page-wrapper">
+
+<!-- ═══ HEADER ═══════════════════════════════════════════════ -->
+<div class="section-label">RetailX Data Platform · Microsoft Fabric Workshop</div>
+<h1>Lab 4 — Gold Layer: Star Schema</h1>
+
+<div class="lab-header">
+  <div class="lab-meta-row">
+    <span class="badge b-gold">🥇 Gold Layer</span>
+    <span class="badge b-gray">⏱ 25 minutes</span>
+    <span class="badge b-blue">Lab 4 of 5</span>
+  </div>
+  <p style="margin-bottom:10px">
+    Build the complete star schema in a single notebook:
+    <code>dim_date</code> (SQL sequence), <code>dim_customer</code>,
+    <code>dim_product</code>, <code>dim_geography</code> (enriched from silver_countries),
+    and <code>fact_sales</code> with all surrogate key joins.
+    Then query it live via the SQL Analytics Endpoint.
+  </p>
+  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">
+    <span class="tag-pill">Window functions</span>
+    <span class="tag-pill">row_number() SK</span>
+    <span class="tag-pill">SQL sequence</span>
+    <span class="tag-pill">LEFT JOIN</span>
+    <span class="tag-pill">date_key integer</span>
+    <span class="tag-pill">SQL Endpoint</span>
+  </div>
+
+  <!-- Star schema preview -->
+  <div class="star-visual">
+    <div class="star-title">Target star schema — Gold layer</div>
+    <div class="star-layout">
+      <!-- Top center: dim_date -->
+      <div></div>
+      <div class="star-dim" style="text-align:center">
+        <div class="star-dim-name">dim_date</div>
+        <div class="star-dim-rows">1,461 rows · SQL sequence</div>
+        <div class="star-dim-sk">PK: date_key (INT)</div>
+      </div>
+      <div></div>
+      <!-- Middle row: dim_customer ← fact_sales → dim_product -->
+      <div class="star-dim">
+        <div class="star-dim-name">dim_customer</div>
+        <div class="star-dim-rows">~793 rows</div>
+        <div class="star-dim-sk">PK: customer_sk (INT)</div>
+      </div>
+      <div class="star-fact">
+        <div class="star-fact-name">fact_sales</div>
+        <div class="star-fact-rows">~9,994 rows · 4 FKs + 7 measures</div>
+        <div style="font-size:10px;color:#B45309;margin-top:4px">← All 4 dims joined →</div>
+      </div>
+      <div class="star-dim">
+        <div class="star-dim-name">dim_product</div>
+        <div class="star-dim-rows">~1,850 rows</div>
+        <div class="star-dim-sk">PK: product_sk (INT)</div>
+      </div>
+      <!-- Bottom center: dim_geography -->
+      <div></div>
+      <div class="star-dim" style="text-align:center">
+        <div class="star-dim-name">dim_geography</div>
+        <div class="star-dim-rows">~632 rows · enriched from silver_countries</div>
+        <div class="star-dim-sk">PK: geo_sk (INT)</div>
+      </div>
+      <div></div>
+    </div>
+  </div>
+
+  <div class="prog-wrap">
+    <div class="prog-label" id="prog-label">Progress: 0 / 10 steps completed</div>
+    <div class="prog-bar"><div class="prog-fill" id="prog-fill"></div></div>
+  </div>
+</div>
+
+
+<!-- ═══ STEP 1 — Create notebook + params ═══════════════════ -->
+<div class="step-card" id="sc-1">
+  <div class="step-header" onclick="toggleStep(1)">
+    <input type="checkbox" class="step-chk" id="chk-1" onclick="event.stopPropagation()" onchange="markDone(1,10)">
+    <div class="step-num" id="sn-1">1</div>
+    <div class="step-title-wrap">
+      <div class="step-title">Create 'NB-03-GOLD-StarSchema' and add parameters</div>
+      <div class="step-subtitle">Naming convention · SRC_SALES + SRC_COUNTRIES params</div>
+    </div>
+    <div class="step-badges"><span class="type-badge type-ui">UI</span></div>
+    <span class="step-toggle" id="tog-1">▼</span>
+  </div>
+  <div class="step-body" id="sb-1">
+    <div class="task-block">
+      <div class="task-label">🎯 Your Task</div>
+      <div class="task-content">Create the Gold notebook. This one reads from two Silver tables — so it needs two source parameters.</div>
+      <ul class="task-steps">
+        <li><span class="step-arrow">→</span>Workspace → + New → Notebook → rename: <code>NB-03-GOLD-StarSchema</code></li>
+        <li><span class="step-arrow">→</span>Attach <code>LH_RetailX</code> Lakehouse</li>
+        <li><span class="step-arrow">→</span>Add Markdown header cell (Cell 1): Source → silver_sales + silver_countries, Target → dim_* + fact_sales, Layer → 🥇 Gold</li>
+        <li><span class="step-arrow">→</span>Add Cell 2 with parameters and imports — toggle as parameter cell</li>
+      </ul>
+    </div>
+    <div class="tier-buttons">
+      <button class="tier-btn btn-answer" onclick="toggleTier('ans-1',this)">✅ Show Parameters Cell</button>
+    </div>
+    <div class="answer-block" id="ans-1">
+      <div class="answer-header">✅ Cell 2 — Parameters &amp; Imports<span class="answer-note">Toggle as parameter cell</span></div>
+      <div class="code-block" style="margin:12px 14px">
+        <div class="code-hdr"><span class="code-lbl">Parameters &amp; Imports</span><button class="copy-btn" onclick="cp(this,'p1')">Copy</button></div>
+        <pre id="code-p1"># Parameters
+p_FullLoad    = True
+SRC_SALES     = "silver_sales"
+SRC_COUNTRIES = "silver_countries"
+
+from pyspark.sql import functions as F
+from pyspark.sql.types import IntegerType
+from pyspark.sql.window import Window</pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══ STEP 2 — CHALLENGE 1: dim_date SQL ══════════════════ -->
+<div class="step-card" id="sc-2">
+  <div class="step-header" onclick="toggleStep(2)">
+    <input type="checkbox" class="step-chk" id="chk-2" onclick="event.stopPropagation()" onchange="markDone(2,10)">
+    <div class="step-num" id="sn-2">2</div>
+    <div class="step-title-wrap">
+      <div class="step-title">🧩 Challenge 1 — Build dim_date using SQL sequence</div>
+      <div class="step-subtitle">spark.sql · sequence() · explode() · date_format() · 1,461 rows</div>
+    </div>
+    <div class="step-badges">
+      <span class="type-badge type-code">CODE</span>
+      <span class="type-badge type-quiz">Quiz</span>
+    </div>
+    <span class="step-toggle" id="tog-2">▼</span>
+  </div>
+  <div class="step-body" id="sb-2">
+    <div class="task-block">
+      <div class="task-label">🎯 Code Challenge 1</div>
+      <div class="task-content">Generate dim_date entirely using a SQL query — no source table needed. Use the Spark SQL <code>sequence()</code> function to generate one row per day from 2014-01-01 to 2017-12-31, then derive all calendar columns.</div>
+      <ul class="task-steps">
+        <li><span class="step-arrow">→</span>Use <code>spark.sql()</code> with a multi-line SQL string</li>
+        <li><span class="step-arrow">→</span>Inner subquery: <code>SELECT explode(sequence(date('2014-01-01'), date('2017-12-31'), interval 1 day)) AS d</code></li>
+        <li><span class="step-arrow">→</span>Outer SELECT: derive all 10 columns from <code>d</code> (see list below)</li>
+        <li><span class="step-arrow">→</span><code>date_key</code>: integer in format YYYYMMDD — cast <code>date_format(d,'yyyyMMdd')</code> to INT</li>
+        <li><span class="step-arrow">→</span><code>is_weekend</code>: dayofweek returns 1=Sun, 2=Mon... 7=Sat — weekend is 1 (Sun) or 7 (Sat)</li>
+        <li><span class="step-arrow">→</span>Write to Delta as <code>dim_date</code>, print row count (expected: <strong>1,461</strong>)</li>
+      </ul>
+    </div>
+    <div class="tier-buttons">
+      <button class="tier-btn btn-hint" onclick="toggleTier('hint-2',this)">💡 Show Hint</button>
+      <button class="tier-btn btn-answer" onclick="toggleTier('ans-2',this)">✅ Show Answer</button>
+      <button class="tier-btn btn-instructor" onclick="toggleTier('inst-2',this)">👨‍🏫 Instructor Note</button>
+    </div>
+    <div class="hint-block" id="hint-2">
+      <div class="hint-header">💡 Hint — SQL skeleton</div>
+      <div class="hint-skeleton">dim_date = spark.sql("""
+    SELECT
+        CAST(date_format(d, '_____') AS INT) AS date_key,  -- YYYYMMDD int
+        d                                    AS date,
+        year(d)                              AS year,
+        quarter(d)                           AS quarter,
+        month(d)                             AS month_num,
+        date_format(d, '_____')              AS month_name,  -- 'MMMM' = January
+        date_format(d, '_____')              AS month_short, -- 'MMM'  = Jan
+        (dayofweek(d) IN (_____, _____))     AS is_weekend,  -- 1=Sun, 7=Sat
+        date_format(d, '_____')              AS year_month,  -- 'yyyy-MM'
+        concat('Q', quarter(d))              AS quarter_label
+    FROM (
+        SELECT explode(
+            sequence(date('_____'), date('_____'), interval 1 day)
+        ) AS d
+    )
+""")
+dim_date.write.format("delta").mode("overwrite").saveAsTable("_____")
+print(f"dim_date      : {dim_date.count()} rows")  -- expected 1461</div>
+      <div class="hint-content">date_format patterns used:
+  'yyyyMMdd'  → '20140103'   (for date_key integer)
+  'MMMM'      → 'January'    (full month name)
+  'MMM'       → 'Jan'        (3-letter short name)
+  'yyyy-MM'   → '2014-01'    (for year_month label)
+
+dayofweek() in Spark SQL:
+  1 = Sunday, 2 = Monday, ... 6 = Friday, 7 = Saturday
+  So is_weekend = dayofweek IN (1, 7)</div>
+    </div>
+    <div class="answer-block" id="ans-2">
+      <div class="answer-header">✅ Challenge 1 Answer<span class="answer-note">Cell 3 — tested: 1461 rows, correct is_weekend logic</span></div>
+      <div class="code-block" style="margin:12px 14px">
+        <div class="code-hdr"><span class="code-lbl">Cell 3 — dim_date</span><button class="copy-btn" onclick="cp(this,'dimdate')">Copy</button></div>
+        <pre id="code-dimdate"># ── Load source tables ────────────────────────────────────────
+s  = spark.table(SRC_SALES)
+cn = spark.table(SRC_COUNTRIES)
+
+# ── 1) dim_date — generated entirely by SQL sequence ──────────
+dim_date = spark.sql("""
+    SELECT
+        CAST(date_format(d, 'yyyyMMdd') AS INT) AS date_key,
+        d                                        AS date,
+        year(d)                                  AS year,
+        quarter(d)                               AS quarter,
+        month(d)                                 AS month_num,
+        date_format(d, 'MMMM')                  AS month_name,
+        date_format(d, 'MMM')                    AS month_short,
+        (dayofweek(d) IN (1, 7))                 AS is_weekend,
+        date_format(d, 'yyyy-MM')               AS year_month,
+        concat('Q', quarter(d))                  AS quarter_label
+    FROM (
+        SELECT explode(
+            sequence(
+                date('2014-01-01'),
+                date('2017-12-31'),
+                interval 1 day
+            )
+        ) AS d
+    )
+""")
+dim_date.write.format("delta").mode("overwrite").saveAsTable("dim_date")
+print(f"dim_date      : {dim_date.count()} rows")   # expected 1461</pre>
+      </div>
+      <div class="answer-explain">
+        <strong>Why generate dim_date with SQL instead of from the data?</strong> If we only took dates from silver_sales, dim_date would only have rows for dates that appear in the data — no weekend rows without orders, no January 1st entries, etc. A complete, contiguous date table is a Power BI requirement for time intelligence (YoY, MTD, QTD) to work correctly. The SQL sequence generates every single day regardless of whether it has sales.<br><br>
+        <strong>Why 1,461 rows?</strong> 2014-01-01 to 2017-12-31 = 4 years. 2016 is a leap year (366 days). So: 365 + 365 + 366 + 365 = 1,461.
+      </div>
+    </div>
+    <div class="instructor-block" id="inst-2">
+      <div class="instructor-label">Instructor Note</div>
+      This is a great moment to explain why a continuous date table matters for Power BI time intelligence. Ask: "If dim_date only had dates with sales, what would DATESYTD() return on January 1st?" The answer: nothing — DATESYTD needs every date in the year to be present. Also demonstrate: dayofweek(date('2014-01-04')) = 7 → Saturday → is_weekend = true. Students can verify this directly in the SQL endpoint.
+    </div>
+    <div class="kc-block">
+      <div class="kc-header">🧠 Knowledge Check</div>
+      <div class="kc-question">You filter <code>dim_date</code> to <code>WHERE is_weekend = true</code>. How many rows do you expect to see for the year 2014?</div>
+      <div class="kc-options" id="kc-2-opts">
+        <div class="kc-option" onclick="answerKC(2,0,false)"><span class="kc-opt-icon">A</span> 52 rows — one per week in a year</div>
+        <div class="kc-option" onclick="answerKC(2,1,true)"><span class="kc-opt-icon">B</span> 104 or 105 rows — both Saturdays and Sundays are included as weekend days</div>
+        <div class="kc-option" onclick="answerKC(2,2,false)"><span class="kc-opt-icon">C</span> 0 rows — the Superstore dataset has no weekend orders so is_weekend is always false</div>
+        <div class="kc-option" onclick="answerKC(2,3,false)"><span class="kc-opt-icon">D</span> 365 rows — every day is included in the weekend filter</div>
+      </div>
+      <div class="kc-feedback" id="kc-2-fb"></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══ STEP 3 — CHALLENGE 2: dim_customer + dim_product ════ -->
+<div class="step-card" id="sc-3">
+  <div class="step-header" onclick="toggleStep(3)">
+    <input type="checkbox" class="step-chk" id="chk-3" onclick="event.stopPropagation()" onchange="markDone(3,10)">
+    <div class="step-num" id="sn-3">3</div>
+    <div class="step-title-wrap">
+      <div class="step-title">🧩 Challenge 2 — Build dim_customer &amp; dim_product</div>
+      <div class="step-subtitle">dropDuplicates · Window.orderBy · row_number() · surrogate keys</div>
+    </div>
+    <div class="step-badges"><span class="type-badge type-code">CODE</span></div>
+    <span class="step-toggle" id="tog-3">▼</span>
+  </div>
+  <div class="step-body" id="sb-3">
+    <div class="task-block">
+      <div class="task-label">🎯 Code Challenge 2</div>
+      <div class="task-content">Extract unique customers and products from <code>silver_sales</code>. Assign each a stable integer surrogate key using <code>row_number()</code> over a Window ordered by the natural key.</div>
+      <ul class="task-steps">
+        <li><span class="step-arrow">→</span>For <strong>dim_customer</strong>: select <code>customer_id</code>, <code>customer_name</code>, <code>segment</code> → deduplicate on <code>customer_id</code> → add <code>customer_sk</code></li>
+        <li><span class="step-arrow">→</span>For <strong>dim_product</strong>: select <code>product_id</code>, <code>product_name</code>, <code>category</code>, <code>sub_category</code> → deduplicate on <code>product_id</code> → add <code>product_sk</code></li>
+        <li><span class="step-arrow">→</span>Both use: <code>F.row_number().over(Window.orderBy("natural_key_col"))</code></li>
+        <li><span class="step-arrow">→</span>Both add <code>_ts = F.current_timestamp()</code></li>
+        <li><span class="step-arrow">→</span>Write both to Delta, print row counts</li>
+      </ul>
+    </div>
+    <div class="tier-buttons">
+      <button class="tier-btn btn-hint" onclick="toggleTier('hint-3',this)">💡 Show Hint</button>
+      <button class="tier-btn btn-answer" onclick="toggleTier('ans-3',this)">✅ Show Answer</button>
+    </div>
+    <div class="hint-block" id="hint-3">
+      <div class="hint-header">💡 Hint — Window + row_number() pattern</div>
+      <div class="hint-skeleton">dim_customer = (s
+    .select("customer_id", "customer_name", "_____")
+    .dropDuplicates(["_____"])
+    .withColumn("customer_sk",
+        F.row_number().over(Window.orderBy("_____")))  # order by natural key
+    .withColumn("_ts", F.current_timestamp()))
+dim_customer.write.format("_____").mode("overwrite").saveAsTable("_____")
+print(f"dim_customer  : {dim_customer.count()} rows")
+
+dim_product = (s
+    .select("product_id", "_____", "_____", "_____")
+    .dropDuplicates(["_____"])
+    .withColumn("product_sk",
+        F.row_number().over(Window.orderBy("_____")))
+    .withColumn("_ts", F.current_timestamp()))
+dim_product.write.format("_____").mode("overwrite").saveAsTable("_____")
+print(f"dim_product   : {dim_product.count()} rows")</div>
+      <div class="hint-content">Why order by the natural key?
+  Window.orderBy("customer_id") ensures the SK assignments are DETERMINISTIC.
+  Every time you run this notebook, CG-12520 (Claire Gute) gets the same customer_sk.
+  If you use Window.orderBy(F.rand()), the SK changes on every run — breaking
+  any existing fact_sales rows that reference the old SK values.</div>
+    </div>
+    <div class="answer-block" id="ans-3">
+      <div class="answer-header">✅ Challenge 2 Answer<span class="answer-note">Cell 4</span></div>
+      <div class="code-block" style="margin:12px 14px">
+        <div class="code-hdr"><span class="code-lbl">Cell 4 — dim_customer + dim_product</span><button class="copy-btn" onclick="cp(this,'dimdims')">Copy</button></div>
+        <pre id="code-dimdims"># ── 2) dim_customer ───────────────────────────────────────────
+dim_customer = (s
+    .select("customer_id", "customer_name", "segment")
+    .dropDuplicates(["customer_id"])
+    .withColumn("customer_sk",
+        F.row_number().over(Window.orderBy("customer_id")))
+    .withColumn("_ts", F.current_timestamp()))
+dim_customer.write.format("delta").mode("overwrite").saveAsTable("dim_customer")
+print(f"dim_customer  : {dim_customer.count()} rows")
+
+# ── 3) dim_product ─────────────────────────────────────────────
+dim_product = (s
+    .select("product_id", "product_name", "category", "sub_category")
+    .dropDuplicates(["product_id"])
+    .withColumn("product_sk",
+        F.row_number().over(Window.orderBy("product_id")))
+    .withColumn("_ts", F.current_timestamp()))
+dim_product.write.format("delta").mode("overwrite").saveAsTable("dim_product")
+print(f"dim_product   : {dim_product.count()} rows")</pre>
+      </div>
+      <div class="answer-explain"><strong>row_number() vs monotonically_increasing_id():</strong> We use <code>row_number().over(Window.orderBy("natural_key"))</code> for dimension tables because it generates a stable, deterministic sequence (1, 2, 3...). <code>monotonically_increasing_id()</code> generates large non-sequential integers that are partition-dependent and change between runs — avoid it for SKs. We reserve <code>monotonically_increasing_id()</code> for <code>fact_sk</code> in the fact table where stability is less critical.</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══ STEP 4 — CHALLENGE 3: dim_geography ═════════════════ -->
+<div class="step-card" id="sc-4">
+  <div class="step-header" onclick="toggleStep(4)">
+    <input type="checkbox" class="step-chk" id="chk-4" onclick="event.stopPropagation()" onchange="markDone(4,10)">
+    <div class="step-num" id="sn-4">4</div>
+    <div class="step-title-wrap">
+      <div class="step-title">🧩 Challenge 3 — Build dim_geography (data source join)</div>
+      <div class="step-subtitle">The only dim that combines both data sources · LEFT JOIN · .drop()</div>
+    </div>
+    <div class="step-badges">
+      <span class="type-badge type-code">CODE</span>
+      <span class="type-badge type-quiz">Quiz</span>
+    </div>
+    <span class="step-toggle" id="tog-4">▼</span>
+  </div>
+  <div class="step-body" id="sb-4">
+    <div class="task-block">
+      <div class="task-label">🎯 Code Challenge 3 — The most interesting dimension</div>
+      <div class="task-content"><code>dim_geography</code> is special — it enriches location data from <code>silver_sales</code> with <code>country_code</code> and <code>subregion</code> from <code>silver_countries</code>. This is where the two data sources merge for the first time.</div>
+      <ul class="task-steps">
+        <li><span class="step-arrow">→</span>Extract unique geo combinations from silver_sales: <code>country</code>, <code>state</code>, <code>city</code>, <code>region</code>, <code>postal_code</code></li>
+        <li><span class="step-arrow">→</span>LEFT JOIN with <code>silver_countries</code> on <code>geo.country == cn.name_common</code></li>
+        <li><span class="step-arrow">→</span>Select only <code>country_code</code> and <code>subregion</code> from silver_countries — then <code>.drop("name_common")</code> to avoid column name clash</li>
+        <li><span class="step-arrow">→</span>Add <code>geo_sk</code> using <code>Window.orderBy("country","state","city")</code></li>
+        <li><span class="step-arrow">→</span>Write to Delta as <code>dim_geography</code>, print row count</li>
+      </ul>
+    </div>
+    <div class="tier-buttons">
+      <button class="tier-btn btn-hint" onclick="toggleTier('hint-4',this)">💡 Show Hint</button>
+      <button class="tier-btn btn-answer" onclick="toggleTier('ans-4',this)">✅ Show Answer</button>
+      <button class="tier-btn btn-instructor" onclick="toggleTier('inst-4',this)">👨‍🏫 Instructor Note</button>
+    </div>
+    <div class="hint-block" id="hint-4">
+      <div class="hint-header">💡 Hint — LEFT JOIN pattern + column clash</div>
+      <div class="hint-skeleton">geo = (s
+    .select("country", "state", "city", "region", "postal_code")
+    .dropDuplicates())
+
+dim_geography = (geo
+    .join(
+        cn.select("name_common", "_____", "_____"),  # only bring over 2 cols
+        geo.country == cn._____,                      # join condition
+        "_____"                                       # join type: keep all geo rows
+    )
+    .drop("_____")           # remove name_common after join (avoid clash)
+    .withColumn("geo_sk",
+        F.row_number().over(Window.orderBy("_____", "_____", "_____")))
+    .withColumn("_ts", F.current_timestamp()))
+
+dim_geography.write.format("delta").mode("overwrite").saveAsTable("_____")
+print(f"dim_geography : {dim_geography.count()} rows")</div>
+      <div class="hint-content">Why LEFT JOIN and not INNER JOIN?
+  silver_sales only has US data. silver_countries has all 245 countries.
+  If we used INNER JOIN, we'd only keep geo rows where country matched a country name.
+  LEFT JOIN keeps ALL geo rows — even ones without a match in silver_countries
+  (those get null for country_code and subregion, which is acceptable).
+
+Why .drop("name_common")?
+  After joining, the DataFrame has BOTH geo.country AND cn.name_common.
+  They contain the same values (that was the join condition!) so name_common
+  is redundant. Dropping it keeps the schema clean.</div>
+    </div>
+    <div class="answer-block" id="ans-4">
+      <div class="answer-header">✅ Challenge 3 Answer<span class="answer-note">Cell 5 — the cross-source join</span></div>
+      <div class="code-block" style="margin:12px 14px">
+        <div class="code-hdr"><span class="code-lbl">Cell 5 — dim_geography</span><button class="copy-btn" onclick="cp(this,'dimgeo')">Copy</button></div>
+        <pre id="code-dimgeo"># ── 4) dim_geography — enriched with silver_countries ─────────
+geo = (s
+    .select("country", "state", "city", "region", "postal_code")
+    .dropDuplicates())
+
+dim_geography = (geo
+    .join(
+        cn.select("name_common", "country_code", "subregion"),
+        geo.country == cn.name_common,
+        "left"
+    )
+    .drop("name_common")
+    .withColumn("geo_sk",
+        F.row_number().over(Window.orderBy("country", "state", "city")))
+    .withColumn("_ts", F.current_timestamp()))
+dim_geography.write.format("delta").mode("overwrite").saveAsTable("dim_geography")
+print(f"dim_geography : {dim_geography.count()} rows")</pre>
+      </div>
+    </div>
+    <div class="instructor-block" id="inst-4">
+      <div class="instructor-label">Instructor Note</div>
+      This is the single most architecturally interesting step in the whole workshop — it's where the two independent data sources (Superstore CSV and REST Countries API) are combined for the first time. Ask students: "Why did we need to ingest the Countries API at all?" The answer: to enrich US-only sales data with country codes and subregions for future geographic analysis. Even though the Superstore dataset only has US data, this join demonstrates the pattern for multi-country datasets in production.
+    </div>
+    <div class="kc-block">
+      <div class="kc-header">🧠 Knowledge Check</div>
+      <div class="kc-question">After the LEFT JOIN, you check <code>dim_geography</code> and notice that <code>country_code</code> is <code>null</code> for all rows. What is the most likely cause?</div>
+      <div class="kc-options" id="kc-4-opts">
+        <div class="kc-option" onclick="answerKC(4,0,false)"><span class="kc-opt-icon">A</span> silver_countries is empty — the NB-02-SILVER-Countries notebook was not run</div>
+        <div class="kc-option" onclick="answerKC(4,1,true)"><span class="kc-opt-icon">B</span> The join condition doesn't match — silver_sales has "United States" but silver_countries has a different name for the US (e.g. "United States of America")</div>
+        <div class="kc-option" onclick="answerKC(4,2,false)"><span class="kc-opt-icon">C</span> LEFT JOIN always returns nulls for the right-side table columns</div>
+        <div class="kc-option" onclick="answerKC(4,3,false)"><span class="kc-opt-icon">D</span> country_code was dropped when we called .drop("name_common")</div>
+      </div>
+      <div class="kc-feedback" id="kc-4-fb"></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══ STEP 5 — CHALLENGE 4: fact_sales ════════════════════ -->
+<div class="step-card" id="sc-5">
+  <div class="step-header" onclick="toggleStep(5)">
+    <input type="checkbox" class="step-chk" id="chk-5" onclick="event.stopPropagation()" onchange="markDone(5,10)">
+    <div class="step-num" id="sn-5">5</div>
+    <div class="step-title-wrap">
+      <div class="step-title">🧩 Challenge 4 — Build fact_sales (the star center)</div>
+      <div class="step-subtitle">Join 3 dims · date_key integer cast · final select</div>
+    </div>
+    <div class="step-badges"><span class="type-badge type-code">CODE</span></div>
+    <span class="step-toggle" id="tog-5">▼</span>
+  </div>
+  <div class="step-body" id="sb-5">
+    <div class="task-block">
+      <div class="task-label">🎯 Code Challenge 4 — The star centre</div>
+      <div class="task-content">Join <code>silver_sales</code> with all three SK lookup DataFrames to replace natural keys with surrogate keys. Generate the <code>date_key</code> integer columns from the date columns.</div>
+      <ul class="task-steps">
+        <li><span class="step-arrow">→</span>Load the 3 SK lookup DataFrames from the tables you just created</li>
+        <li><span class="step-arrow">→</span>Join silver_sales → dim_customer (on <code>customer_id</code>) → dim_product (on <code>product_id</code>) → dim_geography (on <code>["country","state","city"]</code>) — all LEFT JOINs</li>
+        <li><span class="step-arrow">→</span>Add <code>order_date_key</code>: cast <code>date_format(order_date, "yyyyMMdd")</code> to IntegerType</li>
+        <li><span class="step-arrow">→</span>Add <code>ship_date_key</code>: same pattern for ship_date</li>
+        <li><span class="step-arrow">→</span>Add <code>fact_sk</code> using <code>F.monotonically_increasing_id()</code></li>
+        <li><span class="step-arrow">→</span>Final <code>.select()</code> with exactly 15 columns (see hint)</li>
+        <li><span class="step-arrow">→</span>Write to Delta as <code>fact_sales</code>, print row count</li>
+      </ul>
+    </div>
+    <div class="tier-buttons">
+      <button class="tier-btn btn-hint" onclick="toggleTier('hint-5',this)">💡 Show Hint</button>
+      <button class="tier-btn btn-answer" onclick="toggleTier('ans-5',this)">✅ Show Answer</button>
+    </div>
+    <div class="hint-block" id="hint-5">
+      <div class="hint-header">💡 Hint — fact_sales join chain</div>
+      <div class="hint-skeleton"># Load SK lookup tables (only the FK + SK columns)
+dc = spark.table("dim_customer") .select("customer_id",  "_____")
+dp = spark.table("dim_product")  .select("product_id",   "_____")
+dg = spark.table("dim_geography").select("country","state","city", "_____")
+
+fact_sales = (s
+    .join(dc, "_____", "left")       # single column join
+    .join(dp, "_____", "left")       # single column join
+    .join(dg, ["_____","_____","_____"], "left")   # multi-column join
+
+    # Convert date columns to integer keys
+    .withColumn("order_date_key",
+        F.date_format(F.col("order_date"), "_____").cast(_____()))
+    .withColumn("ship_date_key",
+        F.date_format(F.col("ship_date"),  "_____").cast(_____()))
+
+    .withColumn("fact_sk", F.monotonically_increasing_id())
+
+    .select(
+        "fact_sk", "order_id",
+        "order_date_key", "ship_date_key",
+        "_____", "_____", "_____",   # 3 FK surrogate keys
+        "sales","quantity","discount","profit",
+        "days_to_ship","profit_margin","net_revenue",
+        "_ingestion_ts"))
+
+fact_sales.write.format("delta").mode("overwrite").saveAsTable("_____")
+print(f"fact_sales    : {fact_sales.count()} rows")</div>
+    </div>
+    <div class="answer-block" id="ans-5">
+      <div class="answer-header">✅ Challenge 4 Answer<span class="answer-note">Cell 6 — tested with correct column count</span></div>
+      <div class="code-block" style="margin:12px 14px">
+        <div class="code-hdr"><span class="code-lbl">Cell 6 — fact_sales</span><button class="copy-btn" onclick="cp(this,'fact')">Copy</button></div>
+        <pre id="code-fact"># ── 5) fact_sales — join all dimension SKs ────────────────────
+dc = spark.table("dim_customer") .select("customer_id",  "customer_sk")
+dp = spark.table("dim_product")  .select("product_id",   "product_sk")
+dg = spark.table("dim_geography").select("country", "state", "city", "geo_sk")
+
+fact_sales = (s
+    .join(dc, "customer_id", "left")
+    .join(dp, "product_id",  "left")
+    .join(dg, ["country", "state", "city"], "left")
+    .withColumn("order_date_key",
+        F.date_format(F.col("order_date"), "yyyyMMdd").cast(IntegerType()))
+    .withColumn("ship_date_key",
+        F.date_format(F.col("ship_date"),  "yyyyMMdd").cast(IntegerType()))
+    .withColumn("fact_sk", F.monotonically_increasing_id())
+    .select(
+        "fact_sk",    "order_id",
+        "order_date_key", "ship_date_key",
+        "customer_sk", "product_sk", "geo_sk",
+        "sales", "quantity", "discount", "profit",
+        "days_to_ship", "profit_margin", "net_revenue",
+        "_ingestion_ts"))
+fact_sales.write.format("delta").mode("overwrite").saveAsTable("fact_sales")
+print(f"fact_sales    : {fact_sales.count()} rows")
+
+# ── Verify all 5 Gold tables exist ────────────────────────────
+spark.sql("SHOW TABLES").filter(
+    "tableName LIKE 'dim_%' OR tableName LIKE 'fact_%'"
+).show()</pre>
+      </div>
+      <div class="answer-explain"><strong>Why load dim tables again with .select()?</strong> We only need the SK column from each dim for the join. Loading only <code>["customer_id","customer_sk"]</code> instead of all 4 customer columns reduces shuffle data during the join — especially important with large dimension tables in production.<br><br><strong>Why multi-column join for dim_geography?</strong> There is no single column that uniquely identifies a geo combination — we need all three of <code>country + state + city</code> together as a composite key. The list syntax <code>["country","state","city"]</code> tells Spark to match on all three simultaneously.</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══ STEP 6 — Run and verify ══════════════════════════════ -->
+<div class="step-card" id="sc-6">
+  <div class="step-header" onclick="toggleStep(6)">
+    <input type="checkbox" class="step-chk" id="chk-6" onclick="event.stopPropagation()" onchange="markDone(6,10)">
+    <div class="step-num" id="sn-6">6</div>
+    <div class="step-title-wrap">
+      <div class="step-title">Run all cells and verify the 5 Gold tables</div>
+      <div class="step-subtitle">Expected row counts · Check no null SKs in fact_sales</div>
+    </div>
+    <div class="step-badges"><span class="type-badge type-ui">UI</span></div>
+    <span class="step-toggle" id="tog-6">▼</span>
+  </div>
+  <div class="step-body" id="sb-6">
+    <div class="task-block">
+      <div class="task-label">🎯 Your Task</div>
+      <ul class="task-steps">
+        <li><span class="step-arrow">→</span>Click <strong>Run all</strong> — expected outputs in order:</li>
+        <li><span class="step-arrow">→</span><code>dim_date      : 1461 rows</code></li>
+        <li><span class="step-arrow">→</span><code>dim_customer  : 793 rows</code> (approximately)</li>
+        <li><span class="step-arrow">→</span><code>dim_product   : 1850 rows</code> (approximately)</li>
+        <li><span class="step-arrow">→</span><code>dim_geography : 632 rows</code> (approximately)</li>
+        <li><span class="step-arrow">→</span><code>fact_sales    : 9994 rows</code></li>
+        <li><span class="step-arrow">→</span>In LH_RetailX → Tables: verify 9 tables total (4 bronze/silver + 5 gold)</li>
+        <li><span class="step-arrow">→</span>Add a DQ cell: verify no null customer_sk, product_sk, or geo_sk in fact_sales</li>
+      </ul>
+    </div>
+    <div class="tier-buttons">
+      <button class="tier-btn btn-answer" onclick="toggleTier('ans-6',this)">✅ Show DQ cell for fact_sales</button>
+    </div>
+    <div class="answer-block" id="ans-6">
+      <div class="answer-header">✅ fact_sales DQ cell<span class="answer-note">Add as Cell 7</span></div>
+      <div class="code-block" style="margin:12px 14px">
+        <div class="code-hdr"><span class="code-lbl">Cell 7 — Gold DQ checks</span><button class="copy-btn" onclick="cp(this,'golddq')">Copy</button></div>
+        <pre id="code-golddq"># ── Gold DQ: verify no null surrogate keys ────────────────────
+f = spark.table("fact_sales")
+total = f.count()
+
+null_csk = f.filter(F.col("customer_sk").isNull()).count()
+null_psk = f.filter(F.col("product_sk").isNull()).count()
+null_gsk = f.filter(F.col("geo_sk").isNull()).count()
+null_dsk = f.filter(F.col("order_date_key").isNull()).count()
+
+print(f"[DQ] fact_sales: {total} rows")
+print(f"  null customer_sk : {null_csk}")
+print(f"  null product_sk  : {null_psk}")
+print(f"  null geo_sk      : {null_gsk}")
+print(f"  null order_date_key: {null_dsk}")
+
+assert null_csk == 0, "DQ: null customer_sk in fact_sales"
+assert null_psk == 0, "DQ: null product_sk in fact_sales"
+assert null_dsk == 0, "DQ: null order_date_key in fact_sales"
+# geo_sk may have nulls if a city had no match (acceptable)
+print("[DQ] All critical FK checks passed ✓")</pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══ STEP 7 — SQL Analytics Endpoint ══════════════════════ -->
+<div class="step-card" id="sc-7">
+  <div class="step-header" onclick="toggleStep(7)">
+    <input type="checkbox" class="step-chk" id="chk-7" onclick="event.stopPropagation()" onchange="markDone(7,10)">
+    <div class="step-num" id="sn-7">7</div>
+    <div class="step-title-wrap">
+      <div class="step-title">Query the star schema via SQL Analytics Endpoint</div>
+      <div class="step-subtitle">3 test queries · Validate the joins work correctly</div>
+    </div>
+    <div class="step-badges">
+      <span class="type-badge type-ui">UI</span>
+      <span class="type-badge type-quiz">Quiz</span>
+    </div>
+    <span class="step-toggle" id="tog-7">▼</span>
+  </div>
+  <div class="step-body" id="sb-7">
+    <div class="task-block">
+      <div class="task-label">🎯 Your Task</div>
+      <div class="task-content">Switch to the SQL Analytics Endpoint in LH_RetailX and run each query below. Each one validates a different dimension join. Write down the expected result before running to test your understanding.</div>
+    </div>
+
+    <!-- Query 1 -->
+    <div style="margin:0 16px 10px">
+      <div style="font-size:12px;font-weight:600;color:#334155;margin-bottom:5px">Query 1 — Sales by product category (tests dim_product join)</div>
+      <div class="sql-block">
+        <div class="sql-hdr"><span class="sql-lbl">SQL — paste into SQL endpoint query editor</span><button class="copy-btn" onclick="cp(this,'sql1')">Copy</button></div>
+        <pre id="code-sql1">SELECT
+    p.category,
+    ROUND(SUM(f.sales),   0) AS total_sales,
+    ROUND(SUM(f.profit),  0) AS total_profit,
+    ROUND(AVG(f.profit_margin), 1) AS avg_margin_pct
+FROM fact_sales f
+JOIN dim_product p ON f.product_sk = p.product_sk
+GROUP BY p.category
+ORDER BY total_sales DESC;</pre>
+      </div>
+      <div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:6px;padding:8px 12px;font-size:12px;color:#14532D;margin-top:4px">
+        ✅ Expected order: Technology (~$836K) &gt; Furniture (~$742K) &gt; Office Supplies (~$719K)
+      </div>
+    </div>
+
+    <!-- Query 2 -->
+    <div style="margin:0 16px 10px">
+      <div style="font-size:12px;font-weight:600;color:#334155;margin-bottom:5px">Query 2 — Revenue by year (tests dim_date join)</div>
+      <div class="sql-block">
+        <div class="sql-hdr"><span class="sql-lbl">SQL</span><button class="copy-btn" onclick="cp(this,'sql2')">Copy</button></div>
+        <pre id="code-sql2">SELECT
+    d.year,
+    COUNT(DISTINCT f.order_id) AS total_orders,
+    ROUND(SUM(f.sales), 0)     AS revenue,
+    ROUND(AVG(f.days_to_ship), 1) AS avg_days_to_ship
+FROM fact_sales f
+JOIN dim_date d ON f.order_date_key = d.date_key
+GROUP BY d.year
+ORDER BY d.year;</pre>
+      </div>
+      <div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:6px;padding:8px 12px;font-size:12px;color:#14532D;margin-top:4px">
+        ✅ Expected: revenue grows each year 2014→2017 (growth trend validates date join)
+      </div>
+    </div>
+
+    <!-- Query 3 -->
+    <div style="margin:0 16px 14px">
+      <div style="font-size:12px;font-weight:600;color:#334155;margin-bottom:5px">Query 3 — Top 5 customers (tests dim_customer join)</div>
+      <div class="sql-block">
+        <div class="sql-hdr"><span class="sql-lbl">SQL</span><button class="copy-btn" onclick="cp(this,'sql3')">Copy</button></div>
+        <pre id="code-sql3">SELECT
+    c.customer_name,
+    c.segment,
+    COUNT(DISTINCT f.order_id)     AS orders,
+    ROUND(SUM(f.sales), 0)         AS total_sales,
+    ROUND(AVG(f.profit_margin), 1) AS avg_margin_pct
+FROM fact_sales f
+JOIN dim_customer c ON f.customer_sk = c.customer_sk
+GROUP BY c.customer_name, c.segment
+ORDER BY total_sales DESC
+LIMIT 5;</pre>
+      </div>
+    </div>
+
+    <div class="tier-buttons">
+      <button class="tier-btn btn-instructor" onclick="toggleTier('inst-7',this)">👨‍🏫 Instructor Note</button>
+    </div>
+    <div class="instructor-block" id="inst-7">
+      <div class="instructor-label">Instructor Note</div>
+      These 3 queries are the proof that the star schema works. If any join returns nulls or 0 revenue, there's a bug to investigate. The SQL endpoint responds instantly — there's no Spark startup delay because it reads Delta files directly via a SQL engine. This is a great moment to show students that the same Delta tables are accessible via both Spark (notebooks) and SQL (endpoint) without any data movement or copy.
+    </div>
+    <div class="kc-block">
+      <div class="kc-header">🧠 Knowledge Check</div>
+      <div class="kc-question">Query 2 returns <code>NULL</code> for <code>d.year</code> on all rows. The <code>dim_date</code> table has 1,461 rows. What is wrong?</div>
+      <div class="kc-options" id="kc-7-opts">
+        <div class="kc-option" onclick="answerKC(7,0,false)"><span class="kc-opt-icon">A</span> dim_date was not written to Delta correctly</div>
+        <div class="kc-option" onclick="answerKC(7,1,false)"><span class="kc-opt-icon">B</span> The JOIN syntax is wrong — it should use ON d.date = f.order_date</div>
+        <div class="kc-option" onclick="answerKC(7,2,true)"><span class="kc-opt-icon">C</span> order_date_key in fact_sales is null — the date_format cast failed because order_date was still a string, not a Date type</div>
+        <div class="kc-option" onclick="answerKC(7,3,false)"><span class="kc-opt-icon">D</span> The year column in dim_date is named differently</div>
+      </div>
+      <div class="kc-feedback" id="kc-7-fb"></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══ STEP 8 — Add NB-03 to pipeline ═══════════════════════ -->
+<div class="step-card" id="sc-8">
+  <div class="step-header" onclick="toggleStep(8)">
+    <input type="checkbox" class="step-chk" id="chk-8" onclick="event.stopPropagation()" onchange="markDone(8,10)">
+    <div class="step-num" id="sn-8">8</div>
+    <div class="step-title-wrap">
+      <div class="step-title">Add NB-03 to the pipeline — complete the DAG</div>
+      <div class="step-subtitle">4th activity · Join from both Silver activities</div>
+    </div>
+    <div class="step-badges"><span class="type-badge type-ui">UI</span></div>
+    <span class="step-toggle" id="tog-8">▼</span>
+  </div>
+  <div class="step-body" id="sb-8">
+    <div class="task-block">
+      <div class="task-label">🎯 Your Task</div>
+      <div class="task-content">Open <code>PL-RetailX-Daily</code> and add the Gold notebook as the final activity. Wire it to receive from both Silver activities (join pattern).</div>
+      <ul class="task-steps">
+        <li><span class="step-arrow">→</span>Open <code>PL-RetailX-Daily</code> pipeline</li>
+        <li><span class="step-arrow">→</span>Add Notebook activity: Name = <code>GOLD-StarSchema</code>, Notebook = <code>NB-03-GOLD-StarSchema</code>, Timeout = 00:30:00</li>
+        <li><span class="step-arrow">→</span>Connect <code>SILVER-Sales</code> On success → <code>GOLD-StarSchema</code></li>
+        <li><span class="step-arrow">→</span>Connect <code>SILVER-Countries</code> On success → <code>GOLD-StarSchema</code></li>
+        <li><span class="step-arrow">→</span>Verify: GOLD-StarSchema has 2 incoming arrows (from both Silver activities)</li>
+      </ul>
+    </div>
+    <div class="tier-buttons">
+      <button class="tier-btn btn-hint" onclick="toggleTier('hint-8',this)">💡 Show Hint</button>
+    </div>
+    <div class="hint-block" id="hint-8">
+      <div class="hint-header">💡 Hint — Final DAG topology</div>
+      <div class="hint-content">The final pipeline should look like this:
+
+  [BRONZE-Countries] ──success──→ [SILVER-Sales]    ──success──→ [GOLD-StarSchema]
+                    └─success──→ [SILVER-Countries] ──success──┘
+
+  GOLD-StarSchema will start ONLY after BOTH Silver activities succeed.
+  If either Silver fails, GOLD will not run.
+
+This is the fan-in (join) pattern — the opposite of the fan-out we used in Lab 3.
+Fabric pipeline engine handles this automatically: it waits until all incoming
+"On success" dependencies are satisfied before dispatching the activity.</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══ STEP 9 — Run full pipeline ═══════════════════════════ -->
+<div class="step-card" id="sc-9">
+  <div class="step-header" onclick="toggleStep(9)">
+    <input type="checkbox" class="step-chk" id="chk-9" onclick="event.stopPropagation()" onchange="markDone(9,10)">
+    <div class="step-num" id="sn-9">9</div>
+    <div class="step-title-wrap">
+      <div class="step-title">Run the full 4-activity pipeline end-to-end</div>
+      <div class="step-subtitle">~8 min total · Monitor the DAG execution live</div>
+    </div>
+    <div class="step-badges"><span class="type-badge type-ui">UI</span></div>
+    <span class="step-toggle" id="tog-9">▼</span>
+  </div>
+  <div class="step-body" id="sb-9">
+    <div class="task-block">
+      <div class="task-label">🎯 Your Task</div>
+      <div class="task-content">Run the full pipeline and observe the DAG execution order in the Monitor view.</div>
+      <ul class="task-steps">
+        <li><span class="step-arrow">→</span>Pipeline → <strong>Run → Save and run</strong></li>
+        <li><span class="step-arrow">→</span>Monitor → observe in real time: Bronze starts → Silver-Sales + Silver-Countries start simultaneously → Gold waits → Gold starts when both Silver are done</li>
+        <li><span class="step-arrow">→</span>All 4 activities should show ✅ green when done</li>
+        <li><span class="step-arrow">→</span>Check total runtime in the Monitor view — should be ~8 minutes</li>
+      </ul>
+    </div>
+    <div class="tier-buttons">
+      <button class="tier-btn btn-hint" onclick="toggleTier('hint-9',this)">💡 If Gold fails</button>
+    </div>
+    <div class="hint-block" id="hint-9">
+      <div class="hint-header">💡 Diagnosing Gold notebook failures</div>
+      <div class="hint-content">Most common Gold failures:
+
+❌ "AnalysisException: Table not found: silver_sales"
+→ silver_sales doesn't exist yet or its name has a typo
+→ Verify SRC_SALES = "silver_sales" matches exactly
+
+❌ "WindowFunctions are not supported without ordering"
+→ Missing .over() on row_number()
+→ Check: F.row_number().over(Window.orderBy("natural_key"))
+
+❌ fact_sales has null customer_sk / product_sk (many rows)
+→ The join column has a mismatch — e.g. silver_sales has "Customer ID" not "customer_id"
+→ Verify the Silver notebooks renamed columns correctly
+
+❌ order_date_key is null
+→ order_date is a string not a Date type → date_format() on a string returns null
+→ Verify NB-02-SILVER-Sales cast order_date correctly</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══ STEP 10 — Verify 9 tables + optional exploration ═════ -->
+<div class="step-card" id="sc-10">
+  <div class="step-header" onclick="toggleStep(10)">
+    <input type="checkbox" class="step-chk" id="chk-10" onclick="event.stopPropagation()" onchange="markDone(10,10)">
+    <div class="step-num" id="sn-10">10</div>
+    <div class="step-title-wrap">
+      <div class="step-title">Verify all 9 tables and explore the star schema</div>
+      <div class="step-subtitle">Final Gold check · Lakehouse has full medallion stack</div>
+    </div>
+    <div class="step-badges">
+      <span class="type-badge type-ui">UI</span>
+      <span class="type-badge type-quiz">Quiz</span>
+    </div>
+    <span class="step-toggle" id="tog-10">▼</span>
+  </div>
+  <div class="step-body" id="sb-10">
+    <div class="task-block">
+      <div class="task-label">🎯 Your Task</div>
+      <ul class="task-steps">
+        <li><span class="step-arrow">→</span>LH_RetailX → Tables: confirm all 9 tables are present across Bronze, Silver, Gold</li>
+        <li><span class="step-arrow">→</span>SQL endpoint → run: <code>SELECT COUNT(*) FROM dim_date WHERE is_weekend = true AND year = 2014</code> — expected ~104</li>
+        <li><span class="step-arrow">→</span>SQL endpoint → run: <code>SELECT country_code, COUNT(*) AS cities FROM dim_geography GROUP BY country_code</code> — expected US dominates</li>
+        <li><span class="step-arrow">→</span>Review <code>fact_sales</code> schema — confirm it has <strong>no</strong> customer_name, product_name, or state columns (only SKs and measures)</li>
+      </ul>
+    </div>
+    <div class="kc-block">
+      <div class="kc-header">🧠 Final Lab Check</div>
+      <div class="kc-question">A business user wants to filter the Power BI report by <code>segment</code> (Consumer / Corporate / Home Office). Which table should carry the <code>segment</code> column in your star schema?</div>
+      <div class="kc-options" id="kc-10-opts">
+        <div class="kc-option" onclick="answerKC(10,0,false)"><span class="kc-opt-icon">A</span> fact_sales — it's a filter attribute used in most queries</div>
+        <div class="kc-option" onclick="answerKC(10,1,true)"><span class="kc-opt-icon">B</span> dim_customer — segment describes a property of the customer, not the transaction</div>
+        <div class="kc-option" onclick="answerKC(10,2,false)"><span class="kc-opt-icon">C</span> dim_product — segment is a product classification</div>
+        <div class="kc-option" onclick="answerKC(10,3,false)"><span class="kc-opt-icon">D</span> A separate dim_segment table — every attribute needs its own dimension</div>
+      </div>
+      <div class="kc-feedback" id="kc-10-fb"></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══ COMPLETION ════════════════════════════════════════════ -->
+<div class="completion-card" id="completion-card" style="display:none">
+  <div class="completion-icon">🥇</div>
+  <div class="completion-title">Lab 4 Complete — Gold Star Schema Done!</div>
+  <div style="font-size:13px;color:#166534;margin-bottom:12px">All 9 tables across all 3 medallion layers are in place. The full data pipeline runs end-to-end.</div>
+  <div class="tables-built">
+    <span class="table-built-tag">🥉 raw_sales</span>
+    <span class="table-built-tag">🥉 raw_countries</span>
+    <span class="table-built-tag">🥈 silver_sales</span>
+    <span class="table-built-tag">🥈 silver_countries</span>
+    <span class="table-built-tag">🥇 dim_date</span>
+    <span class="table-built-tag">🥇 dim_customer</span>
+    <span class="table-built-tag">🥇 dim_product</span>
+    <span class="table-built-tag">🥇 dim_geography</span>
+    <span class="table-built-tag">🥇 fact_sales</span>
+  </div>
+  <div style="font-size:13px;color:#166534">
+    <strong>Up next → Lab 5:</strong> Create the DirectLake semantic model, build 4 relationships,
+    write 8 DAX measures, and build the Power BI executive dashboard.
+  </div>
+</div>
+
+<div class="divider"></div>
+<div class="card" style="border-left:4px solid #3B82F6">
+  <div class="section-label">Up next</div>
+  <h2>Lab 5 — Platinum Layer: Power BI DirectLake Report</h2>
+  <p style="margin-top:8px;margin-bottom:0">
+    In Lab 5 you create <code>SM_RetailX</code> — a DirectLake semantic model that reads
+    the Gold Delta tables directly from OneLake with no import and no scheduled refresh.
+    You build 4 relationships, write 8 DAX measures, and create the executive
+    <code>RPT-RetailX-Overview</code> dashboard with cards, line chart, bar chart, map, and slicers.
+  </p>
+</div>
+
+</div><!-- end page-wrapper -->
+
+<!-- ============================================================
+     JAVASCRIPT
+============================================================ -->
+<script>
+function toggleStep(n){
+  var b=document.getElementById('sb-'+n),t=document.getElementById('tog-'+n);
+  if(!b)return;var o=b.classList.contains('open');
+  b.classList.toggle('open',!o);t.classList.toggle('open',!o);
+}
+function toggleTier(id,btn){
+  var el=document.getElementById(id);if(!el)return;
+  var o=el.classList.contains('open');
+  el.classList.toggle('open',!o);if(btn)btn.classList.toggle('active',!o);
+}
+var TOTAL=10,done=0;
+function markDone(n){
+  var c=document.getElementById('chk-'+n),card=document.getElementById('sc-'+n);
+  if(!c)return;
+  if(c.checked){card.classList.add('done');done++;}
+  else{card.classList.remove('done');done--;}
+  var pct=Math.round(done/TOTAL*100);
+  document.getElementById('prog-fill').style.width=pct+'%';
+  document.getElementById('prog-label').textContent='Progress: '+done+' / '+TOTAL+' steps completed';
+  var cc=document.getElementById('completion-card');
+  if(cc)cc.style.display=(done===TOTAL)?'block':'none';
+}
+var KC={
+  2:{correct:1,
+     f:{ok:'✅ Correct! There are both Saturdays and Sundays — so 2 weekend days per week. 2014 has 52 weeks + 1 extra day → approximately 104–105 weekend days. Run the query to confirm the exact number.',
+        no:'❌ Not quite. is_weekend = true captures BOTH Saturdays and Sundays — that\'s 2 days per week, approximately 104–105 rows in a 52-week year. Not just Sundays or just weekends.'}},
+  4:{correct:1,
+     f:{ok:'✅ Correct! The LEFT JOIN is on geo.country == cn.name_common. The Superstore dataset uses "United States" as the country name. If the REST Countries API returns "United States" as name_common, the join works. Verify by checking: SELECT DISTINCT name_common FROM silver_countries WHERE country_code = \'US\'',
+        no:'❌ Not quite. A LEFT JOIN always keeps all rows from the left table. If country_code is null for ALL rows, it means no rows matched — i.e., the join condition found no matches. The most likely cause is that the country name in silver_sales doesn\'t exactly match name_common in silver_countries.'}},
+  7:{correct:2,
+     f:{ok:'✅ Correct! date_format() applied to a string column returns null — it only works on DateType/TimestampType. If order_date was not properly cast to Date in the Silver notebook, order_date_key will be null throughout fact_sales, causing the JOIN to fail.',
+        no:'❌ Not quite. The join syntax is correct — it should be ON f.order_date_key = d.date_key. The most common cause of null year after a valid JOIN is that order_date_key itself is null in fact_sales. Check: SELECT COUNT(*) FROM fact_sales WHERE order_date_key IS NULL.'}},
+  10:{correct:1,
+      f:{ok:'✅ Correct! Segment describes the customer (Consumer, Corporate, Home Office) — it\'s a customer attribute, not a property of the transaction. It belongs in dim_customer. In the star schema, fact_sales only holds measures and foreign keys. Descriptive attributes always go in dimension tables.',
+         no:'❌ Not quite. Star schema principle: descriptive attributes go in dimension tables, not the fact table. Segment describes the customer, so it belongs in dim_customer. The fact table should only contain numeric measures (sales, profit) and foreign key references (customer_sk, product_sk, etc.).'}}
+};
+function answerKC(n,idx,ok){
+  var opts=document.querySelectorAll('#kc-'+n+'-opts .kc-option');
+  var fb=document.getElementById('kc-'+n+'-fb');
+  var ans=KC[n];if(!ans||!fb)return;
+  opts.forEach(function(o){o.style.pointerEvents='none';});
+  opts.forEach(function(o,i){
+    if(i===ans.correct)o.classList.add('reveal');
+    if(i===idx&&!ok)o.classList.add('wrong');
+  });
+  fb.classList.add('show');fb.classList.add(ok?'fb-correct':'fb-wrong');
+  fb.textContent=ok?ans.f.ok:ans.f.no;
+}
+function cp(btn,id){
+  var pre=document.getElementById('code-'+id);if(!pre)return;
+  var t=pre.textContent;
+  function ok(){btn.textContent='✓ Copied';btn.classList.add('ok');
+    setTimeout(function(){btn.textContent='Copy';btn.classList.remove('ok');},2000);}
+  function fail(){btn.textContent='Failed';}
+  if(navigator.clipboard&&window.isSecureContext){
+    navigator.clipboard.writeText(t).then(ok).catch(function(){fb(t,ok,fail);});}
+  else fb(t,ok,fail);
+}
+function fb(t,ok,fail){
+  var a=document.createElement('textarea');a.value=t;
+  a.style.cssText='position:fixed;opacity:0';document.body.appendChild(a);a.select();
+  try{document.execCommand('copy')?ok():fail();}catch(e){fail();}
+  document.body.removeChild(a);
+}
+toggleStep(1);
+</script>
+</body>
+</html>

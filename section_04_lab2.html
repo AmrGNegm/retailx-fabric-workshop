@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RetailX Fabric Workshop — Lab 2: Bronze API Notebook</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;background:#F0F4F8;color:#1A202C;font-size:14px;line-height:1.6}
+.page-wrapper{max-width:860px;margin:0 auto;padding:32px 24px 60px}
+h1{font-size:26px;font-weight:700;color:#0F172A;margin-bottom:4px}
+h2{font-size:19px;font-weight:700;color:#1E293B;margin-bottom:6px}
+h3{font-size:15px;font-weight:600;color:#334155;margin-bottom:8px}
+p{color:#475569;line-height:1.75;margin-bottom:10px}
+code{font-family:'Consolas','Courier New',monospace;font-size:12px;background:#F1F5F9;border:1px solid #E2E8F0;border-radius:4px;padding:1px 6px;color:#0F172A}
+
+/* ── LAYOUT ── */
+.section-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#94A3B8;margin-bottom:6px}
+.divider{height:1px;background:#E2E8F0;margin:24px 0}
+.card{background:#FFF;border:1px solid #E2E8F0;border-radius:12px;padding:18px 20px;margin-bottom:18px}
+
+.info-box{border-radius:8px;padding:11px 14px;font-size:13px;line-height:1.65;margin:10px 0;display:flex;gap:10px;align-items:flex-start}
+.ib-icon{font-size:15px;flex-shrink:0;margin-top:1px}
+.info-blue  {background:#EFF6FF;border:1px solid #BFDBFE;color:#1E40AF}
+.info-amber {background:#FFFBEB;border:1px solid #FDE68A;color:#92400E}
+.info-green {background:#F0FDF4;border:1px solid #BBF7D0;color:#14532D}
+.info-purple{background:#F5F3FF;border:1px solid #DDD6FE;color:#4C1D95}
+
+/* ── LAB HEADER ── */
+.lab-header{background:#FFF;border:1px solid #E2E8F0;border-radius:12px;padding:18px 20px;margin-bottom:20px;border-left:4px solid #F59E0B}
+.lab-meta-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.badge{font-size:10px;font-weight:700;padding:3px 9px;border-radius:4px;text-transform:uppercase;letter-spacing:.04em}
+.b-bronze{background:#FEF3C7;color:#92400E}
+.b-gray{background:#F1F5F9;color:#475569;border:1px solid #E2E8F0}
+.b-blue{background:#EFF6FF;color:#1D4ED8}
+.tag-pill{font-size:11px;padding:2px 8px;border-radius:10px;background:#F1F5F9;border:1px solid #E2E8F0;color:#475569}
+.prog-wrap{margin-top:14px}
+.prog-label{font-size:12px;color:#64748B;margin-bottom:5px}
+.prog-bar{height:6px;background:#E2E8F0;border-radius:3px;overflow:hidden}
+.prog-fill{height:100%;background:#F59E0B;border-radius:3px;transition:width .3s;width:0%}
+
+/* ── STEP CARDS ── */
+.step-card{background:#FFF;border:1px solid #E2E8F0;border-radius:10px;margin-bottom:10px;overflow:hidden;transition:border-color .15s,box-shadow .15s}
+.step-card:hover{box-shadow:0 2px 8px rgba(0,0,0,.05)}
+.step-card.done{border-color:#86EFAC}
+.step-header{display:flex;align-items:center;gap:10px;padding:12px 16px;cursor:pointer;user-select:none;transition:background .1s}
+.step-header:hover{background:#FAFAFA}
+.step-chk{width:16px;height:16px;accent-color:#16A34A;cursor:pointer;flex-shrink:0}
+.step-num{width:24px;height:24px;border-radius:50%;background:#F1F5F9;border:1px solid #E2E8F0;font-size:11px;font-weight:700;color:#64748B;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.step-card.done .step-num{background:#DCFCE7;border-color:#86EFAC;color:#15803D}
+.step-title-wrap{flex:1;min-width:0}
+.step-title{font-size:13px;font-weight:600;color:#1E293B;line-height:1.35}
+.step-card.done .step-title{color:#15803D}
+.step-subtitle{font-size:11px;color:#94A3B8;margin-top:1px}
+.step-badges{display:flex;gap:5px;align-items:center;flex-shrink:0}
+.type-badge{font-size:9px;font-weight:700;padding:2px 6px;border-radius:3px;text-transform:uppercase;letter-spacing:.04em}
+.type-ui{background:#EFF6FF;color:#1D4ED8}
+.type-code{background:#F5F3FF;color:#6D28D9}
+.type-quiz{background:#FFF7ED;color:#C2410C}
+.step-toggle{font-size:12px;color:#94A3B8;transition:transform .2s;flex-shrink:0}
+.step-toggle.open{transform:rotate(180deg)}
+.step-body{display:none;border-top:1px solid #F1F5F9}
+.step-body.open{display:block}
+
+/* ── TASK BLOCK ── */
+.task-block{padding:14px 16px 12px}
+.task-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#94A3B8;margin-bottom:8px}
+.task-content{font-size:13px;color:#334155;line-height:1.75;white-space:pre-line}
+.task-steps{list-style:none;margin:10px 0}
+.task-steps li{display:flex;align-items:flex-start;gap:9px;padding:5px 0;font-size:13px;color:#334155;line-height:1.55;border-bottom:1px solid #F8FAFC}
+.task-steps li:last-child{border:none}
+.step-arrow{color:#3B82F6;font-weight:700;flex-shrink:0;margin-top:1px}
+
+/* ── TIER BUTTONS ── */
+.tier-buttons{display:flex;gap:8px;padding:0 16px 12px;flex-wrap:wrap}
+.tier-btn{font-size:12px;font-weight:600;padding:6px 14px;border-radius:6px;border:1.5px solid;cursor:pointer;font-family:inherit;transition:all .15s;display:flex;align-items:center;gap:5px}
+.btn-hint{background:#FFFBEB;border-color:#FDE68A;color:#92400E}
+.btn-hint:hover{background:#FEF3C7}
+.btn-hint.active{background:#FEF3C7;border-color:#F59E0B}
+.btn-answer{background:#F5F3FF;border-color:#DDD6FE;color:#4C1D95}
+.btn-answer:hover{background:#EDE9FE}
+.btn-answer.active{background:#EDE9FE;border-color:#8B5CF6}
+.btn-instructor{background:#F8FAFC;border-color:#E2E8F0;color:#64748B;font-size:11px;padding:5px 10px}
+.btn-instructor:hover{background:#F1F5F9}
+
+/* ── HINT BLOCK ── */
+.hint-block{display:none;margin:0 16px 12px;background:#FFFBEB;border:1.5px solid #FDE68A;border-radius:8px;overflow:hidden}
+.hint-block.open{display:block}
+.hint-header{padding:8px 12px;background:#FEF3C7;border-bottom:1px solid #FDE68A;font-size:11px;font-weight:700;color:#92400E;display:flex;align-items:center;gap:6px}
+.hint-content{padding:12px 14px;font-size:13px;color:#78350F;line-height:1.7;white-space:pre-line}
+.hint-skeleton{font-family:'Consolas','Courier New',monospace;font-size:12px;background:#FFFBEB;padding:12px 14px;line-height:1.8;color:#78350F;overflow-x:auto;white-space:pre;border-top:1px solid #FDE68A}
+
+/* ── ANSWER BLOCK ── */
+.answer-block{display:none;margin:0 16px 12px;background:#F5F3FF;border:1.5px solid #C4B5FD;border-radius:8px;overflow:hidden}
+.answer-block.open{display:block}
+.answer-header{padding:8px 12px;background:#EDE9FE;border-bottom:1px solid #C4B5FD;font-size:11px;font-weight:700;color:#4C1D95;display:flex;align-items:center;justify-content:space-between;gap:6px}
+.answer-note{font-size:10px;font-weight:400;color:#7C3AED}
+.answer-content{padding:12px 14px;font-size:13px;color:#2E1065;line-height:1.7;white-space:pre-line}
+.answer-explain{padding:8px 14px 12px;font-size:12px;color:#4C1D95;line-height:1.65;border-top:1px solid #DDD6FE}
+
+/* ── INSTRUCTOR BLOCK ── */
+.instructor-block{display:none;margin:0 16px 14px;background:#F8FAFC;border:1px dashed #CBD5E1;border-radius:8px;padding:10px 13px;font-size:12px;color:#64748B;line-height:1.65}
+.instructor-block.open{display:block}
+.instructor-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#94A3B8;margin-bottom:5px}
+
+/* ── CODE BLOCK ── */
+.code-block{border-radius:8px;overflow:hidden;margin:8px 0;border:1px solid #334155}
+.code-hdr{display:flex;justify-content:space-between;align-items:center;padding:7px 14px;background:#1E293B;border-bottom:1px solid #334155}
+.code-lbl{font-family:'Consolas','Courier New',monospace;font-size:11px;color:#38BDF8}
+.copy-btn{font-size:11px;padding:3px 10px;border-radius:4px;background:transparent;border:1px solid #475569;color:#94A3B8;cursor:pointer;font-family:inherit;transition:all .15s}
+.copy-btn:hover{background:#334155;color:#E2E8F0}
+.copy-btn.ok{border-color:#22C55E!important;color:#22C55E!important}
+pre{margin:0;padding:14px 16px;background:#0F172A;color:#E2E8F0;font-size:12px;line-height:1.75;font-family:'Consolas','Courier New',monospace;overflow-x:auto;white-space:pre}
+
+/* ── KNOWLEDGE CHECK ── */
+.kc-block{margin:0 16px 14px;background:#FFF7ED;border:1.5px solid #FED7AA;border-radius:8px;overflow:hidden}
+.kc-header{padding:8px 13px;background:#FFEDD5;border-bottom:1px solid #FED7AA;font-size:11px;font-weight:700;color:#C2410C;display:flex;align-items:center;gap:6px}
+.kc-question{padding:12px 13px 8px;font-size:13px;font-weight:500;color:#431407;line-height:1.55}
+.kc-options{padding:0 13px 12px;display:flex;flex-direction:column;gap:6px}
+.kc-option{display:flex;align-items:flex-start;gap:9px;padding:8px 11px;border-radius:6px;border:1.5px solid #FED7AA;background:#FFFBEB;cursor:pointer;font-size:12px;color:#431407;line-height:1.4;transition:all .15s;user-select:none}
+.kc-option:hover{background:#FEF3C7;border-color:#F59E0B}
+.kc-option.correct{background:#DCFCE7;border-color:#86EFAC;color:#14532D}
+.kc-option.wrong{background:#FEE2E2;border-color:#FECACA;color:#7F1D1D}
+.kc-option.reveal{background:#DCFCE7;border-color:#86EFAC;color:#14532D}
+.kc-opt-icon{font-size:12px;flex-shrink:0;font-weight:700}
+.kc-feedback{margin:0 13px 12px;padding:8px 11px;border-radius:6px;font-size:12px;line-height:1.55;display:none}
+.kc-feedback.show{display:block}
+.kc-feedback.fb-correct{background:#DCFCE7;color:#14532D;border:1px solid #86EFAC}
+.kc-feedback.fb-wrong{background:#FEE2E2;color:#7F1D1D;border:1px solid #FECACA}
+
+/* ── COMPLETION ── */
+.completion-card{background:linear-gradient(135deg,#FFFBEB 0%,#F0FDF4 100%);border:1.5px solid #86EFAC;border-radius:12px;padding:20px;margin-top:20px;text-align:center}
+.completion-icon{font-size:36px;margin-bottom:8px}
+.completion-title{font-size:18px;font-weight:700;color:#14532D;margin-bottom:6px}
+.completion-text{font-size:13px;color:#166534;margin-bottom:14px}
+.tables-built{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.table-built-tag{font-family:'Consolas','Courier New',monospace;font-size:12px;padding:4px 12px;border-radius:5px;background:#FEF9C3;border:1px solid #FDE68A;color:#78350F;font-weight:600}
+
+/* ── BUG CALLOUT ── */
+.bug-box{background:#FEF2F2;border:1.5px solid #FCA5A5;border-radius:8px;padding:10px 13px;margin:8px 0;font-size:12px;color:#7F1D1D;line-height:1.6}
+.bug-box-title{font-weight:700;margin-bottom:4px;display:flex;align-items:center;gap:6px}
+
+@media(max-width:640px){.page-wrapper{padding:14px 10px 40px}}
+</style>
+</head>
+<body>
+<div class="page-wrapper">
+
+<!-- ═══════════════════════════════════════════════════════
+     LAB HEADER
+═══════════════════════════════════════════════════════ -->
+<div class="section-label">RetailX Data Platform · Microsoft Fabric Workshop</div>
+<h1>Lab 2 — Bronze Layer: REST Countries API Notebook</h1>
+
+<div class="lab-header">
+  <div class="lab-meta-row">
+    <span class="badge b-bronze">🥉 Bronze Layer</span>
+    <span class="badge b-gray">⏱ 30 minutes</span>
+    <span class="badge b-blue">Lab 2 of 5</span>
+  </div>
+  <p style="margin-bottom:10px">
+    In this lab you write your first PySpark notebook from scratch.
+    You will call a REST API, save the raw JSON to the Lakehouse Files zone,
+    parse 250 country objects into a DataFrame, run data quality checks,
+    and write to a Delta table — completing the Bronze layer.
+  </p>
+  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">
+    <span class="tag-pill">PySpark Notebook</span>
+    <span class="tag-pill">requests library</span>
+    <span class="tag-pill">mssparkutils</span>
+    <span class="tag-pill">JSON parsing</span>
+    <span class="tag-pill">DQ Assertions</span>
+    <span class="tag-pill">Delta Tables</span>
+  </div>
+  <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:12px 14px;margin-bottom:14px">
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#94A3B8;margin-bottom:8px">By end of this lab you will have</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:12px;color:#475569">
+      <div>✅ NB-01-BRONZE-Countries-API notebook created</div>
+      <div>✅ Raw JSON saved to Files/bronze/countries/</div>
+      <div>✅ 250 countries parsed into a DataFrame</div>
+      <div>✅ raw_countries Delta table in Bronze layer</div>
+    </div>
+  </div>
+
+  <!-- Code challenge overview -->
+  <div class="info-box info-purple" style="margin-bottom:14px">
+    <span class="ib-icon">🧩</span>
+    <div>
+      <strong>This lab has 5 code challenges.</strong> Each builds on the previous one.
+      Write the code yourself, use the skeleton hint when stuck, reveal the answer only as a last resort.
+      The complete tested notebook is in the Cheat Sheet section if you fall behind.
+    </div>
+  </div>
+
+  <div class="prog-wrap">
+    <div class="prog-label" id="prog-label">Progress: 0 / 10 steps completed</div>
+    <div class="prog-bar"><div class="prog-fill" id="prog-fill"></div></div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     STEP 1 — Create the notebook
+═══════════════════════════════════════════════════════ -->
+<div class="step-card" id="sc-1">
+  <div class="step-header" onclick="toggleStep(1)">
+    <input type="checkbox" class="step-chk" id="chk-1" onclick="event.stopPropagation()" onchange="markDone(1,10)">
+    <div class="step-num" id="sn-1">1</div>
+    <div class="step-title-wrap">
+      <div class="step-title">Create notebook 'NB-01-BRONZE-Countries-API'</div>
+      <div class="step-subtitle">Naming convention · Attach Lakehouse</div>
+    </div>
+    <div class="step-badges"><span class="type-badge type-ui">UI</span></div>
+    <span class="step-toggle" id="tog-1">▼</span>
+  </div>
+  <div class="step-body" id="sb-1">
+    <div class="task-block">
+      <div class="task-label">🎯 Your Task</div>
+      <div class="task-content">Create a new Fabric notebook, give it the correct name following the project naming convention, and attach LH_RetailX.</div>
+      <ul class="task-steps">
+        <li><span class="step-arrow">→</span>In the <code>RetailX-Analytics</code> workspace → <strong>+ New → Notebook</strong></li>
+        <li><span class="step-arrow">→</span>Rename it to: <code>NB-01-BRONZE-Countries-API</code> (click the title at the top)</li>
+        <li><span class="step-arrow">→</span>Left panel → <strong>Add Lakehouse → Existing Lakehouse → LH_RetailX → Add</strong></li>
+        <li><span class="step-arrow">→</span>Confirm the Lakehouse file tree appears in the left panel (Tables + Files sections)</li>
+        <li><span class="step-arrow">→</span>Notice the <code>Files/bronze</code> subfolder you created in Lab 1 should be visible</li>
+      </ul>
+    </div>
+    <div class="tier-buttons">
+      <button class="tier-btn btn-hint" onclick="toggleTier('hint-1',this)">💡 Show Hint</button>
+      <button class="tier-btn btn-instructor" onclick="toggleTier('inst-1',this)">👨‍🏫 Instructor Note</button>
+    </div>
+    <div class="hint-block" id="hint-1">
+      <div class="hint-header">💡 Hint</div>
+      <div class="hint-content">Naming convention reminder: NB-{seq}-{LAYER}-{Name}
+→ NB = Notebook
+→ 01 = sequence number (ensures pipeline ordering is obvious)
+→ BRONZE = the medallion layer this notebook writes to
+→ Countries-API = what the notebook ingests
+
+If you do not see the Lakehouse file tree:
+→ Left panel has a small "+" or "Add" button near the top
+→ Choose "Existing Lakehouse" (not "New Lakehouse")
+→ Select LH_RetailX from the dropdown
+
+The Spark session starts when you run your first cell — not when you create the notebook.</div>
+    </div>
+    <div class="instructor-block" id="inst-1">
+      <div class="instructor-label">Instructor Note</div>
+      Reinforce the naming convention: NB-{seq}-{LAYER}-{Name}. The sequence number (01, 02, 03) is important because it makes the pipeline execution order obvious at a glance. Without it, team members can't tell which notebook runs first just from the name. Also: always attach the Lakehouse before writing any code — students who forget this get confusing errors later when spark.table() can't resolve the table name.
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     STEP 2 — Markdown header cell
+═══════════════════════════════════════════════════════ -->
+<div class="step-card" id="sc-2">
+  <div class="step-header" onclick="toggleStep(2)">
+    <input type="checkbox" class="step-chk" id="chk-2" onclick="event.stopPropagation()" onchange="markDone(2,10)">
+    <div class="step-num" id="sn-2">2</div>
+    <div class="step-title-wrap">
+      <div class="step-title">Add the Markdown documentation header</div>
+      <div class="step-subtitle">Production-standard — every notebook gets one</div>
+    </div>
+    <div class="step-badges"><span class="type-badge type-code">CODE</span></div>
+    <span class="step-toggle" id="tog-2">▼</span>
+  </div>
+  <div class="step-body" id="sb-2">
+    <div class="task-block">
+      <div class="task-label">🎯 Your Task</div>
+      <div class="task-content">The first cell of every production notebook must be a Markdown cell that documents its source, target, layer, and owner. Write this header yourself based on what you know about this notebook.</div>
+      <ul class="task-steps">
+        <li><span class="step-arrow">→</span>Change the first cell type to <strong>Markdown</strong> (dropdown in the cell toolbar)</li>
+        <li><span class="step-arrow">→</span>Write a header that documents: Source, Target table, Layer, Tool</li>
+        <li><span class="step-arrow">→</span>Run the cell — it should render as formatted Markdown</li>
+      </ul>
+    </div>
+    <div class="tier-buttons">
+      <button class="tier-btn btn-hint" onclick="toggleTier('hint-2',this)">💡 Show Hint</button>
+      <button class="tier-btn btn-answer" onclick="toggleTier('ans-2',this)">✅ Show Answer</button>
+    </div>
+    <div class="hint-block" id="hint-2">
+      <div class="hint-header">💡 Hint — Markdown table structure</div>
+      <div class="hint-skeleton"># NB-01 | Bronze Layer: Countries API
+
+| Field   | Value           |
+|---------|-----------------|
+| Source  | ___________     |
+| Target  | ___________     |
+| Layer   | ___________     |
+| Tool    | ___________     |</div>
+      <div class="hint-content">Fill in:
+→ Source:  REST Countries API (restcountries.com/v3.1/all)
+→ Target:  raw_countries (Delta table)
+→ Layer:   Bronze (101_raw)
+→ Tool:    PySpark Notebook + requests library</div>
+    </div>
+    <div class="answer-block" id="ans-2">
+      <div class="answer-header">✅ Markdown Header<span class="answer-note">Use as your template</span></div>
+      <div class="code-block" style="margin:12px 14px">
+        <div class="code-hdr"><span class="code-lbl">Cell 1 — Markdown (change cell type first)</span><button class="copy-btn" onclick="cp(this,'md-hdr')">Copy</button></div>
+        <pre id="code-md-hdr"># NB-01 | Bronze Layer: Countries API
+
+| Field    | Value                              |
+|----------|------------------------------------|
+| Source   | REST Countries API (restcountries.com/v3.1/all) |
+| Target   | raw_countries (Delta table)        |
+| Layer    | 🥉 Bronze                          |
+| Tool     | PySpark + requests library         |
+| Owner    | RetailX Data Engineering Team      |
+
+> **Purpose:** Fetch all countries from the REST Countries public API, save the raw
+> JSON response to `Files/bronze/countries/`, parse into a typed DataFrame,
+> run DQ checks, and write to the `raw_countries` Delta table.</pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     STEP 3 — Parameters cell
+═══════════════════════════════════════════════════════ -->
+<div class="step-card" id="sc-3">
+  <div class="step-header" onclick="toggleStep(3)">
+    <input type="checkbox" class="step-chk" id="chk-3" onclick="event.stopPropagation()" onchange="markDone(3,10)">
+    <div class="step-num" id="sn-3">3</div>
+    <div class="step-title-wrap">
+      <div class="step-title">Add the Parameters and Imports cell</div>
+      <div class="step-subtitle">All config at the top · No hardcoded values later</div>
+    </div>
+    <div class="step-badges"><span class="type-badge type-code">CODE</span></div>
+    <span class="step-toggle" id="tog-3">▼</span>
+  </div>
+  <div class="step-body" id="sb-3">
+    <div class="task-block">
+      <div class="task-label">🎯 Your Task</div>
+      <div class="task-content">Add a code cell with all configuration at the top. No URLs, table names, or settings should be hardcoded anywhere else in the notebook.</div>
+      <ul class="task-steps">
+        <li><span class="step-arrow">→</span>Add a new code cell below the Markdown header</li>
+        <li><span class="step-arrow">→</span>Declare: <code>p_FullLoad</code>, <code>API_URL</code>, <code>RAW_TABLE</code></li>
+        <li><span class="step-arrow">→</span>Import: <code>requests</code>, <code>json</code>, <code>functions as F</code>, <code>datetime</code></li>
+        <li><span class="step-arrow">→</span>Right-click the cell → <strong>Toggle parameter cell</strong> (enables Pipeline override)</li>
+      </ul>
+    </div>
+    <div class="tier-buttons">
+      <button class="tier-btn btn-hint" onclick="toggleTier('hint-3',this)">💡 Show Hint</button>
+      <button class="tier-btn btn-answer" onclick="toggleTier('ans-3',this)">✅ Show Answer</button>
+    </div>
+    <div class="hint-block" id="hint-3">
+      <div class="hint-header">💡 Hint — skeleton</div>
+      <div class="hint-skeleton"># Parameters
+p_FullLoad = _____        # True = full reload
+API_URL    = "_____"      # REST Countries endpoint
+RAW_TABLE  = "_____"      # Delta table name (Bronze)
+
+# Imports
+import _____, _____       # HTTP + JSON
+from pyspark.sql import functions as F
+from datetime import datetime</div>
+    </div>
+    <div class="answer-block" id="ans-3">
+      <div class="answer-header">✅ Full Answer<span class="answer-note">Cell 2</span></div>
+      <div class="code-block" style="margin:12px 14px">
+        <div class="code-hdr"><span class="code-lbl">Cell 2 — Parameters &amp; Imports (toggle as parameter cell)</span><button class="copy-btn" onclick="cp(this,'params')">Copy</button></div>
+        <pre id="code-params"># Parameters
+p_FullLoad = True
+API_URL    = "https://restcountries.com/v3.1/all"
+RAW_TABLE  = "raw_countries"
+
+# Imports
+import requests, json
+from pyspark.sql import functions as F
+from datetime import datetime</pre>
+      </div>
+      <div class="answer-explain">After adding this cell: right-click it → <strong>Toggle parameter cell</strong>. A small "P" icon appears on the cell. This allows a Data Pipeline to override <code>p_FullLoad</code>, <code>API_URL</code>, or <code>RAW_TABLE</code> at runtime without editing the notebook.</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     STEP 4 — CODE CHALLENGE 1: API Fetch
+═══════════════════════════════════════════════════════ -->
+<div class="step-card" id="sc-4">
+  <div class="step-header" onclick="toggleStep(4)">
+    <input type="checkbox" class="step-chk" id="chk-4" onclick="event.stopPropagation()" onchange="markDone(4,10)">
+    <div class="step-num" id="sn-4">4</div>
+    <div class="step-title-wrap">
+      <div class="step-title">🧩 Challenge 1 — Fetch from the REST Countries API</div>
+      <div class="step-subtitle">requests.get · raise_for_status · .json()</div>
+    </div>
+    <div class="step-badges">
+      <span class="type-badge type-code">CODE</span>
+      <span class="type-badge type-quiz">Quiz</span>
+    </div>
+    <span class="step-toggle" id="tog-4">▼</span>
+  </div>
+  <div class="step-body" id="sb-4">
+    <div class="task-block">
+      <div class="task-label">🎯 Code Challenge 1</div>
+      <div class="task-content">Write the code that calls the REST Countries API and loads the JSON response. The API is public, no authentication needed.</div>
+      <ul class="task-steps">
+        <li><span class="step-arrow">→</span>Make an HTTP GET request to <code>API_URL</code> with a 30-second timeout</li>
+        <li><span class="step-arrow">→</span>Raise an error immediately if the HTTP status code is not 200</li>
+        <li><span class="step-arrow">→</span>Parse the JSON response body into a Python list</li>
+        <li><span class="step-arrow">→</span>Print how many countries were returned</li>
+        <li><span class="step-arrow">→</span>Expected output: <code>Fetched 250 countries</code></li>
+      </ul>
+    </div>
+    <div class="tier-buttons">
+      <button class="tier-btn btn-hint" onclick="toggleTier('hint-4',this)">💡 Show Hint</button>
+      <button class="tier-btn btn-answer" onclick="toggleTier('ans-4',this)">✅ Show Answer</button>
+      <button class="tier-btn btn-instructor" onclick="toggleTier('inst-4',this)">👨‍🏫 Instructor Note</button>
+    </div>
+    <div class="hint-block" id="hint-4">
+      <div class="hint-header">💡 Hint — requests pattern</div>
+      <div class="hint-content">The requests library works like this:
+
+  response = requests._____(url, timeout=_____)  # HTTP method + timeout
+  response._____()                                # check for HTTP errors
+  data = response._____()                         # parse JSON body → Python list/dict
+
+Common methods:
+  requests.get(url)       → GET request
+  response.raise_for_status() → raises HTTPError if status >= 400
+  response.json()         → parses body as JSON → returns list or dict
+
+The API returns a JSON array: [{country1}, {country2}, ...]
+So response.json() returns a Python list of dicts.</div>
+    </div>
+    <div class="answer-block" id="ans-4">
+      <div class="answer-header">✅ Challenge 1 Answer<span class="answer-note">Cell 3</span></div>
+      <div class="code-block" style="margin:12px 14px">
+        <div class="code-hdr"><span class="code-lbl">Cell 3 — API Fetch</span><button class="copy-btn" onclick="cp(this,'fetch')">Copy</button></div>
+        <pre id="code-fetch"># ── Fetch from REST Countries API ─────────────────────────────
+print("Fetching REST Countries API...")
+
+r = requests.get(API_URL, timeout=30)
+r.raise_for_status()           # raises HTTPError if status >= 400
+countries = r.json()           # parse JSON → list of 250 country dicts
+
+print(f"Fetched {len(countries)} countries")</pre>
+      </div>
+      <div class="answer-explain"><strong>Why raise_for_status()?</strong> Without it, a 404 or 500 error would silently return an empty or error body, and the notebook would fail later with a confusing error. raise_for_status() fails fast with a clear HTTP error message.<br><br><strong>Why timeout=30?</strong> Without a timeout, if the API is slow, the notebook hangs forever and blocks the pipeline. 30 seconds is generous for a public API returning 250 records.</div>
+    </div>
+    <div class="instructor-block" id="inst-4">
+      <div class="instructor-label">Instructor Note</div>
+      This step typically takes students 3–5 minutes. Common mistakes: using requests.post() instead of .get(), forgetting .raise_for_status(), and trying to use response.text instead of .json(). Run the cell together — the expected output is "Fetched 250 countries" (exact number varies slightly as the API adds/removes territories).
+    </div>
+    <!-- Knowledge Check -->
+    <div class="kc-block">
+      <div class="kc-header">🧠 Knowledge Check</div>
+      <div class="kc-question">The REST Countries API returns HTTP status 503 (Service Unavailable) due to a temporary outage. What happens in your notebook code?</div>
+      <div class="kc-options" id="kc-4-opts">
+        <div class="kc-option" onclick="answerKC(4,0,false)"><span class="kc-opt-icon">A</span> The notebook continues silently because requests.get() never raises errors</div>
+        <div class="kc-option" onclick="answerKC(4,1,true)"><span class="kc-opt-icon">B</span> raise_for_status() immediately raises an HTTPError — the notebook stops with a clear error message</div>
+        <div class="kc-option" onclick="answerKC(4,2,false)"><span class="kc-opt-icon">C</span> r.json() raises a JSONDecodeError because the error body is not valid JSON</div>
+        <div class="kc-option" onclick="answerKC(4,3,false)"><span class="kc-opt-icon">D</span> The timeout=30 catches the 503 and retries automatically</div>
+      </div>
+      <div class="kc-feedback" id="kc-4-fb"></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     STEP 5 — CODE CHALLENGE 2: Save raw JSON
+═══════════════════════════════════════════════════════ -->
+<div class="step-card" id="sc-5">
+  <div class="step-header" onclick="toggleStep(5)">
+    <input type="checkbox" class="step-chk" id="chk-5" onclick="event.stopPropagation()" onchange="markDone(5,10)">
+    <div class="step-num" id="sn-5">5</div>
+    <div class="step-title-wrap">
+      <div class="step-title">🧩 Challenge 2 — Save raw JSON to Files/bronze/</div>
+      <div class="step-subtitle">mssparkutils.fs.put · Timestamped filename · Immutable archive</div>
+    </div>
+    <div class="step-badges">
+      <span class="type-badge type-code">CODE</span>
+      <span class="type-badge type-quiz">Quiz</span>
+    </div>
+    <span class="step-toggle" id="tog-5">▼</span>
+  </div>
+  <div class="step-body" id="sb-5">
+    <div class="task-block">
+      <div class="task-label">🎯 Code Challenge 2</div>
+      <div class="task-content">Before parsing, save the raw API response as a JSON file in the Lakehouse Files zone. This is the immutable archive of the exact source data.</div>
+      <ul class="task-steps">
+        <li><span class="step-arrow">→</span>Generate a timestamp string in format <code>YYYYMMDD_HHMMSS</code></li>
+        <li><span class="step-arrow">→</span>Use <code>mssparkutils.fs.put()</code> to write the JSON to: <code>Files/bronze/countries/countries_{ts}.json</code></li>
+        <li><span class="step-arrow">→</span>Serialize the Python list to a JSON string using <code>json.dumps()</code></li>
+        <li><span class="step-arrow">→</span>Set <code>overwrite=True</code> so reruns don't fail</li>
+        <li><span class="step-arrow">→</span>Print the path where it was saved</li>
+      </ul>
+      <div class="info-box info-amber" style="margin-top:8px;margin-bottom:0">
+        <span class="ib-icon">🔑</span>
+        <span><strong>Key concept:</strong> This is what makes the Bronze layer truly immutable. Even if the API changes or goes offline, you always have the original raw response to reprocess. Never skip this step.</span>
+      </div>
+    </div>
+    <div class="tier-buttons">
+      <button class="tier-btn btn-hint" onclick="toggleTier('hint-5',this)">💡 Show Hint</button>
+      <button class="tier-btn btn-answer" onclick="toggleTier('ans-5',this)">✅ Show Answer</button>
+    </div>
+    <div class="hint-block" id="hint-5">
+      <div class="hint-header">💡 Hint — mssparkutils + json.dumps</div>
+      <div class="hint-content">Generating a timestamp:
+  ts = datetime.now().strftime("_____")   # format: YYYYMMDD_HHMMSS
+
+Writing a file to the Lakehouse:
+  mssparkutils.fs.put(
+      path,         # string: "Files/bronze/countries/countries_{ts}.json"
+      content,      # string: must be a STRING, not a Python list/dict
+      overwrite     # bool: True
+  )
+
+Converting a Python list/dict to a JSON string:
+  json_string = json._____(python_object)   # not json.load() — that reads, this writes</div>
+    </div>
+    <div class="answer-block" id="ans-5">
+      <div class="answer-header">✅ Challenge 2 Answer<span class="answer-note">Cell 4</span></div>
+      <div class="code-block" style="margin:12px 14px">
+        <div class="code-hdr"><span class="code-lbl">Cell 4 — Save Raw JSON</span><button class="copy-btn" onclick="cp(this,'savejson')">Copy</button></div>
+        <pre id="code-savejson"># ── Save raw JSON to Files/bronze/ (immutable archive) ────────
+ts       = datetime.now().strftime("%Y%m%d_%H%M%S")
+raw_path = f"Files/bronze/countries/countries_{ts}.json"
+
+mssparkutils.fs.put(
+    raw_path,
+    json.dumps(countries),   # serialize list → JSON string
+    overwrite=True
+)
+print(f"Saved raw JSON → {raw_path}")</pre>
+      </div>
+      <div class="answer-explain"><strong>Why a timestamp in the filename?</strong> Each run produces a uniquely named file. This preserves every API snapshot — if you run the pipeline daily, you have 365 files, one per day. You can see exactly what the API returned on any given date.<br><br><strong>Why json.dumps() not json.dump()?</strong> <code>dumps()</code> returns a string (for writing to a variable or mssparkutils). <code>dump()</code> writes to a file object. mssparkutils.fs.put() expects a string — use dumps().</div>
+    </div>
+    <!-- Knowledge Check -->
+    <div class="kc-block">
+      <div class="kc-header">🧠 Knowledge Check</div>
+      <div class="kc-question">A bug is found in the <code>parse()</code> function 3 months after the pipeline has been running daily. Which statement is TRUE because you saved the raw JSON?</div>
+      <div class="kc-options" id="kc-5-opts">
+        <div class="kc-option" onclick="answerKC(5,0,false)"><span class="kc-opt-icon">A</span> You must re-call the API to get the data back and reprocess it</div>
+        <div class="kc-option" onclick="answerKC(5,1,true)"><span class="kc-opt-icon">B</span> You can fix the parse() function and reprocess all 90 raw JSON files without calling the API again</div>
+        <div class="kc-option" onclick="answerKC(5,2,false)"><span class="kc-opt-icon">C</span> The bug cannot be fixed because the Delta table has already been overwritten</div>
+        <div class="kc-option" onclick="answerKC(5,3,false)"><span class="kc-opt-icon">D</span> You must delete the raw JSON files and start fresh</div>
+      </div>
+      <div class="kc-feedback" id="kc-5-fb"></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     STEP 6 — CODE CHALLENGE 3: Parse + DataFrame
+═══════════════════════════════════════════════════════ -->
+<div class="step-card" id="sc-6">
+  <div class="step-header" onclick="toggleStep(6)">
+    <input type="checkbox" class="step-chk" id="chk-6" onclick="event.stopPropagation()" onchange="markDone(6,10)">
+    <div class="step-num" id="sn-6">6</div>
+    <div class="step-title-wrap">
+      <div class="step-title">🧩 Challenge 3 — Write the parse() function &amp; create DataFrame</div>
+      <div class="step-subtitle">JSON navigation · None-safe patterns · createDataFrame()</div>
+    </div>
+    <div class="step-badges"><span class="type-badge type-code">CODE</span></div>
+    <span class="step-toggle" id="tog-6">▼</span>
+  </div>
+  <div class="step-body" id="sb-6">
+    <div class="task-block">
+      <div class="task-label">🎯 Code Challenge 3 — The hardest one</div>
+      <div class="task-content">Write a <code>parse(c)</code> function that takes one country dict and returns a flat dict with 11 fields. Then apply it to all 250 countries and create a Spark DataFrame.</div>
+      <ul class="task-steps">
+        <li><span class="step-arrow">→</span>The function must extract: <code>country_code</code>, <code>name_common</code>, <code>region</code>, <code>subregion</code>, <code>population</code>, <code>area_km2</code>, <code>capital</code>, <code>currency_code</code>, <code>currency_name</code>, <code>latitude</code>, <code>longitude</code></li>
+        <li><span class="step-arrow">→</span>Handle: nested objects, optional keys, None values, empty lists</li>
+        <li><span class="step-arrow">→</span>Apply with a list comprehension: <code>[parse(c) for c in countries]</code></li>
+        <li><span class="step-arrow">→</span>Create the DataFrame: <code>df = spark.createDataFrame(records)</code></li>
+      </ul>
+    </div>
+
+    <!-- Bug callout -->
+    <div class="bug-box" style="margin:0 16px 10px">
+      <div class="bug-box-title">⚠️ Tested &amp; Fixed — Common traps in this function</div>
+      <code>c.get("subregion", "")</code> returns <code>None</code> when the key exists but value is None — use <code>c.get("subregion") or ""</code><br>
+      <code>int(c.get("population", 0))</code> crashes when value is None — use <code>int(c.get("population") or 0)</code><br>
+      Same applies to <code>area_km2</code> — some countries have <code>"area": null</code> in the API response.
+    </div>
+
+    <div class="tier-buttons">
+      <button class="tier-btn btn-hint" onclick="toggleTier('hint-6',this)">💡 Show Hint (skeleton)</button>
+      <button class="tier-btn btn-answer" onclick="toggleTier('ans-6',this)">✅ Show Full Answer</button>
+      <button class="tier-btn btn-instructor" onclick="toggleTier('inst-6',this)">👨‍🏫 Instructor Note</button>
+    </div>
+    <div class="hint-block" id="hint-6">
+      <div class="hint-header">💡 Hint — parse() skeleton with nested access patterns</div>
+      <div class="hint-skeleton">def parse(c):
+    curs = c.get("currencies", {})    # dict of currency objects (may be empty)
+    return {
+        "country_code" : c.get("cca2", ""),
+        "name_common"  : c.get("name", {}).get("_____", ""),  # nested!
+        "region"       : c.get("region", ""),
+        "subregion"    : c.get("subregion") or "",   # None-safe!
+        "population"   : int(c.get("population") or _____),
+        "area_km2"     : float(c.get("area") or _____),
+        "capital"      : c.get("capital", [""])[0] if c.get("_____") else "",
+        "currency_code": list(curs.keys())[0] if curs else "",
+        "currency_name": list(curs.values())[0].get("_____","") if curs else "",
+        "latitude"     : float(c.get("latlng", [0,0])[_____]) if c.get("latlng") else 0.0,
+        "longitude"    : float(c.get("latlng", [0,0])[_____]) if c.get("latlng") else 0.0,
+    }
+
+# Apply to all countries
+records = [parse(c) for c in countries]
+
+# Create Spark DataFrame
+df = spark.createDataFrame(_____)</div>
+      <div class="hint-content">API structure reference for one country:
+{
+  "cca2": "SA",
+  "name": {"common": "Saudi Arabia", "official": "..."},
+  "region": "Asia",
+  "subregion": "Western Asia",     ← can be null for some countries!
+  "population": 35950396,           ← can be null for tiny territories!
+  "area": 2149690.0,                ← can be null!
+  "capital": ["Riyadh"],            ← list of strings (empty list = no capital)
+  "currencies": {"SAR": {"name": "Saudi riyal", "symbol": "..."}},
+  "latlng": [25.0, 45.0]            ← [latitude, longitude]
+}</div>
+    </div>
+    <div class="answer-block" id="ans-6">
+      <div class="answer-header">✅ Challenge 3 Answer<span class="answer-note">Cell 5 — tested with 250 edge cases</span></div>
+      <div class="code-block" style="margin:12px 14px">
+        <div class="code-hdr"><span class="code-lbl">Cell 5 — parse() function + DataFrame creation</span><button class="copy-btn" onclick="cp(this,'parse')">Copy</button></div>
+        <pre id="code-parse"># ── Parse JSON records → flat Python dicts ────────────────────
+def parse(c):
+    curs = c.get("currencies", {})
+    return {
+        "country_code" : c.get("cca2", ""),
+        "name_common"  : c.get("name", {}).get("common", ""),
+        "region"       : c.get("region", ""),
+        "subregion"    : c.get("subregion") or "",      # None-safe
+        "population"   : int(c.get("population") or 0), # None-safe
+        "area_km2"     : float(c.get("area") or 0),     # None-safe
+        "capital"      : c.get("capital", [""])[0] if c.get("capital") else "",
+        "currency_code": list(curs.keys())[0] if curs else "",
+        "currency_name": list(curs.values())[0].get("name", "") if curs else "",
+        "latitude"     : float(c.get("latlng", [0,0])[0]) if c.get("latlng") else 0.0,
+        "longitude"    : float(c.get("latlng", [0,0])[1]) if c.get("latlng") else 0.0,
+    }
+
+records = [parse(c) for c in countries]
+
+# ── Create Spark DataFrame ─────────────────────────────────────
+df = spark.createDataFrame(records)
+print(f"DataFrame created: {df.count()} rows, {len(df.columns)} columns")
+display(df.limit(3))</pre>
+      </div>
+      <div class="answer-explain">
+        <strong>3 key None-safe patterns used here:</strong><br>
+        • <code>c.get("subregion") or ""</code> — handles both missing key AND key with None value<br>
+        • <code>int(c.get("population") or 0)</code> — <code>int(None)</code> crashes; <code>int(0)</code> is fine<br>
+        • <code>c.get("capital",[""])[0] if c.get("capital") else ""</code> — handles None AND empty list<br><br>
+        <strong>Note on latlng:</strong> index 0 = latitude, index 1 = longitude. This is a common source of bugs — always verify which index is which.
+      </div>
+    </div>
+    <div class="instructor-block" id="inst-6">
+      <div class="instructor-label">Instructor Note</div>
+      This is the hardest coding challenge in the whole workshop. Give students 8–10 minutes. Most will have the structure right but miss the None-safe patterns. When they hit errors, ask: "What happens when you call int(None)?" The or 0 / or "" pattern is a Pythonic idiom they should know. After this challenge, run display(df.limit(3)) together so everyone sees the parsed data.
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     STEP 7 — CODE CHALLENGE 4: Audit columns + DQ
+═══════════════════════════════════════════════════════ -->
+<div class="step-card" id="sc-7">
+  <div class="step-header" onclick="toggleStep(7)">
+    <input type="checkbox" class="step-chk" id="chk-7" onclick="event.stopPropagation()" onchange="markDone(7,10)">
+    <div class="step-num" id="sn-7">7</div>
+    <div class="step-title-wrap">
+      <div class="step-title">🧩 Challenge 4 — Add audit columns &amp; run DQ checks</div>
+      <div class="step-subtitle">withColumn · current_timestamp · F.lit · assert</div>
+    </div>
+    <div class="step-badges">
+      <span class="type-badge type-code">CODE</span>
+      <span class="type-badge type-quiz">Quiz</span>
+    </div>
+    <span class="step-toggle" id="tog-7">▼</span>
+  </div>
+  <div class="step-body" id="sb-7">
+    <div class="task-block">
+      <div class="task-label">🎯 Code Challenge 4</div>
+      <div class="task-content">Add 3 audit columns to the DataFrame, then run 2 data quality assertions that will stop the notebook if the data is invalid.</div>
+      <ul class="task-steps">
+        <li><span class="step-arrow">→</span>Add column <code>_ingestion_ts</code>: current timestamp (use Spark function, not Python datetime)</li>
+        <li><span class="step-arrow">→</span>Add column <code>_source</code>: the API_URL string as a literal</li>
+        <li><span class="step-arrow">→</span>Add column <code>_batch_id</code>: the <code>ts</code> timestamp string as a literal</li>
+        <li><span class="step-arrow">→</span>DQ check 1: assert no empty <code>name_common</code> values</li>
+        <li><span class="step-arrow">→</span>DQ check 2: assert no empty <code>country_code</code> values</li>
+        <li><span class="step-arrow">→</span>Print the total row count and DQ result</li>
+      </ul>
+    </div>
+    <div class="tier-buttons">
+      <button class="tier-btn btn-hint" onclick="toggleTier('hint-7',this)">💡 Show Hint</button>
+      <button class="tier-btn btn-answer" onclick="toggleTier('ans-7',this)">✅ Show Answer</button>
+    </div>
+    <div class="hint-block" id="hint-7">
+      <div class="hint-header">💡 Hint — withColumn patterns</div>
+      <div class="hint-skeleton">df = (df
+    .withColumn("_ingestion_ts", F.___________())      # Spark timestamp function
+    .withColumn("_source",       F.lit(_____))          # literal string value
+    .withColumn("_batch_id",     F.lit(_____)))         # literal string value
+
+# DQ Check — count bad rows and assert = 0
+total = df.count()
+assert df.filter(F.col("_____") == "").count() == 0, "DQ: empty names found"
+assert df.filter(F.col("_____") == "").count() == 0, "DQ: empty codes found"
+print(f"[DQ] {total} records — all checks passed")</div>
+      <div class="hint-content">Spark functions to use:
+→ F.current_timestamp()  → Timestamp column with the current time
+→ F.lit("some string")   → Literal column — same value in every row
+
+Remember: all .withColumn() calls must be wrapped in outer ()
+because Python does not allow multi-line chained method calls without them.</div>
+    </div>
+    <div class="answer-block" id="ans-7">
+      <div class="answer-header">✅ Challenge 4 Answer<span class="answer-note">Cell 6</span></div>
+      <div class="code-block" style="margin:12px 14px">
+        <div class="code-hdr"><span class="code-lbl">Cell 6 — Audit columns + DQ checks</span><button class="copy-btn" onclick="cp(this,'audit')">Copy</button></div>
+        <pre id="code-audit"># ── Add audit columns ─────────────────────────────────────────
+df = (df
+    .withColumn("_ingestion_ts", F.current_timestamp())
+    .withColumn("_source",       F.lit(API_URL))
+    .withColumn("_batch_id",     F.lit(ts)))
+
+# ── Data Quality Checks ────────────────────────────────────────
+total = df.count()
+assert df.filter(F.col("name_common")  == "").count() == 0, \
+    "DQ FAILED: empty country names found"
+assert df.filter(F.col("country_code") == "").count() == 0, \
+    "DQ FAILED: empty country codes found"
+print(f"[DQ] {total} records — all checks passed")</pre>
+      </div>
+      <div class="answer-explain"><strong>Why F.current_timestamp() instead of Python datetime.now()?</strong><br>
+        <code>F.current_timestamp()</code> runs at the Spark executor level and returns a TimestampType column. <code>datetime.now()</code> is a Python object — you would need <code>F.lit(str(datetime.now()))</code> which is less precise and stored as a string, not a proper timestamp type.<br><br>
+        <strong>Why two DQ checks and not one?</strong> Each check tests a different thing. If only the name_common check existed and country_code was empty, the data would silently pass. Defensive DQ means checking every critical field independently.</div>
+    </div>
+    <!-- Knowledge Check -->
+    <div class="kc-block">
+      <div class="kc-header">🧠 Knowledge Check</div>
+      <div class="kc-question">The DQ assertion fails: <code>AssertionError: DQ FAILED: empty country names found</code>. What is the best next step?</div>
+      <div class="kc-options" id="kc-7-opts">
+        <div class="kc-option" onclick="answerKC(7,0,false)"><span class="kc-opt-icon">A</span> Remove the assertion and let the bad data through to the Silver layer</div>
+        <div class="kc-option" onclick="answerKC(7,1,false)"><span class="kc-opt-icon">B</span> Immediately write the data to Delta and filter bad rows in Power BI</div>
+        <div class="kc-option" onclick="answerKC(7,2,true)"><span class="kc-opt-icon">C</span> Investigate which records have empty names, fix the parse() function, and rerun the notebook</div>
+        <div class="kc-option" onclick="answerKC(7,3,false)"><span class="kc-opt-icon">D</span> Change the assertion to a warning print statement so the pipeline continues</div>
+      </div>
+      <div class="kc-feedback" id="kc-7-fb"></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     STEP 8 — CODE CHALLENGE 5: Write to Delta
+═══════════════════════════════════════════════════════ -->
+<div class="step-card" id="sc-8">
+  <div class="step-header" onclick="toggleStep(8)">
+    <input type="checkbox" class="step-chk" id="chk-8" onclick="event.stopPropagation()" onchange="markDone(8,10)">
+    <div class="step-num" id="sn-8">8</div>
+    <div class="step-title-wrap">
+      <div class="step-title">🧩 Challenge 5 — Write to Delta table</div>
+      <div class="step-subtitle">df.write.format("delta") · saveAsTable · overwriteSchema</div>
+    </div>
+    <div class="step-badges"><span class="type-badge type-code">CODE</span></div>
+    <span class="step-toggle" id="tog-8">▼</span>
+  </div>
+  <div class="step-body" id="sb-8">
+    <div class="task-block">
+      <div class="task-label">🎯 Code Challenge 5</div>
+      <div class="task-content">Write the DataFrame to a managed Delta table in LH_RetailX. The table name comes from the <code>RAW_TABLE</code> parameter. Use overwrite mode with schema overwrite enabled.</div>
+      <ul class="task-steps">
+        <li><span class="step-arrow">→</span>Use <code>df.write.format("delta")</code> as the format</li>
+        <li><span class="step-arrow">→</span>Set mode to <code>"overwrite"</code> for a full reload on every run</li>
+        <li><span class="step-arrow">→</span>Add option <code>overwriteSchema = "true"</code> to allow schema changes between runs</li>
+        <li><span class="step-arrow">→</span>Use <code>.saveAsTable(RAW_TABLE)</code> — not <code>.save(path)</code></li>
+        <li><span class="step-arrow">→</span>Print confirmation: table name and row count</li>
+        <li><span class="step-arrow">→</span>Display a 5-row preview with <code>display(spark.table(RAW_TABLE).limit(5))</code></li>
+      </ul>
+    </div>
+    <div class="tier-buttons">
+      <button class="tier-btn btn-hint" onclick="toggleTier('hint-8',this)">💡 Show Hint</button>
+      <button class="tier-btn btn-answer" onclick="toggleTier('ans-8',this)">✅ Show Answer</button>
+      <button class="tier-btn btn-instructor" onclick="toggleTier('inst-8',this)">👨‍🏫 Instructor Note</button>
+    </div>
+    <div class="hint-block" id="hint-8">
+      <div class="hint-header">💡 Hint — Delta write pattern</div>
+      <div class="hint-skeleton">(_____                           # start with opening paren
+   .write
+   .format("_____")               # Delta format
+   .mode("_____")                 # overwrite or append
+   .option("overwriteSchema", "_____")   # "true" as a string
+   .saveAsTable(_____))           # use the parameter variable
+
+print(f"Written {_____}: {_____} rows")
+display(spark.table(_____).limit(5))</div>
+      <div class="hint-content">Important:
+→ The entire chain MUST be wrapped in outer () for multi-line Python
+→ saveAsTable() takes the table name as a string
+→ Use RAW_TABLE (the variable) not "raw_countries" (hardcoded) 
+→ overwriteSchema must be the string "true", not the boolean True</div>
+    </div>
+    <div class="answer-block" id="ans-8">
+      <div class="answer-header">✅ Challenge 5 Answer<span class="answer-note">Cell 7</span></div>
+      <div class="code-block" style="margin:12px 14px">
+        <div class="code-hdr"><span class="code-lbl">Cell 7 — Write to Delta table</span><button class="copy-btn" onclick="cp(this,'write')">Copy</button></div>
+        <pre id="code-write"># ── Write to Delta (Bronze layer) ─────────────────────────────
+(df.write
+   .format("delta")
+   .mode("overwrite")
+   .option("overwriteSchema", "true")
+   .saveAsTable(RAW_TABLE))
+
+print(f"Written {RAW_TABLE}: {df.count()} rows")
+display(spark.table(RAW_TABLE).limit(5))</pre>
+      </div>
+      <div class="answer-explain"><strong>saveAsTable() vs save(path):</strong> <code>saveAsTable("raw_countries")</code> registers the table in the Lakehouse metastore, making it immediately queryable by name in SQL endpoint and other notebooks. <code>.save(path)</code> just writes Parquet files without registering — you would need a separate CTAS statement to query it.<br><br><strong>overwriteSchema "true":</strong> Without this, if you add a column to the DataFrame between runs (e.g., a new audit column), Delta will reject the write because the schema changed. With it, Delta updates the schema and overwrites the data atomically.</div>
+    </div>
+    <div class="instructor-block" id="inst-8">
+      <div class="instructor-label">Instructor Note</div>
+      Common student mistake: forgetting the outer parentheses → IndentationError on the second line. Point this out explicitly — it is a Python syntax rule, not a Spark rule. The chain works in one line without parens but becomes unreadable. When the write succeeds, switch to LH_RetailX to show the raw_countries table appearing in the Tables section.
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     STEP 9 — Run all cells
+═══════════════════════════════════════════════════════ -->
+<div class="step-card" id="sc-9">
+  <div class="step-header" onclick="toggleStep(9)">
+    <input type="checkbox" class="step-chk" id="chk-9" onclick="event.stopPropagation()" onchange="markDone(9,10)">
+    <div class="step-num" id="sn-9">9</div>
+    <div class="step-title-wrap">
+      <div class="step-title">Run all cells and verify expected output</div>
+      <div class="step-subtitle">First Spark run · ~60–90 sec · Check each cell output</div>
+    </div>
+    <div class="step-badges"><span class="type-badge type-ui">UI</span></div>
+    <span class="step-toggle" id="tog-9">▼</span>
+  </div>
+  <div class="step-body" id="sb-9">
+    <div class="task-block">
+      <div class="task-label">🎯 Your Task</div>
+      <div class="task-content">Click <strong>Run all</strong> at the top of the notebook. Wait for all cells to complete. Verify the output of each cell matches expectations.</div>
+      <ul class="task-steps">
+        <li><span class="step-arrow">→</span>Cell 3 output: <code>Fetched 250 countries</code></li>
+        <li><span class="step-arrow">→</span>Cell 4 output: <code>Saved raw JSON → Files/bronze/countries/countries_YYYYMMDD_HHMMSS.json</code></li>
+        <li><span class="step-arrow">→</span>Cell 5 output: <code>DataFrame created: 250 rows, 11 columns</code></li>
+        <li><span class="step-arrow">→</span>Cell 6 output: <code>[DQ] 250 records — all checks passed</code></li>
+        <li><span class="step-arrow">→</span>Cell 7 output: <code>Written raw_countries: 250 rows</code> + table preview</li>
+      </ul>
+    </div>
+    <div class="tier-buttons">
+      <button class="tier-btn btn-hint" onclick="toggleTier('hint-9',this)">💡 Show Hint (troubleshooting)</button>
+    </div>
+    <div class="hint-block" id="hint-9">
+      <div class="hint-header">💡 Hint — Common errors and fixes</div>
+      <div class="hint-content">❌ "Session not started" or long wait on first cell:
+→ Normal. The Spark session starts on first run (30–60 sec). Be patient.
+
+❌ "ConnectionError" or "Timeout" on the API fetch cell:
+→ Check your internet connection. Try opening restcountries.com/v3.1/all in your browser.
+→ If the API is temporarily down: use the saved JSON file from a previous run (rare).
+
+❌ "AssertionError: DQ FAILED: empty country names found":
+→ The parse() function has a bug — check None-safe patterns
+→ Run: display(df.filter(F.col("name_common") == "")) to see the bad rows
+
+❌ "IndentationError: unexpected indent" in the write cell:
+→ Missing outer parentheses around the chain. Wrap everything in ()
+
+❌ raw_countries doesn't appear in LH_RetailX → Tables:
+→ Click the ↻ refresh button in the Tables panel header
+→ The table IS there — the UI just hasn't refreshed yet</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     STEP 10 — Explore the output
+═══════════════════════════════════════════════════════ -->
+<div class="step-card" id="sc-10">
+  <div class="step-header" onclick="toggleStep(10)">
+    <input type="checkbox" class="step-chk" id="chk-10" onclick="event.stopPropagation()" onchange="markDone(10,10)">
+    <div class="step-num" id="sn-10">10</div>
+    <div class="step-title-wrap">
+      <div class="step-title">Explore the Bronze output — Files and Tables</div>
+      <div class="step-subtitle">Raw JSON in Files/bronze · raw_countries in Tables</div>
+    </div>
+    <div class="step-badges">
+      <span class="type-badge type-ui">UI</span>
+      <span class="type-badge type-quiz">Quiz</span>
+    </div>
+    <span class="step-toggle" id="tog-10">▼</span>
+  </div>
+  <div class="step-body" id="sb-10">
+    <div class="task-block">
+      <div class="task-label">🎯 Your Task</div>
+      <div class="task-content">Navigate the Lakehouse to confirm both outputs exist — the raw JSON file (immutable archive) and the raw_countries Delta table (Bronze landing).</div>
+      <ul class="task-steps">
+        <li><span class="step-arrow">→</span>In LH_RetailX → <strong>Files → bronze → countries</strong> — click the JSON file to preview the raw API response</li>
+        <li><span class="step-arrow">→</span>In LH_RetailX → <strong>Tables → raw_countries</strong> — right-click → <strong>Preview data</strong></li>
+        <li><span class="step-arrow">→</span>Switch to the <strong>SQL analytics endpoint</strong> and run: <code>SELECT region, COUNT(*) AS cnt FROM raw_countries GROUP BY region ORDER BY cnt DESC</code></li>
+        <li><span class="step-arrow">→</span>Identify the 3 audit columns in raw_countries: <code>_ingestion_ts</code>, <code>_source</code>, <code>_batch_id</code></li>
+      </ul>
+    </div>
+    <div class="tier-buttons">
+      <button class="tier-btn btn-hint" onclick="toggleTier('hint-10',this)">💡 Show Hint</button>
+      <button class="tier-btn btn-instructor" onclick="toggleTier('inst-10',this)">👨‍🏫 Instructor Note</button>
+    </div>
+    <div class="hint-block" id="hint-10">
+      <div class="hint-header">💡 Hint — Expected SQL results</div>
+      <div class="hint-content">Expected GROUP BY region result (approximate):
+  Africa    — 54
+  Americas  — 35
+  Asia      — 49
+  Europe    — 44
+  Oceania   — 27
+  Antarctic — 5
+
+If your counts are different: the API may have changed slightly — that is fine.
+The key check is: total across all regions ≈ 250 (within ±5 for contested territories).</div>
+    </div>
+    <div class="instructor-block" id="inst-10">
+      <div class="instructor-label">Instructor Note</div>
+      This is a great moment to show students that both the Files and Tables sections are different views of the same OneLake storage. The JSON file is in the unstructured Files zone. The Delta table is in the managed Tables zone. Both were written by the same notebook run — one via mssparkutils.fs.put(), the other via df.write.saveAsTable(). Running the SQL query in the endpoint shows the T-SQL capability of the Lakehouse without any additional setup.
+    </div>
+    <!-- Knowledge Check -->
+    <div class="kc-block">
+      <div class="kc-header">🧠 Final Lab Check — Bronze layer complete</div>
+      <div class="kc-question">You now have raw_countries (Delta table) AND countries_YYYYMMDD.json (raw file). Your colleague asks: "Can we skip saving the JSON file next time to save storage?" What is your answer?</div>
+      <div class="kc-options" id="kc-10-opts">
+        <div class="kc-option" onclick="answerKC(10,0,false)"><span class="kc-opt-icon">A</span> Yes — the Delta table already has all the data, so the JSON is redundant</div>
+        <div class="kc-option" onclick="answerKC(10,1,false)"><span class="kc-opt-icon">B</span> Yes — but only if we use Delta time travel to access historical versions</div>
+        <div class="kc-option" onclick="answerKC(10,2,true)"><span class="kc-opt-icon">C</span> No — the JSON is the immutable source archive. If parse() has a bug, we can reprocess the original bytes without hitting the API again</div>
+        <div class="kc-option" onclick="answerKC(10,3,false)"><span class="kc-opt-icon">D</span> No — because mssparkutils.fs.put() is required for the notebook to run correctly</div>
+      </div>
+      <div class="kc-feedback" id="kc-10-fb"></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     COMPLETION
+═══════════════════════════════════════════════════════ -->
+<div class="completion-card" id="completion-card" style="display:none">
+  <div class="completion-icon">🥉</div>
+  <div class="completion-title">Lab 2 Complete — Bronze Layer Done!</div>
+  <div class="completion-text">The Bronze layer is complete. Both ingestion paths are working:</div>
+  <div class="tables-built">
+    <span class="table-built-tag">🥉 raw_sales (9,994 rows) — Lab 1</span>
+    <span class="table-built-tag">🥉 raw_countries (250 rows) — Lab 2</span>
+  </div>
+  <div style="font-size:13px;color:#166534">
+    <strong>Up next → Lab 3:</strong> Write two Silver notebooks to clean and enrich both tables,
+    then orchestrate everything with a Data Pipeline (NB-01 → NB-02a ∥ NB-02b).
+  </div>
+</div>
+
+<!-- Next section card -->
+<div class="divider"></div>
+<div class="card" style="border-left:4px solid #94A3B8">
+  <div class="section-label">Up next</div>
+  <h2>Lab 3 — Silver Layer &amp; Data Pipeline</h2>
+  <p style="margin-top:8px;margin-bottom:0">
+    In Lab 3 you build two Silver notebooks — one for sales, one for countries —
+    that clean types, rename columns, add derived business columns,
+    and deduplicate the Bronze data.
+    Then you wire all three notebooks into a Data Pipeline with
+    serial and parallel execution dependencies.
+  </p>
+</div>
+
+</div><!-- end page-wrapper -->
+
+<!-- ============================================================
+     JAVASCRIPT
+============================================================ -->
+<script>
+
+/* ── STEP EXPAND / COLLAPSE ── */
+function toggleStep(n) {
+  var body = document.getElementById('sb-' + n);
+  var tog  = document.getElementById('tog-' + n);
+  if (!body) return;
+  var isOpen = body.classList.contains('open');
+  body.classList.toggle('open',  !isOpen);
+  tog.classList.toggle('open',   !isOpen);
+}
+
+/* ── 3-TIER PANEL TOGGLE ── */
+function toggleTier(id, btn) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  var isOpen = el.classList.contains('open');
+  el.classList.toggle('open', !isOpen);
+  if (btn) btn.classList.toggle('active', !isOpen);
+}
+
+/* ── STEP CHECKBOX / PROGRESS ── */
+var TOTAL = 10;
+var done  = 0;
+
+function markDone(n) {
+  var chk  = document.getElementById('chk-' + n);
+  var card = document.getElementById('sc-' + n);
+  if (!chk) return;
+  if (chk.checked) { card.classList.add('done'); done++; }
+  else             { card.classList.remove('done'); done--; }
+
+  var pct = Math.round((done / TOTAL) * 100);
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('prog-label').textContent =
+    'Progress: ' + done + ' / ' + TOTAL + ' steps completed';
+
+  var cc = document.getElementById('completion-card');
+  if (cc) cc.style.display = (done === TOTAL) ? 'block' : 'none';
+}
+
+/* ── KNOWLEDGE CHECK ── */
+var KC = {
+  4: { correct: 1,
+    f: { ok: "✅ Correct! raise_for_status() immediately raises an HTTPError on any 4xx or 5xx response. The notebook stops with a clear error message at the fetch step rather than silently producing bad data downstream.",
+         no: "❌ Not quite. raise_for_status() fires BEFORE r.json() is called. It checks the HTTP status code and raises HTTPError (e.g. '503 Service Unavailable') immediately, stopping the notebook cleanly." }},
+  5: { correct: 1,
+    f: { ok: "✅ Correct! This is exactly why saving raw JSON to Files/bronze/ is mandatory. You have 90 timestamped JSON snapshots — each one is the exact API response for that day. Fix parse() once and replay all of them without a single API call.",
+         no: "❌ Not quite. Because you saved the raw JSON files, you can reprocess from the original source data without calling the API. The Delta table has the parsed data; the JSON files have the raw bytes." }},
+  7: { correct: 2,
+    f: { ok: "✅ Correct! A DQ failure is a signal to investigate. Run display(df.filter(F.col('name_common') == '')) to find the bad rows, fix parse(), and rerun. Letting bad data through breaks the downstream Silver and Gold layers.",
+         no: "❌ Not quite. DQ assertions exist to stop bad data at the source. Removing or weakening them means bad data flows through to Silver, Gold, and eventually Power BI reports — where it is much harder to fix." }},
+  10: { correct: 2,
+    f: { ok: "✅ Correct! The JSON file is the source of truth for the raw Bronze layer. Delta time travel is powerful but it tracks the state of the parsed+typed table — not the original raw bytes. If your parse() logic has a bug, the raw file lets you reprocess from zero.",
+         no: "❌ Not quite. Delta time travel tracks versions of the Delta table — the already-parsed, typed data. The raw JSON file contains the original bytes from the API exactly as received. If parse() is wrong, you need the raw file to reprocess correctly." }}
+};
+
+function answerKC(stepN, idx, isCorrect) {
+  var opts = document.querySelectorAll('#kc-' + stepN + '-opts .kc-option');
+  var fb   = document.getElementById('kc-' + stepN + '-fb');
+  var ans  = KC[stepN];
+  if (!ans || !fb) return;
+
+  opts.forEach(function(o) { o.style.pointerEvents = 'none'; });
+  opts.forEach(function(o, i) {
+    if (i === ans.correct) o.classList.add('reveal');
+    if (i === idx && !isCorrect) o.classList.add('wrong');
+  });
+
+  fb.classList.add('show');
+  fb.classList.add(isCorrect ? 'fb-correct' : 'fb-wrong');
+  fb.textContent = isCorrect ? ans.f.ok : ans.f.no;
+}
+
+/* ── COPY ── */
+function cp(btn, id) {
+  var pre = document.getElementById('code-' + id);
+  if (!pre) return;
+  var t = pre.textContent;
+  function ok() {
+    btn.textContent = '✓ Copied'; btn.classList.add('ok');
+    setTimeout(function(){ btn.textContent='Copy'; btn.classList.remove('ok'); }, 2000);
+  }
+  function fail() { btn.textContent = 'Failed'; }
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(t).then(ok).catch(function(){ fb(t,ok,fail); });
+  } else { fb(t,ok,fail); }
+}
+function fb(t, ok, fail) {
+  var a = document.createElement('textarea');
+  a.value = t; a.style.cssText = 'position:fixed;opacity:0';
+  document.body.appendChild(a); a.select();
+  try { document.execCommand('copy') ? ok() : fail(); } catch(e){ fail(); }
+  document.body.removeChild(a);
+}
+
+/* ── AUTO-OPEN STEP 1 ── */
+toggleStep(1);
+</script>
+</body>
+</html>
